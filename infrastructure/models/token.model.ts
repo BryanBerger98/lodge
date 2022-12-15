@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, Model, models } from 'mongoose';
 import { IToken } from '../../types/token.type';
 
 const tokenSchema = new Schema<IToken>({
@@ -27,6 +27,6 @@ const tokenSchema = new Schema<IToken>({
     },
 });
 
-const Token = model<IToken>('Token', tokenSchema);
+const Token: Model<IToken, unknown, unknown, unknown, typeof tokenSchema> = models.Token || model<IToken>('Token', tokenSchema);
 
 export default Token;

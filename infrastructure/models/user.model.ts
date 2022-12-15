@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, models, Model } from 'mongoose';
 import { IUser } from '../../types/user.type';
 
 const userSchema = new Schema<IUser>({
@@ -41,6 +41,6 @@ const userSchema = new Schema<IUser>({
     },
 });
 
-const User = model<IUser>('User', userSchema);
+const User: Model<IUser, unknown, unknown, unknown, typeof userSchema> = models.User || model<IUser>('User', userSchema);
 
 export default User;

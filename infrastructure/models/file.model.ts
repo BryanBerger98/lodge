@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, models, Model } from 'mongoose';
 import { ILodgeFile } from '../../types/file.type';
 
 const fileSchema = new Schema<ILodgeFile>({
@@ -55,6 +55,6 @@ const fileSchema = new Schema<ILodgeFile>({
     },
 });
 
-const File = model<ILodgeFile>('File', fileSchema);
+const File: Model<ILodgeFile, unknown, unknown, unknown, typeof fileSchema> = models.File || model<ILodgeFile>('File', fileSchema);
 
 export default File;

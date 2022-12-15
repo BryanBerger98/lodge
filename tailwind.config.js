@@ -9,9 +9,6 @@ module.exports = {
 		extend: {
 			fontFamily: {
 				sans: [ 'Nunito', 'sans-serif' ],
-				zapfino: [ 'Zapfino', 'sans-serif' ],
-				robotoCondensed: [ 'Roboto Condensed', 'sans-serif' ],
-				roboto: [ 'Roboto', 'sans-serif' ],
 			},
 			colors: {
 				light: {
