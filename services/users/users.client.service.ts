@@ -1,6 +1,6 @@
+import { ObjectId } from '../../infrastructure/types/database.type';
 import useAxios from '../../lib/axios';
-import { IUser } from '../../types/user.type';
-import { CreateUserDTO, UpdateUserDTO } from './users.type';
+import { CreateUserDTO, UpdateUserDTO, IUser } from '../../types/user.type';
 
 const baseUrl = '/users';
 
@@ -46,7 +46,7 @@ const useUsersClientService = () => {
         }
     };
 
-    const deleteUserById = async (userId: string): Promise<IUser> => {
+    const deleteUserById = async (userId: string | ObjectId): Promise<IUser> => {
         try {
             const response = await axios.delete(`${ baseUrl }/${ userId }`, { withCredentials: true });
             const { data: deletedUser } = response;
@@ -56,7 +56,7 @@ const useUsersClientService = () => {
         }
     };
 
-    const getUsers = async ({ field, direction }, skip, limit, searchString) => {
+    const getUsers = async ({ field, direction }: { field: string, direction: -1 | 1 }, skip: number, limit: number, searchString?: string) => {
         try {
             const response = await axios.get(`${ baseUrl }?sortField=${ field }&sortDirection=${ direction }&limit=${ limit }&skip=${ skip }${ searchString && searchString.length > 0 ? '&search=' + searchString : '' }`, { withCredentials: true });
             const users = response && response.data && response.data.users ? response.data.users : [];
@@ -73,7 +73,7 @@ const useUsersClientService = () => {
         }
     };
 
-    const sendResetPasswordEmailToUser = async (userId: string) => {
+    const sendResetPasswordEmailToUser = async (userId: string | ObjectId) => {
         try {
             const response = await axios.post(`${ baseUrl }/reset-password/`, { userId }, { withCredentials: true });
             return response.data;
@@ -82,7 +82,7 @@ const useUsersClientService = () => {
         }
     };
 
-    const switchDisabledUser = async (userId: string) => {
+    const switchDisabledUser = async (userId: string | ObjectId) => {
         try {
             const response = await axios.put(`${ baseUrl }/switch-disabled`, { userId }, { withCredentials: true });
             return response.data;

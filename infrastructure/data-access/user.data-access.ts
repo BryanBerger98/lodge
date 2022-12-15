@@ -68,3 +68,12 @@ export const updateUserPassword = async (userId: string | ObjectId, newHashedPas
         throw error;
     }
 };
+
+export const deleteUserById = async (userId: string | ObjectId): Promise<IUser | null> => {
+    try {
+        const deletedUser = await UserModel.findByIdAndDelete(userId);
+        return deletedUser;
+    } catch (error) {
+        throw error;
+    }
+};
