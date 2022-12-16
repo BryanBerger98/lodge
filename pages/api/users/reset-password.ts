@@ -5,8 +5,11 @@ import { setPermissions } from '../../../utils/permissions.util';
 import { generateToken } from '../../../utils/jwt.util';
 import { NextApiHandler } from 'next';
 import { tokenDataAccess, userDataAccess } from '../../../infrastructure/data-access';
+import { connectToDatabase } from '../../../infrastructure/database';
 
 const handler: NextApiHandler = async (req, res) => {
+
+    await connectToDatabase();
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 

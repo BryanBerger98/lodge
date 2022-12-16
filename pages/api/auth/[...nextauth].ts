@@ -1,34 +1,38 @@
-import NextAuth, { User } from 'next-auth';
+import NextAuth, { Awaitable, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { verifyPassword } from '../../../utils/password.util';
 import { connectToDatabase } from '../../../infrastructure/database';
 import { userDataAccess } from '../../../infrastructure/data-access';
+import { IUser } from '../../../types/user.type';
 
 export default NextAuth({
     session: { strategy: 'jwt' },
     providers: [
         CredentialsProvider({
-            async authorize(credentials) {
-                await connectToDatabase();
+            authorize: async (credentials) => {
+                try {
+                    await connectToDatabase();
 
-                if (!credentials) {
-                    return null;
+                    if (!credentials) {
+                        return null;
+                    }
+
+                    const user = await userDataAccess.findUserByEmail(credentials.email.toLowerCase().trim());
+
+                    if (!user) {
+                        throw new Error('No user registered.');
+                    }
+
+                    const isPasswordValid = await verifyPassword(credentials.password, user.password);
+
+                    if (!isPasswordValid) {
+                        throw new Error('Wrong password.');
+                    }
+
+                    return user;
+                } catch (error) {
+                    throw error;
                 }
-
-                const user = await userDataAccess.findUserByEmail(credentials.email.toLowerCase().trim());
-
-                if (!user) {
-                    throw new Error('No user registered.');
-                }
-
-                const isPasswordValid = await verifyPassword(credentials.password, user.password);
-
-                if (!isPasswordValid) {
-                    throw new Error('Wrong password.');
-                }
-
-                return user;
-
             },
         }),
     ],

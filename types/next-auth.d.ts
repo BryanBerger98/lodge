@@ -7,7 +7,9 @@ declare module 'next-auth' {
   /**
    * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
    */
-	interface User extends IUser {}
+	interface User extends IUser {
+		_id: ObjectId | string;
+	}
 
   interface Session {
     user: IUser;

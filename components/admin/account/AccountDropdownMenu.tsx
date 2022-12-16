@@ -33,7 +33,7 @@ const AccountDropDownMenu = ({ currentUser }: AccountDropdownMenuProperties) => 
                                 width={ 36 }
                                 height={ 36 }
                                 className='rounded-full'
-                            />
+                              />
                             : <FiUser />
                     }
                 </Menu.Button>
@@ -56,7 +56,7 @@ const AccountDropDownMenu = ({ currentUser }: AccountDropdownMenuProperties) => 
                                         active ? 'bg-primary-light-default text-white dark:bg-primary-dark-default dark:text-secondary-dark-default' : 'text-secondary-dark-shade dark:text-secondary-light-shade'
                                     } group flex rounded-lg items-center w-full px-2 py-2 text-sm` }
                                     onClick={ () => {
-                                        router.push('/account');
+                                        router.push('/admin/account');
                                     } }
                                 >
                                     {active ? (

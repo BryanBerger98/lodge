@@ -110,12 +110,9 @@ const useAuthClientService = () => {
         }
     };
 
-    const updateAccount = async ({ phone_number, username }: { phone_number: string, username: string }): Promise<IUser> => {
+    const updateAccount = async (valuesToUpdate: { phone_number?: string, username?: string }): Promise<IUser> => {
         try {
-            const response = await axios.put(`${ baseUrl }/account`, {
-                phone_number,
-                username,
-            }, {
+            const response = await axios.put(`${ baseUrl }/account`, valuesToUpdate, {
                 headers: { 'Content-Type': 'application/json' },
                 withCredentials: true,
             });

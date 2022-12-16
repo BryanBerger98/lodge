@@ -25,38 +25,42 @@ const Sidebar: FC<SidebarProperties> = ({ isSidebarOpen, setIsSidebarOpen }) => 
                         <small>NAVIGATION</small>
                         <ul>
                             <li>
-                                <Link href={ '/admin/dashboard' }>
-                                    <a className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer">
-                                        <FiHome />
-                                        <span>Tableau de bord</span>
-                                    </a>
+                                <Link
+                                    href={ '/admin/dashboard' }
+                                    className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer"
+                                >
+                                    <FiHome />
+                                    <span>Tableau de bord</span>
                                 </Link>
                             </li>
                             {
                                 user && isUserAbleToWatch(user.role, [ 'admin' ]) &&
 								<li>
-								    <Link href={ '/admin/users' }>
-								        <a className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer">
-								            <FiUsers />
-								            <span>Utilisateurs</span>
-								        </a>
+								    <Link
+								        href={ '/admin/users' }
+								        className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer"
+								    >
+								        <FiUsers />
+								        <span>Utilisateurs</span>
 								    </Link>
 								</li>
                             }
                             <li>
-                                <Link href={ '/admin/skills' }>
-                                    <a className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer">
-                                        <FiAward />
-                                        <span>Compétences</span>
-                                    </a>
+                                <Link
+                                    href={ '/admin/skills' }
+                                    className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer"
+                                >
+                                    <FiAward />
+                                    <span>Compétences</span>
                                 </Link>
                             </li>
                             <li>
-                                <Link href={ '/admin/productions' }>
-                                    <a className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer">
-                                        <FiLayers />
-                                        <span>Productions</span>
-                                    </a>
+                                <Link
+                                    href={ '/admin/productions' }
+                                    className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer"
+                                >
+                                    <FiLayers />
+                                    <span>Productions</span>
                                 </Link>
                             </li>
                         </ul>

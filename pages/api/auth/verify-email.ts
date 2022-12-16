@@ -1,10 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import { tokenDataAccess, userDataAccess } from '../../../infrastructure/data-access';
+import { connectToDatabase } from '../../../infrastructure/database';
 import { sendAccountVerificationEmail } from '../../../utils/email.util';
 import { generateToken, verifyToken } from '../../../utils/jwt.util';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+
+    await connectToDatabase();
 
     if (req.method === 'GET') {
 

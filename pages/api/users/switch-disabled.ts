@@ -1,10 +1,13 @@
 import { NextApiHandler } from 'next';
 import { getSession } from 'next-auth/react';
 import { userDataAccess } from '../../../infrastructure/data-access';
+import { connectToDatabase } from '../../../infrastructure/database';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
 import { setPermissions } from '../../../utils/permissions.util';
 
 const handler: NextApiHandler = async (req, res) => {
+
+    await connectToDatabase();
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 

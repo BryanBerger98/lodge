@@ -4,8 +4,11 @@ import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
 import { setPermissions } from '../../../utils/permissions.util';
 import { NextApiHandler } from 'next';
 import { userDataAccess } from '../../../infrastructure/data-access';
+import { connectToDatabase } from '../../../infrastructure/database';
 
 const handler: NextApiHandler = async (req, res) => {
+
+    await connectToDatabase();
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 

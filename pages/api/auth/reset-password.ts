@@ -4,8 +4,11 @@ import { hashPassword } from '../../../utils/password.util';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
 import { tokenDataAccess, userDataAccess } from '../../../infrastructure/data-access';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { connectToDatabase } from '../../../infrastructure/database';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+
+    await connectToDatabase();
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 

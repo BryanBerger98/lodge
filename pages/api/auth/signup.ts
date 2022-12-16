@@ -1,9 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { userDataAccess } from '../../../infrastructure/data-access';
+import { connectToDatabase } from '../../../infrastructure/database';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
 import { hashPassword } from '../../../utils/password.util';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+
+    await connectToDatabase();
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 
