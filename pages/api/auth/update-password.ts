@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
-        const currentUser = await userDataAccess.findUserById(session.user._id);
+        const currentUser = await userDataAccess.findUserWithPasswordById(session.user._id);
 
         if (!currentUser) {
             return res.status(401).json({

@@ -4,7 +4,6 @@ export interface IUser {
 	_id: ObjectId | string;
 	email: string;
 	email_verified: boolean;
-	password: string;
 	role: 'admin' | 'user';
 	username: string;
 	phone_number: string;
@@ -14,6 +13,10 @@ export interface IUser {
 	created_on: Date;
 	updated_on: Date | null;
 	created_by: ObjectId | string | null;
+}
+
+export interface IUserWithPassword extends IUser {
+	password: string;
 }
 
 export type CreateUserDTO = {
@@ -32,4 +35,6 @@ export type SignupUserDTO = {
 	provider_data: 'email';
 };
 
-export type UpdateUserDTO = Omit<IUser, 'password'>;
+export type UpdateUserDTO = Partial<IUser> & {
+	_id: string | ObjectId;
+};

@@ -1,7 +1,7 @@
 import { Schema, model, models, Model } from 'mongoose';
-import { IUser } from '../../types/user.type';
+import { IUserWithPassword } from '../../types/user.type';
 
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema<IUserWithPassword>({
     email: {
         type: String,
         required: true,
@@ -41,6 +41,6 @@ const userSchema = new Schema<IUser>({
     },
 });
 
-const User: Model<IUser, unknown, unknown, unknown, typeof userSchema> = models.User || model<IUser>('User', userSchema);
+const User: Model<IUserWithPassword, unknown, unknown, unknown, typeof userSchema> = models.User || model<IUserWithPassword>('User', userSchema);
 
 export default User;

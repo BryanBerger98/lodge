@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
-        const currentUser = await userDataAccess.findUserById(session.user._id);
+        const currentUser = await userDataAccess.findUserWithPasswordById(session.user._id);
 
         if (!currentUser) {
             return res.status(404).json({
@@ -44,10 +44,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
-        await userDataAccess.updateUser({
-            ...currentUser,
+        const updatedUser = await userDataAccess.updateUser({
+            _id: session.user._id,
             email,
-        });
+            email_verified: false,
+        }, true);
 
         return res.status(200).json({ message: 'Email updated.' });
     }

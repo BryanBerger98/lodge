@@ -39,9 +39,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
         const result = await userDataAccess.updateUser({
-            ...session.user,
+            _id: session.user._id,
             ...updateObject,
-        });
+        }, true);
 
         return res.status(200).json(result);
 

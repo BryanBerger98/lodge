@@ -1,5 +1,6 @@
 import { FilterQuery } from 'mongoose';
-import { CreateUserDTO, IUser, SignupUserDTO, UpdateUserDTO } from '../../types/user.type';
+import { CreateUserDTO, IUser, IUserWithPassword, SignupUserDTO, UpdateUserDTO } from '../../types/user.type';
+import { Optional } from '../../types/utils.type';
 import { UserModel } from '../models';
 import { ObjectId } from '../types/database.type';
 
@@ -26,6 +27,19 @@ export const findUsersCount = async (searchRequest: FilterQuery<IUser>): Promise
 export const findUserByEmail = async (email: string): Promise<IUser | null> => {
     try {
         const serializedEmail = email.toLowerCase().trim();
+        const user: Optional<IUserWithPassword, 'password'> | null = await UserModel.findOne({ email: serializedEmail }, { password: 0 });
+        if (user) {
+            delete user.password;
+        }
+        return user;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const findUserWithPasswordByEmail = async (email: string): Promise<IUserWithPassword | null> => {
+    try {
+        const serializedEmail = email.toLowerCase().trim();
         const user = await UserModel.findOne({ email: serializedEmail });
         return user;
     } catch (error) {
@@ -34,6 +48,15 @@ export const findUserByEmail = async (email: string): Promise<IUser | null> => {
 };
 
 export const findUserById = async (userId: string | ObjectId): Promise<IUser | null> => {
+    try {
+        const user = await UserModel.findById(userId, { password: 0 });
+        return user;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const findUserWithPasswordById = async (userId: string | ObjectId): Promise<IUserWithPassword | null> => {
     try {
         const user = await UserModel.findById(userId);
         return user;
@@ -44,7 +67,8 @@ export const findUserById = async (userId: string | ObjectId): Promise<IUser | n
 
 export const createUser = async (userToCreate: CreateUserDTO | SignupUserDTO): Promise<IUser | null> => {
     try {
-        const createdUser = await UserModel.create({ ...userToCreate });
+        const createdUser: Optional<IUserWithPassword, 'password'> = await UserModel.create({ ...userToCreate });
+        delete createdUser.password;
         return createdUser;
     } catch (error) {
         throw error;
@@ -53,17 +77,25 @@ export const createUser = async (userToCreate: CreateUserDTO | SignupUserDTO): P
 
 export const updateUser = async (userToUpdate: UpdateUserDTO, newDocument = false): Promise<IUser | null> => {
     try {
-        const updatedUser = await UserModel.findByIdAndUpdate(userToUpdate._id, { $set: { ...userToUpdate } }, { new: newDocument });
+        userToUpdate.updated_on = new Date();
+        const updatedUser: Optional<IUserWithPassword, 'password'> | null = await UserModel.findByIdAndUpdate(userToUpdate._id, { $set: { ...userToUpdate } }, { new: newDocument });
+        if (updatedUser) {
+            delete updatedUser.password;
+        }
         return updatedUser;
     } catch (error) {
         throw error;
     }
 };
 
-export const updateUserPassword = async (userId: string | ObjectId, newHashedPassword: string): Promise<IUser | null> => {
+export const updateUserPassword = async (userId: string | ObjectId, newHashedPassword: string): Promise<void> => {
     try {
-        const updatedUser = await UserModel.findByIdAndUpdate(userId, { $set: { password: newHashedPassword } });
-        return updatedUser;
+        await UserModel.findByIdAndUpdate(userId, {
+            $set: {
+                password: newHashedPassword,
+                updated_on: new Date(),
+            },
+        });
     } catch (error) {
         throw error;
     }
