@@ -4,7 +4,6 @@ import { useState, Fragment, useCallback, useEffect } from 'react';
 import UserTableDataMenu from './UserTableDataMenu';
 import Image from 'next/image';
 import Table, { TableSort } from '../tables/Table';
-import { string } from 'prop-types';
 import { useRouter } from 'next/router';
 import { format } from 'libphonenumber-js';
 import { useAuthContext } from '../../../context/auth.context';

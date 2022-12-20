@@ -22,6 +22,16 @@ export const usersSlice = createSlice({
         setUsersState: (state, action) => {
             return action.payload;
         },
+        updateUser: (state, action) => {
+            const users = [ ...state.users ];
+            const userToUpdateIndex = users.findIndex(user => user._id === action.payload._id);
+            users[ userToUpdateIndex ] = {
+                ...[ userToUpdateIndex ],
+                ...action.payload,
+            };
+            state.users = users;
+            return state;
+        },
     },
     extraReducers(builder) {
         builder.addCase(HYDRATE, (state, action) => {
@@ -33,7 +43,7 @@ export const usersSlice = createSlice({
     },
 });
 
-export const { setUsersState } = usersSlice.actions;
+export const { setUsersState, updateUser } = usersSlice.actions;
 
 export const selectUsersState = (state: AppState) => state.users;
 

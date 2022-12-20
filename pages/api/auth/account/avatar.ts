@@ -78,8 +78,6 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: Ne
         }
     }
 
-    console.log('ON PASSE À LA SUITE');
-
     const file = {
         ...convertFileRequestObjetToModel(req.file),
         created_by: currentUser._id,

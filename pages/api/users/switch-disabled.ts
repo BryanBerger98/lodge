@@ -9,7 +9,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     await connectToDatabase();
 
-    // await csrf(req as CsrfRequest, res as CsrfResponse);
+    await csrf(req as CsrfRequest, res as CsrfResponse);
 
     const session = await getSession({ req });
 

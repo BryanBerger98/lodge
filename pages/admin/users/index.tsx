@@ -5,9 +5,8 @@ import Button from '../../../components/admin/ui/Button/Button';
 import { getSession } from 'next-auth/react';
 import SearchField from '../../../components/admin/forms/SearchField';
 import PageTitle from '../../../components/admin/ui/PageTitle';
-import csrf from '../../../utils/csrf.util';
+import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
 import { useCsrfContext } from '../../../context/csrf.context';
-import { string } from 'prop-types';
 import { isUserAbleToWatch } from '../../../utils/permissions.util';
 import { useRouter } from 'next/router';
 import { connect, useSelector } from 'react-redux';
@@ -23,12 +22,12 @@ const UsersPage: FC<UsersPageProperties> = ({ csrfToken }) => {
 
     const [ searchString, setSearchString ] = useState('');
     const { users, total, count } = useSelector(selectUsersState);
-    // const { dispatchCsrfToken } = useCsrfContext();
+    const { dispatchCsrfToken } = useCsrfContext();
     const router = useRouter();
 
-    // useEffect(() => {
-    //     dispatchCsrfToken(csrfToken);
-    // }, [ dispatchCsrfToken, csrfToken ]);
+    useEffect(() => {
+        dispatchCsrfToken(csrfToken);
+    }, [ dispatchCsrfToken, csrfToken ]);
 
     const onSearchUsers = (value: string) => {
         setSearchString(value);
@@ -70,6 +69,10 @@ export default connect(selectUsersState)(UsersPage);
 
 export const getServerSideProps = wrapper.getServerSideProps(store => async ({ req, res }) => {
 
+    const request = req as CsrfRequest;
+    const response = res as CsrfResponse;
+    await csrf(request, response);
+
     const session = await getSession({ req });
 
     if (!session || session && !isUserAbleToWatch(session.user.role, [ 'admin' ])) {
@@ -87,5 +90,5 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async ({ r
 
     store.dispatch(setUsersState({ ...serializedUsersData }));
 
-    return { props: { ...serializedUsersData } };
+    return { props: { csrfToken: request.csrfToken() } };
 });

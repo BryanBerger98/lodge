@@ -94,7 +94,7 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: Ne
     try {
         const savedFile = await fileDataAccess.createFile(file);
         await userDataAccess.updateUser({
-            ...userToEdit,
+            _id: userToEdit._id,
             photo_url: file.path,
         });
         return res.status(200).json(savedFile);
