@@ -56,15 +56,15 @@ const LoginForm = ({ onSubmit, requestError = null }: LoginFormProperties) => {
                     <FiLogIn />
                     <span>Connexion</span>
                 </Button>
-                <Button
+                {/* <Button
                     variant={ 'link' }
-                    href='/auth/signup'
+                    href='/admin/auth/signup'
                 >
 					Pas de compte ? S'inscrire ici
-                </Button>
+                </Button> */}
                 <Button
                     variant={ 'link' }
-                    href='/auth/forgot-password'
+                    href='/admin/auth/forgot-password'
                 >
 					Mot de passe oublié ?
                 </Button>

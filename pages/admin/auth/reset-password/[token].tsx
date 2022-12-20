@@ -2,16 +2,17 @@ import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { FiCheckCircle, FiLogIn, FiSave } from 'react-icons/fi';
 import { FC, useEffect, useState } from 'react';
-import Button from '../../../components/admin/ui/Button/Button';
-import csrf from '../../../utils/csrf.util';
-import { useCsrfContext } from '../../../context/csrf.context';
-import Loader from '../../../components/admin/ui/Loader';
-import TextField from '../../../components/admin/forms/TextField';
-import { GetServerSidePropsContextWithCsrf } from '../../../types/ssr.type';
-import useTranslate from '../../../hooks/useTranslate';
-import useAuthClientService from '../../../services/auth/auth.client.service';
+import Button from '../../../../components/admin/ui/Button/Button';
+import csrf from '../../../../utils/csrf.util';
+import { useCsrfContext } from '../../../../context/csrf.context';
+import Loader from '../../../../components/admin/ui/Loader';
+import TextField from '../../../../components/admin/forms/TextField';
+import { GetServerSidePropsContextWithCsrf } from '../../../../types/ssr.type';
+import useTranslate from '../../../../hooks/useTranslate';
+import useAuthClientService from '../../../../services/auth/auth.client.service';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { IApiError } from '../../../../types/error.type';
 
 type ResetPasswordInputs = {
 	password: string;
@@ -61,14 +62,14 @@ const ResetPasswordPage: FC<ResetPasswordPageProperties> = ({ csrfToken }) => {
         resetPassword(token, password).then(() => {
             setSuccess(true);
             setTimeout(() => {
-                router.replace('/auth/signin');
+                router.replace('/admin/auth/signin');
             }, 3000);
-        }).catch(error => {
+        }).catch((err: IApiError) => {
             if (err.response && err.response.data) {
                 const errorMessage = getTranslatedError(err.response.data.code);
                 return setError(errorMessage);
             }
-            console.error(error);
+            console.error(err);
         }).finally(() => {
             setLoading(false);
         });
@@ -125,7 +126,7 @@ const ResetPasswordPage: FC<ResetPasswordPageProperties> = ({ csrfToken }) => {
                         <p className="mb-3">Vous allez être redirigé dans quelques secondes</p>
                         <Button
                             variant='primary'
-                            href='/auth/signin'
+                            href='/admin/auth/signin'
                         >
                             <span>Se connecter</span>
                             <FiLogIn />

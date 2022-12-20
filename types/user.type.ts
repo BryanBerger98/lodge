@@ -1,10 +1,12 @@
 import { ObjectId } from '../infrastructure/types/database.type';
 
+export type UserRole = 'admin' | 'user';
+
 export interface IUser {
 	_id: ObjectId | string;
 	email: string;
 	email_verified: boolean;
-	role: 'admin' | 'user';
+	role: UserRole;
 	username: string;
 	phone_number: string;
 	photo_url: string;
@@ -23,15 +25,15 @@ export type CreateUserDTO = {
 	username: string;
 	email: string;
 	phone_number: string;
-	role: 'admin' | 'user';
+	role: UserRole;
 	provider_data: 'email';
-	created_by: ObjectId | string | null;
+	created_by?: ObjectId | string | null;
 };
 
 export type SignupUserDTO = {
 	email: string;
 	password: string;
-	role: 'admin' | 'user';
+	role: UserRole;
 	provider_data: 'email';
 };
 

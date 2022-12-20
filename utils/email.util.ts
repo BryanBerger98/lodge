@@ -1,19 +1,8 @@
-import nodemailer from 'nodemailer';
-import Mail from 'nodemailer/lib/mailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { MailOptions, sendMail } from '../lib/mailer';
 import { IToken } from '../types/token.type';
 import { IUser } from '../types/user.type';
 
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: false,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-    tls: { rejectUnauthorized: false },
-});
+const appName = process.env.NEXT_PUBLIC_APP_NAME;
 
 const defaultHead = `
         <head>
@@ -32,11 +21,11 @@ const defaultHead = `
         </head>
      `;
 
-const defaultHeader = '<h1>Next-Base</h1>';
+const defaultHeader = `<h1>${ appName }</h1>`;
 
 export const sendAccountVerificationEmail = (user: IUser, token: IToken) => {
     return new Promise((resolve, reject) => {
-        const tokenLink = `${ process.env.FRONT_URL }/auth/verify-email/${ token.token }`;
+        const tokenLink = `${ process.env.FRONT_URL }${ user.role !== 'admin' ? '' : '/admin' }/auth/verify-email/${ token.token }`;
         const htmlBody = `
         <table class="es-content" cellspacing="0" cellpadding="0" align="center" bgcolor="#ffffff">
             <tbody>
@@ -64,7 +53,7 @@ export const sendAccountVerificationEmail = (user: IUser, token: IToken) => {
                                                 <tr>
                                                     <td align="left" class="esd-block-text es-p40b">
                                                         <p style="font-family: arial, 'helvetica neue', helvetica, sans-serif;">Bien cordialement,</p>
-                                                        <p style="font-family: arial, 'helvetica neue', helvetica, sans-serif;">Next-Base</p>
+                                                        <p style="font-family: arial, 'helvetica neue', helvetica, sans-serif;">${ appName }</p>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -78,18 +67,16 @@ export const sendAccountVerificationEmail = (user: IUser, token: IToken) => {
             </tbody>
         </table>
         `;
-        const emailSubject = 'Next-Base - Confirmation de l\'adresse email';
-        const emailPlainText = 'Next-Base - Confirmation de l\'adresse email';
-        sendEmail(user.email, [], [], emailSubject, emailPlainText, htmlBody, (err, response) => {
-            if (err) return reject(err);
-            resolve(response);
-        });
+        const emailSubject = `${ appName } - Confirmation de l\'adresse email`;
+        const emailPlainText = `${ appName } - Confirmation de l\'adresse email`;
+        sendEmail(user.email, [], [], emailSubject, emailPlainText, htmlBody)
+            .then(resolve).catch(reject);
     });
 };
 
 export const sendResetPasswordEmail = (user: IUser, token: IToken) => {
     return new Promise((resolve, reject) => {
-        const tokenLink = `${ process.env.FRONT_URL }/auth/reset-password/${ token.token }`;
+        const tokenLink = `${ process.env.FRONT_URL }${ user.role !== 'admin' ? '' : '/admin' }/auth/reset-password/${ token.token }`;
         const htmlBody = `
         <table class="es-content" cellspacing="0" cellpadding="0" align="center" bgcolor="#ffffff">
             <tbody>
@@ -120,7 +107,7 @@ export const sendResetPasswordEmail = (user: IUser, token: IToken) => {
                                                         <p><a style="word-break: break-all;" href="${ tokenLink }">${ tokenLink }</a></p>
                                                         <p>Si vous n'êtes pas à l'origine de cette action ou que vous n'en aviez pas été informé, veuillez ignorer cet e-mail.</p>
                                                         <p>Bien cordialement.</p>
-                                                        <p>Next-Base</p>
+                                                        <p>${ appName }</p>
                                                     </td>
                                                 </tr>
 
@@ -135,12 +122,10 @@ export const sendResetPasswordEmail = (user: IUser, token: IToken) => {
             </tbody>
         </table>
         `;
-        const emailSubject = 'Next-Base - Réinitialisation de votre mot de passe';
-        const emailPlainText = 'Next-Base - Réinitialisation de votre mot de passe';
-        sendEmail(user.email, [], [], emailSubject, emailPlainText, htmlBody, (err, response) => {
-            if (err) return reject(err);
-            resolve(response);
-        });
+        const emailSubject = `${ appName } - Réinitialisation de votre mot de passe`;
+        const emailPlainText = `${ appName } - Réinitialisation de votre mot de passe`;
+        sendEmail(user.email, [], [], emailSubject, emailPlainText, htmlBody)
+            .then(resolve).catch(reject);
     });
 };
 
@@ -155,10 +140,10 @@ export const sendResetPasswordEmail = (user: IUser, token: IToken) => {
  * @param {function} callback
  * @returns {void}
  */
-export const sendEmail = (to: string, cc: string[], bcc: string[], subject: string, plainText: string, htmlBody: string, callback: (err: Error | null, info: SMTPTransport.SentMessageInfo) => void) => {
+export const sendEmail = async (to: string, cc: string[], bcc: string[], subject: string, plainText: string, htmlBody: string): Promise<any> => {
 
-    const mailOptions: Mail.Options = {
-        from: `"Next-Base - Ne pas répondre" <${ process.env.EMAIL_USER }>`,
+    const mailOptions: MailOptions = {
+        from: `"${ appName } - Ne pas répondre" <${ process.env.EMAIL_USER }>`,
         to,
         cc,
         bcc,
@@ -201,13 +186,10 @@ export const sendEmail = (to: string, cc: string[], bcc: string[], subject: stri
         </html>
     `;
 
-    transporter.sendMail(mailOptions, (err, info) => {
-        if (err) {
-            console.error('Error occurred. ' + err.message);
-            console.error(err);
-            callback(err, info);
-            return process.exit(1);
-        }
-        callback(null, info);
-    });
+    try {
+        const response = await sendMail(mailOptions);
+        return response;
+    } catch (error) {
+        throw error;
+    }
 };

@@ -10,7 +10,7 @@ const SearchField: FC<SearchFieldProperties> = ({ onSearchElements, placeholder 
     let delay: NodeJS.Timeout;
 
     const onSearch = (event: BaseSyntheticEvent) => {
-        const value = event.currentTarget.value.trim();
+        const value: string = event.currentTarget.value.trim();
         clearDelay();
         delay = setTimeout(() => {
             onSearchElements(value);

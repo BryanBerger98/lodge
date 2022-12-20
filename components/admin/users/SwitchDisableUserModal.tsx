@@ -24,8 +24,8 @@ const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, 
             .then(() => {
                 toast.custom(<Toast variant='success'><FiCheck /><span>Modification enregistrée</span></Toast>);
                 // updateUser({
-                //     ...user,
-                //     disabled: !user.disabled,
+                // 	...user,
+                // 	disabled: !user.disabled,
                 // });
                 if (setUser) {
                     setUser({

@@ -1,12 +1,12 @@
+import { AuthErrorKey, ErrorDomain, UsersErrorKey } from '../types/error.type';
+import { UserRole } from '../types/user.type';
+
 type TranslateLocale = 'fr' | 'en';
 export type TranslateTitle = 'dashboard' | 'users' | 'account';
-type TranslateRole = 'admin' | 'user';
-type TranslateErrorDomain = 'auth' | 'users' | 'default';
-type TranslateAuthError = 'wrong-password' | 'invalid-token' | 'wrong-token' | 'user-not-found' | 'token-not-found' | 'unauthorized' | 'error' | 'email-already-in-use' | 'user-already-verified';
-type TranslateUsersError = 'invalid-input' | 'missing-id' | 'user-not-found' | 'email-already-in-use';
-// type TranslateDefaultError = ''
 
-const titles = {
+type TranslateErrorKey = AuthErrorKey | UsersErrorKey;
+
+const titles: Record<TranslateTitle, Record<TranslateLocale, string>> = {
     dashboard: {
         fr: 'Tableau de bord',
         en: 'Dashboard',
@@ -21,7 +21,7 @@ const titles = {
     },
 };
 
-const roles = {
+const roles: Record<UserRole, Record<TranslateLocale, string>> = {
     admin: {
         fr: 'Administrateur',
         en: 'Admin',
@@ -33,8 +33,8 @@ const roles = {
 };
 
 type Errors = {
-	auth: Record<TranslateAuthError, Record<TranslateLocale, string>>;
-	users: Record<TranslateUsersError, Record<TranslateLocale, string>>;
+	auth: Record<AuthErrorKey, Record<TranslateLocale, string>>;
+	users: Record<UsersErrorKey, Record<TranslateLocale, string>>;
 	default: Record<TranslateLocale, string>;
 }
 
@@ -105,20 +105,22 @@ type TranslateHookOptions = {
 	locale: TranslateLocale;
 };
 
+const appName = process.env.NEXT_PUBLIC_APP_NAME;
+
 const useTranslate = (options: TranslateHookOptions) => {
 
-    function getTranslatedTitle(title: TranslateTitle) {
+    function getTranslatedTitle(title: TranslateTitle): string {
         if (!title) {
             throw new Error('Please set a title');
         }
         const locale = options && options.locale ? options.locale : 'en';
         if (!titles[ title ]) {
-            return 'Next-Base';
+            return appName ?? 'App';
         }
         return titles[ title ][ locale ];
     }
 
-    function getTranslatedRole(role: TranslateRole) {
+    function getTranslatedRole(role: UserRole) {
         if (!role) {
             throw new Error('Please set a role');
         }
@@ -129,25 +131,35 @@ const useTranslate = (options: TranslateHookOptions) => {
         return roles[ role ][ locale ];
     }
 
-    function getTranslatedError(errorCode: string): string {
+    function getTranslatedError(errorCode: string): string | null {
         if (!errorCode) {
             throw new Error('Please set an error code');
         }
         const locale = options && options.locale ? options.locale : 'en';
-        const splittedError = errorCode.split('/') as [TranslateErrorDomain, TranslateAuthError | TranslateUsersError];
+        const splittedError = errorCode.split('/') as [ErrorDomain, TranslateErrorKey];
         const [ domain, code ] = splittedError;
 
-        if (!errors[ domain ]) {
+        const errorDomain = errors[ domain ];
+
+        if (!errorDomain) {
             return errors.default[ locale ];
         }
 
-        if (errors[ domain ] && !Object.hasOwn(errors[ domain ], code)) {
+        if (errorDomain && !Object.hasOwn(errorDomain, code)) {
             return errors.default[ locale ];
         }
 
-        const err = Object.values(errors[ domain ]).find(element => element[ code ]);
+        const errorDomainArray = Object.entries(errors[ domain ]) as [TranslateErrorKey, Record<TranslateLocale, string>][];
 
-        return err[ locale ];
+        const foundError = errorDomainArray.find(([ key ]) => key === code);
+
+        if (foundError) {
+            const [ , error ] = foundError;
+            return error[ locale ];
+        }
+
+        return null;
+
     }
 
     return {

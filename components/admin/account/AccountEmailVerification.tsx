@@ -4,10 +4,11 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import useAuthClientService from '../../../services/auth/auth.client.service';
 import useTranslate from '../../../hooks/useTranslate';
+import { IApiError } from '../../../types/error.type';
 
 const AccountEmailVerification = () => {
 
-    const [ error, setError ] = useState(null);
+    const [ error, setError ] = useState<string | null>(null);
     const [ loading, setLoading ] = useState(false);
     const [ emailSent, setEmailSent ] = useState(false);
     const [ counter, setCounter ] = useState(60);
@@ -43,8 +44,9 @@ const AccountEmailVerification = () => {
             setEmailSent(true);
         } catch (err) {
             setLoading(false);
-            if (err.response && err.response.data && err.response.data.code) {
-                const errorMessage = getTranslatedError(err.response.data.code);
+            const apiError = err as IApiError;
+            if (apiError.response && apiError.response.data && apiError.response.data.code) {
+                const errorMessage = getTranslatedError(apiError.response.data.code);
                 setError(errorMessage);
                 toast.custom(
                     <div className='flex items-center gap-4 bg-danger-light-default text-light-50 text-medium text-base px-5 py-3 rounded-md drop-shadow'>
@@ -52,7 +54,7 @@ const AccountEmailVerification = () => {
                     </div>
                 );
             } else {
-                console.error(error);
+                console.error(err);
                 toast.custom(
                     <div className='flex items-center gap-4 bg-danger-light-default text-light-50 text-medium text-base px-5 py-3 rounded-md drop-shadow'>
                         <FiX /><span>Une erreur est survenue</span>

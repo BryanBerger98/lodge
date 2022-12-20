@@ -102,7 +102,7 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
     const [ dataLoading, setDataLoading ] = useState<boolean>(usersList ? false : true);
 
     const loadUsersTable = useCallback((limit: number, skip: number, sort: TableSort, searchString?: string) => {
-        getUsers(sort, limit, skip, searchString)
+        getUsers(sort, skip, limit, searchString)
             .then(response => {
                 dispatch(setUsersState(response));
             })
@@ -245,5 +245,3 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 };
 
 export default UsersTable;
-
-UsersTable.propTypes = { searchString: string.isRequired };

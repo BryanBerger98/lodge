@@ -77,8 +77,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
+        console.log('SAVED TOKEN >>>', savedToken);
+
         const tokenPayload = verifyToken(savedToken.token);
         const user = await userDataAccess.findUserByEmail(tokenPayload.email);
+        await tokenDataAccess.deleteTokenById(savedToken._id);
 
         if (!user) {
             return res.status(404).json({
@@ -86,6 +89,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 message: 'User not found.',
             });
         }
+
+        console.log('USER >>>', user);
 
         if (typeof user._id === 'string' && user._id !== session.user._id || typeof user._id !== 'string' && user._id.toHexString() !== session.user._id) {
             return res.status(401).json({
@@ -102,11 +107,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         const updatedUser = await userDataAccess.updateUser({
-            ...user,
+            _id: user._id,
             email_verified: true,
         });
 
-        await tokenDataAccess.deleteTokenById(savedToken._id);
+        console.log('updated_user', updatedUser);
 
         return res.status(200).json(updatedUser);
     }

@@ -2,14 +2,14 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, useEffect, FC } from 'react';
 import { FiArrowRight, FiCheckCircle, FiX } from 'react-icons/fi';
-import Button from '../../../components/admin/ui/Button/Button';
-import Loader from '../../../components/admin/ui/Loader';
-import useTranslate from '../../../hooks/useTranslate';
-import { useAuthContext } from '../../../context/auth.context';
-import { useCsrfContext } from '../../../context/csrf.context';
-import csrf from '../../../utils/csrf.util';
-import { GetServerSidePropsContextWithCsrf } from '../../../types/ssr.type';
-import useAuthClientService from '../../../services/auth/auth.client.service';
+import Button from '../../../../components/admin/ui/Button/Button';
+import Loader from '../../../../components/admin/ui/Loader';
+import useTranslate from '../../../../hooks/useTranslate';
+import { useAuthContext } from '../../../../context/auth.context';
+import { useCsrfContext } from '../../../../context/csrf.context';
+import csrf from '../../../../utils/csrf.util';
+import { GetServerSidePropsContextWithCsrf } from '../../../../types/ssr.type';
+import useAuthClientService from '../../../../services/auth/auth.client.service';
 
 type VerifyEmailPageProperties = {
 	csrfToken: string;
@@ -26,7 +26,7 @@ const VerifyEmailPage: FC<VerifyEmailPageProperties> = ({ csrfToken }) => {
         router.replace('/');
     }
 
-    const [ loading, setLoading ] = useState(false);
+    const [ loading, setLoading ] = useState(true);
     const [ success, setSuccess ] = useState(false);
     const [ error, setError ] = useState<string | null>(null);
 

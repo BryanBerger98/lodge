@@ -12,6 +12,8 @@ type LoginPageProperties = {
 	csrfToken: string;
 }
 
+const appName = process.env.NEXT_PUBLIC_APP_NAME;
+
 const LoginPage = ({ csrfToken }: LoginPageProperties) => {
 
     const router = useRouter();
@@ -53,7 +55,7 @@ const LoginPage = ({ csrfToken }: LoginPageProperties) => {
                 <ThemeToggleSwitch />
             </div>
             <div className="w-11/12 md:w-1/2 lg:w-1/3 xl:w-1/4 bg-white dark:bg-secondary-dark-shade dark:text-secondary-light-shade drop-shadow rounded-md p-6 relative">
-                <h1 className='text-primary-light-default dark:text-primary-dark-tint text-center text-3xl mb-3'>Next-Base</h1>
+                <h1 className='text-primary-light-default dark:text-primary-dark-tint text-center text-3xl mb-3'>{ appName }</h1>
                 <h2 className='text-secondary-dark-tint dark:text-secondary-light-default text-center text-2xl mb-5'>Connexion</h2>
                 <LoginForm
                     onSubmit={ handleSubmitLoginForm }

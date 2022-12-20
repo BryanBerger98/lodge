@@ -1,17 +1,18 @@
 import { FiSend } from 'react-icons/fi';
 import * as Yup from 'yup';
-import Button from '../../components/admin/ui/Button/Button';
+import Button from '../../../components/admin/ui/Button/Button';
 import { FC, useEffect, useState } from 'react';
-import ThemeToggleSwitch from '../../components/admin/ui/ThemeToggleSwitch';
-import TextField from '../../components/admin/forms/TextField';
-import csrf from '../../utils/csrf.util';
-import { useCsrfContext } from '../../context/csrf.context';
-import Loader from '../../components/admin/ui/Loader';
-import { GetServerSidePropsContextWithCsrf } from '../../types/ssr.type';
-import useTranslate from '../../hooks/useTranslate';
-import useAuthClientService from '../../services/auth/auth.client.service';
+import ThemeToggleSwitch from '../../../components/admin/ui/ThemeToggleSwitch';
+import TextField from '../../../components/admin/forms/TextField';
+import csrf from '../../../utils/csrf.util';
+import { useCsrfContext } from '../../../context/csrf.context';
+import Loader from '../../../components/admin/ui/Loader';
+import { GetServerSidePropsContextWithCsrf } from '../../../types/ssr.type';
+import useTranslate from '../../../hooks/useTranslate';
+import useAuthClientService from '../../../services/auth/auth.client.service';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { IApiError } from '../../../types/error.type';
 
 type ForgotPasswordFormValues = {
 	email: string;
@@ -67,13 +68,14 @@ const ForgotPasswordPage: FC<ForgotPasswordPageProperties> = ({ csrfToken }) => 
             setEmailSent(true);
             startCountDown(60);
         } catch (err) {
+            const apiError = err as IApiError;
             setLoading(false);
-            if (err.response && err.response.data && err.response.data.code) {
-                const errorMessage = getTranslatedError(err.response.data.code);
+            if (apiError.response && apiError.response.data && apiError.response.data.code) {
+                const errorMessage = getTranslatedError(apiError.response.data.code);
                 setError(errorMessage);
                 return;
             }
-            console.error(err);
+            console.error(apiError);
         }
     };
 
@@ -111,7 +113,7 @@ const ForgotPasswordPage: FC<ForgotPasswordPageProperties> = ({ csrfToken }) => 
                                             </Button>
                                             <Button
                                                 variant={ 'link' }
-                                                href='/auth/signin'
+                                                href='/admin/auth/signin'
                                             >
                                                 Retour
                                             </Button>

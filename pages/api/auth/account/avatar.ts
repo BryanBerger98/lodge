@@ -78,6 +78,8 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: Ne
         }
     }
 
+    console.log('ON PASSE À LA SUITE');
+
     const file = {
         ...convertFileRequestObjetToModel(req.file),
         created_by: currentUser._id,
@@ -85,7 +87,7 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: Ne
     try {
         const savedFile = await fileDataAccess.createFile(file);
         await userDataAccess.updateUser({
-            ...currentUser,
+            _id: currentUser._id,
             photo_url: file.path,
         });
         return res.status(200).json(savedFile);

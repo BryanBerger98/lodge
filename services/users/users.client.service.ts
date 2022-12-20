@@ -34,7 +34,7 @@ const useUsersClientService = () => {
         }
     };
 
-    const updateUserAvatar = async (userId: string, file: File): Promise<any> => {
+    const updateUserAvatar = async (userId: ObjectId | string, file: File): Promise<any> => {
         try {
             const formData = new FormData();
             formData.append('avatar', file);

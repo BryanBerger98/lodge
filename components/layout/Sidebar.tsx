@@ -10,6 +10,8 @@ type SidebarProperties = {
 	setIsSidebarOpen: Dispatch<SetStateAction<boolean>>
 }
 
+const appName = process.env.NEXT_PUBLIC_APP_NAME;
+
 const Sidebar: FC<SidebarProperties> = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     const { data } = useSession();
@@ -20,7 +22,7 @@ const Sidebar: FC<SidebarProperties> = ({ isSidebarOpen, setIsSidebarOpen }) => 
         <>
             <div className={ 'relative w-fit lg:w-56' }>
                 <div className={ `${ isSidebarOpen ? 'w-52 p-3' : 'w-0' } lg:w-56 bg-primary-light-default dark:bg-light-900 fixed inset-y-0 left-0 z-50 flex flex-col lg:p-3 overflow-hidden transition duration-300 ease-in-out` }>
-                    <p className="text-light-50 dark:text-primary-dark-default text-2xl mx-auto my-2 border-b border-dark-50 dark:border-primary-dark-default pb-2">Next-Base</p>
+                    <p className="text-light-50 dark:text-primary-dark-default text-2xl mx-auto my-2 border-b border-dark-50 dark:border-primary-dark-default pb-2">{ appName }</p>
                     <nav className="mt-10 text-light-100 text-sm">
                         <small>NAVIGATION</small>
                         <ul>

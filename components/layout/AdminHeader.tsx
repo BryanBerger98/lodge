@@ -13,6 +13,8 @@ type AdminHeaderProperties = {
 	setIsSidebarOpen: Dispatch<SetStateAction<boolean>>;
 }
 
+const appName = process.env.NEXT_PUBLIC_APP_NAME;
+
 const AdminHeader: FC<AdminHeaderProperties> = ({ currentUser, isSidebarOpen, setIsSidebarOpen }) => {
 
     const [ pageTitle, setPageTitle ] = useState('');
@@ -24,10 +26,10 @@ const AdminHeader: FC<AdminHeaderProperties> = ({ currentUser, isSidebarOpen, se
         if (currentUser) {
             const path = router.pathname;
             const pathArray = path.split('/').filter(el => el !== '') as TranslateTitle[];
-            const title = pathArray.length === 0 ? 'Next-Base' : getTranslatedTitle(pathArray[ 1 ] ? pathArray[ 1 ] : pathArray[ 0 ]);
-            setPageTitle(title);
+            const title = pathArray.length === 0 ? appName : getTranslatedTitle(pathArray[ 1 ] ? pathArray[ 1 ] : pathArray[ 0 ]);
+            setPageTitle(title ?? 'App');
         } else {
-            setPageTitle('Next-Base');
+            setPageTitle(appName ?? 'App');
         }
     }, [ router, getTranslatedTitle, currentUser ]);
 
