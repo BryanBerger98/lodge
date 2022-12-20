@@ -11,6 +11,7 @@ import useAuthClientService from '../../../services/auth/auth.client.service';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { formatPhoneNumber, parsePhoneNumber, PhoneNumber } from '../../../utils/phone-number.util';
+import { IApiError } from '../../../types/error.type';
 
 type ContactInfosFormInputs = {
 	phoneNumber: string;
@@ -43,7 +44,7 @@ const AccountContactInformationsForm: FC<AccountContactInformationsFormPropertie
     };
 
     const [ isPasswordFormModalOpen, setIsPasswordFormModalOpen ] = useState(false);
-    const [ passwordError, setPasswordError ] = useState(null);
+    const [ passwordError, setPasswordError ] = useState<string | null>(null);
     const [ saving, setSaving ] = useState(false);
     const [ phoneNumberValues, setPhoneNumberValues ] = useState<PhoneNumber | null>(currentUser.phone_number ? parsePhoneNumber(currentUser.phone_number) : null);
 
@@ -111,13 +112,14 @@ const AccountContactInformationsForm: FC<AccountContactInformationsFormPropertie
             dispatchCurrentUser(currentUser);
             setIsPasswordFormModalOpen(false);
             setSaving(false);
-        } catch (error) {
+        } catch (err) {
             setSaving(false);
-            if (error.response && error.response.data && error.response.data.code && error.response.data.code === 'auth/wrong-password') {
-                setPasswordError(error.response.data.code);
+            const apiError = err as IApiError;
+            if (apiError.response && apiError.response.data && apiError.response.data.code && apiError.response.data.code === 'auth/wrong-password') {
+                setPasswordError(apiError.response.data.code);
                 return;
             }
-            console.error(error);
+            console.error(err);
         }
     };
 

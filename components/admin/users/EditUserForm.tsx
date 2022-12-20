@@ -30,12 +30,12 @@ const defaultUser = null;
 
 const EditUserForm = ({ user = defaultUser, onSubmit, saving, errorCode }: EditUserFormProperties) => {
 
-    const [ phoneNumberValues, setPhoneNumberValues ] = useState<PhoneNumber | null>(user && user.phone_number ? parsePhoneNumber(user.phone_number ) : null);
+    const [ phoneNumberValues, setPhoneNumberValues ] = useState<PhoneNumber | null>(user && user.phone_number ? parsePhoneNumber(user.phone_number) : null);
 
     const userFormSchema = yup.object({
-        displayName: yup.string().required('Ce champs est requis.'),
+        username: yup.string().required('Ce champs est requis.'),
         email: yup.string().email('Merci de saisir une adresse valide.').required('Ce champs est requis.'),
-        phoneNumber: yup.string(),
+        phone_number: yup.string(),
         role: yup.string(),
     }).required();
 
@@ -45,16 +45,17 @@ const EditUserForm = ({ user = defaultUser, onSubmit, saving, errorCode }: EditU
         defaultValues: {
             username: user ? user.username : '',
             email: user ? user.email : '',
-            phoneNumber: user && user.phone_number ? formatPhoneNumber(user.phone_number) : '',
+            phone_number: user && user.phone_number ? formatPhoneNumber(user.phone_number) : '',
             role: user ? user.role : 'user',
         },
     });
 
     const handleSubmitEditUserForm = (values: EditUserFormInputs) => {
         const { number } = phoneNumberValues ?? { number: '' };
+        console.log(values);
         onSubmit({
             ...values,
-            phoneNumber: number as string,
+            phone_number: number as string,
             disabled: false,
             emailVerified: false,
         });
