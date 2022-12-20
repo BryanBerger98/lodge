@@ -1,9 +1,11 @@
 import { NextApiHandler } from 'next';
 import { getSession } from 'next-auth/react';
-import { userDataAccess } from '../../../../infrastructure/data-access';
+import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../../infrastructure/database';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../../utils/csrf.util';
+import { sendApiError } from '../../../../utils/error.utils';
 import { setPermissions } from '../../../../utils/permissions.util';
+import { unlink } from 'fs/promises';
 
 const handler: NextApiHandler = async (req, res) => {
 
@@ -14,19 +16,13 @@ const handler: NextApiHandler = async (req, res) => {
     const session = await getSession({ req });
 
     if (!session) {
-        return res.status(401).json({
-            code: 'auth/unauthorized',
-            message: 'Unauthorized.',
-        });
+        return sendApiError(res, 'auth', 'unauthorized');
     }
 
     const { user } = session;
 
     if (!user) {
-        return res.status(401).json({
-            code: 'auth/unauthorized',
-            message: 'Unauthorized.',
-        });
+        return sendApiError(res, 'auth', 'unauthorized');
     }
 
     if (req.method === 'DELETE') {
@@ -36,15 +32,24 @@ const handler: NextApiHandler = async (req, res) => {
         const { userId } = req.query;
 
         if (!userId || userId.length === 0) {
-            return res.status(422).json({
-                code: 'users/missing-id',
-                message: 'A user id must be provided.',
-            });
+            return sendApiError(res, 'users', 'missing-id');
         }
 
-        const result = await userDataAccess.deleteUserById(userId as string);
+        const deletedUser = await userDataAccess.deleteUserById(userId as string);
 
-        return res.status(200).json(result);
+        if (deletedUser && deletedUser.photo_url && deletedUser.photo_url !== '') {
+            const profilePhotoUrl = await fileDataAccess.findFileByPath(deletedUser.photo_url);
+            if (profilePhotoUrl) {
+                try {
+                    await unlink(`./public/${ profilePhotoUrl.path }`);
+                    await fileDataAccess.deleteFileById(profilePhotoUrl._id);
+                } catch (error) {
+                    console.error('ERROR - Deleting avatar >', error);
+                }
+            }
+        }
+
+        return res.status(200).json(deletedUser);
     }
 
     if (req.method === 'GET') {
@@ -52,28 +57,19 @@ const handler: NextApiHandler = async (req, res) => {
         const { userId } = req.query;
 
         if (!userId || userId.length === 0) {
-            return res.status(422).json({
-                code: 'users/missing-id',
-                message: 'A user id must be provided.',
-            });
+            return sendApiError(res, 'users', 'missing-id');
         }
 
         const user = await userDataAccess.findUserById(userId as string);
 
         if (!user) {
-            return res.status(404).json({
-                code: 'users/user-not-found',
-                message: 'User not found/',
-            });
+            return sendApiError(res, 'users', 'user-not-found');
         }
 
         return res.status(200).json(user);
     }
 
-    res.status(405).json({
-        code: 'users/wrong-method',
-        message: 'This request method is not allowed.',
-    });
+    return sendApiError(res, 'users', 'wrong-method');
 
 };
 

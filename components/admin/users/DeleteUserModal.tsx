@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import { Dispatch, SetStateAction, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiTrash, FiX } from 'react-icons/fi';
+import useLoadUsersTable from '../../../hooks/useLoadUsersTable';
 import useUsersClientService from '../../../services/users/users.client.service';
 import { IUser } from '../../../types/user.type';
 import Button from '../ui/Button/Button';
@@ -19,6 +20,7 @@ const DeleteUserModal = ({ isOpen, setIsOpen, user }: DeleteUserModalProperties)
     const router = useRouter();
     const [ confirmDeleteUserInputValue, setConfirmDeleteUserInputValue ] = useState('');
     const { deleteUserById } = useUsersClientService();
+    const { loadUsersTable } = useLoadUsersTable();
 
     const onConfirmDeleteUser = async () => {
         try {

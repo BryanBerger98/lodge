@@ -1,8 +1,8 @@
 import { AxiosError, AxiosResponse } from 'axios';
 
 export type ErrorDomain = 'auth' | 'users' | 'default';
-export type AuthErrorKey = 'wrong-password' | 'invalid-token' | 'wrong-token' | 'user-not-found' | 'token-not-found' | 'unauthorized' | 'error' | 'email-already-in-use' | 'user-already-verified';
-export type UsersErrorKey = 'invalid-input' | 'missing-id' | 'user-not-found' | 'email-already-in-use';
+export type AuthErrorKey = 'invalid-input' | 'wrong-password' | 'invalid-token' | 'wrong-token' | 'user-not-found' | 'token-not-found' | 'unauthorized' | 'error' | 'email-already-in-use' | 'user-already-verified' | 'wrong-method';
+export type UsersErrorKey = 'invalid-input' | 'missing-id' | 'user-not-found' | 'email-already-in-use' | 'error' | 'wrong-method';
 
 export type ErrorContent = {
 	code: string;

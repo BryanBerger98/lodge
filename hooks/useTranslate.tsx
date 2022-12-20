@@ -40,6 +40,10 @@ type Errors = {
 
 const errors: Errors = {
     auth: {
+        'invalid-input': {
+            fr: 'Saisie invalide',
+            en: 'Invalid input',
+        },
         'wrong-password': {
             fr: 'Mot de passe incorrect',
             en: 'Wrong password',
@@ -66,7 +70,7 @@ const errors: Errors = {
         },
         'error': {
             fr: 'Une erreur est survenue',
-            en: 'An error has occured',
+            en: 'An error occured',
         },
         'email-already-in-use': {
             fr: 'Adresse email déjà attribuée',
@@ -75,6 +79,10 @@ const errors: Errors = {
         'user-already-verified': {
             fr: 'L\'email de cet utilisateur est déjà vérifié',
             en: 'User email already verified',
+        },
+        'wrong-method': {
+            fr: 'Une erreur est survenue',
+            en: 'An error occured',
         },
     },
     users: {
@@ -94,10 +102,18 @@ const errors: Errors = {
             fr: 'Adresse email déjà attribuée',
             en: 'Email already in use',
         },
+        'error': {
+            fr: 'Une erreur est survenue',
+            en: 'An error occured',
+        },
+        'wrong-method': {
+            fr: 'Une erreur est survenue',
+            en: 'An error occured',
+        },
     },
     default: {
         fr: 'Une erreur est survenue',
-        en: 'An error has occured',
+        en: 'An error occured',
     },
 };
 

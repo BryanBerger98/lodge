@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import { userDataAccess } from '../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../infrastructure/database';
+import { sendApiError } from '../../../utils/error.utils';
 import { verifyPassword } from '../../../utils/password.util';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -13,38 +14,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { email, password } = req.body;
 
         if (!password || password.length < 8 || !email || email.length === 0) {
-            return res.status(422).json({
-                code: 'auth/invalid-input',
-                message: 'Invalid input.',
-            });
+            return sendApiError(res, 'auth', 'invalid-input');
         }
 
         const session = await getSession({ req });
         if (!session) {
-            return res.status(401).json({
-                code: 'auth/unauthorized',
-                message: 'Unauthorized.',
-            });
+            return sendApiError(res, 'auth', 'unauthorized');
         }
 
         const currentUser = await userDataAccess.findUserWithPasswordById(session.user._id);
 
         if (!currentUser) {
-            return res.status(404).json({
-                code: 'auth/user-not-found',
-                message: 'User not found.',
-            });
+            return sendApiError(res, 'auth', 'user-not-found');
         }
 
         const isPasswordVerified = await verifyPassword(password, currentUser.password);
         if (!isPasswordVerified) {
-            return res.status(403).json({
-                code: 'auth/wrong-password',
-                message: 'Wrong password.',
-            });
+            return sendApiError(res, 'auth', 'wrong-password');
         }
 
-        const updatedUser = await userDataAccess.updateUser({
+        await userDataAccess.updateUser({
             _id: session.user._id,
             email,
             email_verified: false,
@@ -53,9 +42,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json({ message: 'Email updated.' });
     }
 
-    res.status(405).json({
-        code: 'auth/wrong-method',
-        message: 'This request method is not allowed.',
-    });
+    sendApiError(res, 'auth', 'invalid-input');
 
 }

@@ -1,17 +1,15 @@
 import { FiCheckCircle, FiLock, FiRotateCw, FiUser } from 'react-icons/fi';
 import { getStringSlashedDateFromDate } from '../../../utils/date.utils';
-import { useState, Fragment, useCallback, useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import UserTableDataMenu from './UserTableDataMenu';
 import Image from 'next/image';
 import Table, { TableSort } from '../tables/Table';
 import { useRouter } from 'next/router';
 import { format } from 'libphonenumber-js';
 import { useAuthContext } from '../../../context/auth.context';
-import useUsersClientService from '../../../services/users/users.client.service';
-import { useDispatch } from 'react-redux';
-import { setUsersState } from '../../../store/users.slice';
 import { IUser } from '../../../types/user.type';
 import { ObjectId } from '../../../infrastructure/types/database.type';
+import useLoadUsersTable from '../../../hooks/useLoadUsersTable';
 
 type UserTableProperties = {
 	searchString?: string;
@@ -19,7 +17,7 @@ type UserTableProperties = {
 	usersCount: number;
 };
 
-type TableField = {
+export type TableField = {
 	title: string;
 	name: string;
 	sortable: boolean,
@@ -27,7 +25,7 @@ type TableField = {
 	align: 'left' | 'right' | 'center',
 };
 
-type TableConfig = {
+export type TableConfig = {
 	limit: number;
 	skip: number;
 	sort: TableSort;
@@ -36,21 +34,6 @@ type TableConfig = {
 const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties) => {
 
     const router = useRouter();
-    const { getUsers } = useUsersClientService();
-    const dispatch = useDispatch();
-
-    const LOCAL_USERS_TABLE_CONFIG = localStorage.getItem('usersTableConfig') ? JSON.parse(localStorage.getItem('usersTableConfig') as string) as TableConfig : null;
-
-    const DEFAULT_LIMIT = LOCAL_USERS_TABLE_CONFIG && LOCAL_USERS_TABLE_CONFIG.limit ? LOCAL_USERS_TABLE_CONFIG.limit : 10;
-    const DEFAULT_SKIP = LOCAL_USERS_TABLE_CONFIG && LOCAL_USERS_TABLE_CONFIG.skip ? LOCAL_USERS_TABLE_CONFIG.skip : 0;
-    const DEFAULT_SORT: TableSort = LOCAL_USERS_TABLE_CONFIG && LOCAL_USERS_TABLE_CONFIG.sort && LOCAL_USERS_TABLE_CONFIG.sort.field ? LOCAL_USERS_TABLE_CONFIG.sort : {
-        field: 'createdAt',
-        direction: -1,
-    };
-
-    const [ limit, setLimit ] = useState<number>(DEFAULT_LIMIT);
-    const [ skip, setSkip ] = useState<number>(DEFAULT_SKIP);
-    const [ sort, setSort ] = useState<TableSort | undefined>(DEFAULT_SORT);
 
     const tableFields: TableField[] = [
         {
@@ -97,29 +80,17 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
         },
     ];
 
+    const { dataLoading, loadUsersTable, DEFAULT_LIMIT, DEFAULT_SKIP, DEFAULT_SORT } = useLoadUsersTable(usersList);
+
     const { currentUser } = useAuthContext();
-    const [ dataLoading, setDataLoading ] = useState<boolean>(usersList ? false : true);
-
-    const loadUsersTable = useCallback((limit: number, skip: number, sort: TableSort, searchString?: string) => {
-        getUsers(sort, skip, limit, searchString)
-            .then(response => {
-                dispatch(setUsersState(response));
-            })
-            .catch(console.error)
-            .finally(() => setDataLoading(false));
-    	// eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ setDataLoading, usersList ]);
-
 
     const handleReloadTable = (limit: number, skip: number, sort: TableSort) => {
-        setLimit(limit);
-        setSkip(skip);
-        setSort((prevSort: TableSort | undefined) => {
-            if (!prevSort || (prevSort && (prevSort.direction !== sort.direction || prevSort.field !== sort.field))) {
-                return sort;
-            }
+        loadUsersTable({
+            limit,
+            skip,
+            sort,
+            searchString,
         });
-        loadUsersTable(limit, skip, sort);
     };
 
     const onEditUser = (userId: string | ObjectId) => {
@@ -127,26 +98,14 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
     };
 
     useEffect(() => {
-        loadUsersTable(limit, skip, sort as TableSort, searchString);
+        // loadUsersTable(limit, skip, sort as TableSort, searchString);
     	// eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ searchString ]);
-
-    // useEffect(() => {
-    //     getSession()
-    //         .then(session => {
-    //             if (session) {
-    //                 setCurrentUser(session.user);
-    //             }
-    //         });
-    // }, [ setCurrentUser ]);
-
-    useEffect(() => {
-        setDataLoading(true);
-    }, [ setDataLoading ]);
 
     return(
         <Fragment>
             <Table
+                tableName='usersTableConfig'
                 dataLoading={ dataLoading }
                 dataCount={ usersCount }
                 defaultLimit={ DEFAULT_LIMIT }

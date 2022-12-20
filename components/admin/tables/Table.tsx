@@ -16,6 +16,7 @@ type TableField = {
 };
 
 type TableProperties = {
+	tableName: string;
 	dataLoading: boolean;
 	dataCount: number;
 	fields: TableField[],
@@ -26,7 +27,7 @@ type TableProperties = {
 	children?: ReactNode;
 };
 
-const Table = ({ dataLoading, dataCount, fields, defaultLimit, defaultSkip, defaultSort, onReloadTable, children = null }: TableProperties) => {
+const Table = ({ tableName, dataLoading, dataCount, fields, defaultLimit, defaultSkip, defaultSort, onReloadTable, children = null }: TableProperties) => {
 
     const [ limit, setLimit ] = useState(defaultLimit);
     const [ skip, setSkip ] = useState(defaultSkip);
@@ -39,7 +40,7 @@ const Table = ({ dataLoading, dataCount, fields, defaultLimit, defaultSkip, defa
         };
         setSort(sort);
         onReloadTable(limit, skip, sort);
-        localStorage.setItem('usersTableConfig', JSON.stringify({
+        localStorage.setItem(tableName, JSON.stringify({
             limit,
             skip,
             sort,
@@ -50,7 +51,7 @@ const Table = ({ dataLoading, dataCount, fields, defaultLimit, defaultSkip, defa
         setLimit(limit);
         setSkip(skip);
         onReloadTable(limit, skip, sort);
-        localStorage.setItem('usersTableConfig', JSON.stringify({
+        localStorage.setItem(tableName, JSON.stringify({
             limit,
             skip,
             sort,

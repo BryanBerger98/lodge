@@ -63,7 +63,7 @@ const ResetPasswordPage: FC<ResetPasswordPageProperties> = ({ csrfToken }) => {
             setTimeout(() => {
                 router.replace('/auth/signin');
             }, 3000);
-        }).catch(error => {
+        }).catch(err => {
             if (err.response && err.response.data) {
                 const errorMessage = getTranslatedError(err.response.data.code);
                 return setError(errorMessage);

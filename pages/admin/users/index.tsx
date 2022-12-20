@@ -13,6 +13,7 @@ import { connect, useSelector } from 'react-redux';
 import { selectUsersState, setUsersState } from '../../../store/users.slice';
 import { wrapper } from '../../../store';
 import { findUsers } from '../../../infrastructure/data-access/user.data-access';
+import useLoadUsersTable from '../../../hooks/useLoadUsersTable';
 
 type UsersPageProperties = {
 	csrfToken: string;
@@ -23,6 +24,7 @@ const UsersPage: FC<UsersPageProperties> = ({ csrfToken }) => {
     const [ searchString, setSearchString ] = useState('');
     const { users, total, count } = useSelector(selectUsersState);
     const { dispatchCsrfToken } = useCsrfContext();
+    const { loadUsersTable } = useLoadUsersTable();
     const router = useRouter();
 
     useEffect(() => {
@@ -30,7 +32,7 @@ const UsersPage: FC<UsersPageProperties> = ({ csrfToken }) => {
     }, [ dispatchCsrfToken, csrfToken ]);
 
     const onSearchUsers = (value: string) => {
-        setSearchString(value);
+        loadUsersTable({ searchString: value });
     };
 
     const onCreateNewUser = () => {
