@@ -9,9 +9,9 @@ import { IUser } from '../../../../types/user.type';
 import EditUserForm, { EditUserFormInputs } from '../../../../components/admin/users/EditUserForm';
 import { useAuthContext } from '../../../../context/auth.context';
 import { wrapper } from '../../../../store';
-import useUsersClientService from '../../../../services/users/users.client.service';
 import { findUserById } from '../../../../infrastructure/data-access/user.data-access';
 import { getSession } from 'next-auth/react';
+import { updateUser } from '../../../../services/users/users.client.service';
 
 type EditUserPageProperties = {
 	csrfToken: string;
@@ -25,8 +25,6 @@ const EditUserPage = ({ csrfToken, userToEdit }: EditUserPageProperties) => {
     const [ errorCode, setErrorCode ] = useState<string | null>(null);
     const { dispatchCsrfToken } = useCsrfContext();
 
-    const { updateUser } = useUsersClientService();
-
     const { currentUser } = useAuthContext();
 
     useEffect(() => {
@@ -39,7 +37,7 @@ const EditUserPage = ({ csrfToken, userToEdit }: EditUserPageProperties) => {
             updateUser({
                 ...user,
                 ...values,
-            })
+            }, csrfToken)
                 .then(userData => {
                     setUser(userData);
                 })

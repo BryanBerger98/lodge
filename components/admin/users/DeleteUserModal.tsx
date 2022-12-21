@@ -2,8 +2,9 @@ import { useRouter } from 'next/router';
 import { Dispatch, SetStateAction, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiTrash, FiX } from 'react-icons/fi';
+import { useCsrfContext } from '../../../context/csrf.context';
 import useLoadUsersTable from '../../../hooks/useLoadUsersTable';
-import useUsersClientService from '../../../services/users/users.client.service';
+import { deleteUserById } from '../../../services/users/users.client.service';
 import { IUser } from '../../../types/user.type';
 import Button from '../ui/Button/Button';
 import Modal from '../ui/Modal';
@@ -19,13 +20,15 @@ const DeleteUserModal = ({ isOpen, setIsOpen, user }: DeleteUserModalProperties)
 
     const router = useRouter();
     const [ confirmDeleteUserInputValue, setConfirmDeleteUserInputValue ] = useState('');
-    const { deleteUserById } = useUsersClientService();
     const { loadUsersTable } = useLoadUsersTable();
+
+    const { csrfToken } = useCsrfContext();
 
     const onConfirmDeleteUser = async () => {
         try {
-            await deleteUserById(user._id);
+            await deleteUserById(user._id, csrfToken);
             toast.custom(<Toast variant='success'><FiTrash /><span>Utilisateur supprimé</span></Toast>);
+            loadUsersTable();
             router.push('/admin/users');
         } catch (error) {
             toast.custom(<Toast variant='danger'><FiX /><span>Une erreur est survenue</span></Toast>);

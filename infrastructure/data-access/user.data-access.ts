@@ -6,7 +6,7 @@ import { ObjectId } from '../types/database.type';
 
 export type SortParams = Record<string, -1 | 1>;
 
-export const findUsers = async (searchRequest: FilterQuery<IUser>, sortParams: SortParams, skip?: number, limit?: number): Promise<Omit<IUser, 'password'>[]> => {
+export const findUsers = async (searchRequest: FilterQuery<IUser>, sortParams: SortParams, skip?: number, limit?: number): Promise<IUser[]> => {
     try {
         const users = await UserModel.find(searchRequest, { password: 0 }).skip(skip ? skip : 0).limit(limit ? limit : 1000).sort(sortParams);
         return users;

@@ -1,9 +1,8 @@
-import NextAuth, { Awaitable, User } from 'next-auth';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { verifyPassword } from '../../../utils/password.util';
 import { connectToDatabase } from '../../../infrastructure/database';
 import { userDataAccess } from '../../../infrastructure/data-access';
-import { IUser } from '../../../types/user.type';
 
 export default NextAuth({
     session: { strategy: 'jwt' },
@@ -17,7 +16,7 @@ export default NextAuth({
                         return null;
                     }
 
-                    const user = await userDataAccess.findUserByEmail(credentials.email.toLowerCase().trim());
+                    const user = await userDataAccess.findUserWithPasswordByEmail(credentials.email.toLowerCase().trim());
 
                     if (!user) {
                         throw new Error('No user registered.');

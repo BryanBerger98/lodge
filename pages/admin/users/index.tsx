@@ -12,7 +12,7 @@ import { useRouter } from 'next/router';
 import { connect, useSelector } from 'react-redux';
 import { selectUsersState, setUsersState } from '../../../store/users.slice';
 import { wrapper } from '../../../store';
-import { findUsers } from '../../../infrastructure/data-access/user.data-access';
+import { findUsers, findUsersCount } from '../../../infrastructure/data-access/user.data-access';
 import useLoadUsersTable from '../../../hooks/useLoadUsersTable';
 
 type UsersPageProperties = {
@@ -87,10 +87,15 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async ({ r
     }
 
     const usersData = await findUsers({}, { 'created_at': -1 }, 0, 10);
+    const usersCount = await findUsersCount({});
 
     const serializedUsersData = JSON.parse(JSON.stringify(usersData));
 
-    store.dispatch(setUsersState({ ...serializedUsersData }));
+    store.dispatch(setUsersState({
+        users: serializedUsersData,
+        total: usersCount,
+        count: usersData.length,
+    }));
 
     return { props: { csrfToken: request.csrfToken() } };
 });

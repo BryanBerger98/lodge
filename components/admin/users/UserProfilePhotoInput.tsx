@@ -2,7 +2,8 @@ import Image from 'next/image';
 import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { FiUser } from 'react-icons/fi';
-import useUsersClientService from '../../../services/users/users.client.service';
+import { useCsrfContext } from '../../../context/csrf.context';
+import { updateUserAvatar } from '../../../services/users/users.client.service';
 import { IUser } from '../../../types/user.type';
 
 type UserProfilePhotoInputProperties = {
@@ -14,8 +15,7 @@ const UserProfilePhotoInput = ({ user, setUser }: UserProfilePhotoInputPropertie
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [ saving, setSaving ] = useState(false);
-
-    const { updateUserAvatar } = useUsersClientService();
+    const { csrfToken } = useCsrfContext();
 
     const handleFileChange = async () => {
         try {
@@ -25,7 +25,7 @@ const UserProfilePhotoInput = ({ user, setUser }: UserProfilePhotoInputPropertie
             if (!file) {
                 return;
             }
-            const fileData = await updateUserAvatar(user._id, file);
+            const fileData = await updateUserAvatar(user._id, file, csrfToken);
             setUser({
                 ...user,
                 photo_url: fileData.path,

@@ -2,7 +2,8 @@ import { Dispatch, FC, SetStateAction } from 'react';
 import toast from 'react-hot-toast';
 import { FiCheck, FiLock, FiUnlock, FiX } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
-import useUsersClientService from '../../../services/users/users.client.service';
+import { useCsrfContext } from '../../../context/csrf.context';
+import { switchDisabledUser } from '../../../services/users/users.client.service';
 import { updateUser } from '../../../store/users.slice';
 import { IUser } from '../../../types/user.type';
 import Button from '../ui/Button/Button';
@@ -18,12 +19,11 @@ type SwitchDisableUserModalProperties = {
 
 const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, setIsOpen, user, setUser }) => {
 
-    // const { updateUser } = useUsersContext();
-    const { switchDisabledUser } = useUsersClientService();
+    const { csrfToken } = useCsrfContext();
     const dispatch = useDispatch();
 
     const onConfirmSwitchDisableUser = () => {
-        switchDisabledUser(user._id)
+        switchDisabledUser(user._id, csrfToken)
             .then(() => {
                 toast.custom(<Toast variant='success'><FiCheck /><span>Modification enregistrée</span></Toast>);
                 dispatch(updateUser({

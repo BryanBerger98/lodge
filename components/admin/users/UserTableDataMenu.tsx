@@ -8,7 +8,8 @@ import Toast from '../ui/Toast';
 import SwitchDisableUserModal from './SwitchDisableUserModal';
 import DeleteUserModal from './DeleteUserModal';
 import { IUser } from '../../../types/user.type';
-import useUsersClientService from '../../../services/users/users.client.service';
+import { sendResetPasswordEmailToUser } from '../../../services/users/users.client.service';
+import { useCsrfContext } from '../../../context/csrf.context';
 
 type UserTableDataMenuProperties = {
 	user: IUser,
@@ -18,13 +19,13 @@ type UserTableDataMenuProperties = {
 const UserTableDataMenu: FC<UserTableDataMenuProperties> = ({ user, currentUser }) => {
 
     const router = useRouter();
-    const { sendResetPasswordEmailToUser } = useUsersClientService();
 
+    const { csrfToken } = useCsrfContext();
     const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
     const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
 
     const onSendResetPasswordEmail = () => {
-        sendResetPasswordEmailToUser(user._id)
+        sendResetPasswordEmailToUser(user._id, csrfToken)
             .then(() => {
                 toast.custom(<Toast><FiSend /><span>Email envoyé !</span></Toast>);
             })

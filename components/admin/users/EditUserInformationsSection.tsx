@@ -7,9 +7,10 @@ import toast from 'react-hot-toast';
 import Toast from '../ui/Toast';
 import SwitchDisableUserModal from './SwitchDisableUserModal';
 import DeleteUserModal from './DeleteUserModal';
-import useUsersClientService from '../../../services/users/users.client.service';
+import { sendResetPasswordEmailToUser } from '../../../services/users/users.client.service';
 import { IUser } from '../../../types/user.type';
 import useTranslate from '../../../hooks/useTranslate';
+import { useCsrfContext } from '../../../context/csrf.context';
 
 type EditUserInformationsSectionProperties = {
 	user: IUser | null;
@@ -19,16 +20,15 @@ type EditUserInformationsSectionProperties = {
 
 const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInformationsSectionProperties) => {
 
+    const { csrfToken } = useCsrfContext();
     const { getTranslatedRole } = useTranslate({ locale: 'fr' });
-
-    const { sendResetPasswordEmailToUser } = useUsersClientService();
 
     const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
     const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
 
     const onSendResetPasswordEmail = () => {
         if (user) {
-            sendResetPasswordEmailToUser(user._id)
+            sendResetPasswordEmailToUser(user._id, csrfToken)
                 .then(() => {
                     toast.custom(<Toast variant='success'><FiSend /><span>Email envoyé !</span></Toast>);
                 })
@@ -79,7 +79,7 @@ const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInf
                                 name='Débloquer le compte'
                                 onClick={ () => setIsSwitchDisableUserModalOpen(true) }
                                 variant='warning'
-                                                       /> }
+                            /> }
                         </div>
                         {
                             currentUser && user && currentUser._id !== user._id &&

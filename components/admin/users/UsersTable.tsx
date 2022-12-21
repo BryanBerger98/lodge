@@ -3,13 +3,16 @@ import { getStringSlashedDateFromDate } from '../../../utils/date.utils';
 import { Fragment, useEffect } from 'react';
 import UserTableDataMenu from './UserTableDataMenu';
 import Image from 'next/image';
-import Table, { TableSort } from '../tables/Table';
+import Table from '../tables/Table';
 import { useRouter } from 'next/router';
 import { format } from 'libphonenumber-js';
 import { useAuthContext } from '../../../context/auth.context';
 import { IUser } from '../../../types/user.type';
 import { ObjectId } from '../../../infrastructure/types/database.type';
 import useLoadUsersTable from '../../../hooks/useLoadUsersTable';
+import { TableField, TableSort } from '../tables/table.type';
+import { useSelector } from 'react-redux';
+import { selectUsersState } from '../../../store/users.slice';
 
 type UserTableProperties = {
 	searchString?: string;
@@ -17,70 +20,57 @@ type UserTableProperties = {
 	usersCount: number;
 };
 
-export type TableField = {
-	title: string;
-	name: string;
-	sortable: boolean,
-	fontStyle: 'bold' | 'semibold' | 'medium' | 'light',
-	align: 'left' | 'right' | 'center',
-};
-
-export type TableConfig = {
-	limit: number;
-	skip: number;
-	sort: TableSort;
-}
+const tableFields: TableField[] = [
+    {
+        title: 'Nom',
+        name: 'displayName',
+        sortable: true,
+        fontStyle: 'semibold',
+        align: 'left',
+    },
+    {
+        title: 'Adresse email',
+        name: 'email',
+        sortable: true,
+        fontStyle: 'semibold',
+        align: 'left',
+    },
+    {
+        title: 'Téléphone',
+        name: 'phoneNumber',
+        sortable: true,
+        fontStyle: 'semibold',
+        align: 'left',
+    },
+    {
+        title: 'Rôle',
+        name: 'role',
+        sortable: true,
+        fontStyle: 'semibold',
+        align: 'left',
+    },
+    {
+        title: 'Date de création',
+        name: 'createdAt',
+        sortable: true,
+        fontStyle: 'semibold',
+        align: 'left',
+    },
+    {
+        title: 'Actions',
+        name: 'actions',
+        sortable: false,
+        fontStyle: 'semibold',
+        align: 'center',
+    },
+];
 
 const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties) => {
 
     const router = useRouter();
 
-    const tableFields: TableField[] = [
-        {
-            title: 'Nom',
-            name: 'displayName',
-            sortable: true,
-            fontStyle: 'semibold',
-            align: 'left',
-        },
-        {
-            title: 'Adresse email',
-            name: 'email',
-            sortable: true,
-            fontStyle: 'semibold',
-            align: 'left',
-        },
-        {
-            title: 'Téléphone',
-            name: 'phoneNumber',
-            sortable: true,
-            fontStyle: 'semibold',
-            align: 'left',
-        },
-        {
-            title: 'Rôle',
-            name: 'role',
-            sortable: true,
-            fontStyle: 'semibold',
-            align: 'left',
-        },
-        {
-            title: 'Date de création',
-            name: 'createdAt',
-            sortable: true,
-            fontStyle: 'semibold',
-            align: 'left',
-        },
-        {
-            title: 'Actions',
-            name: 'actions',
-            sortable: false,
-            fontStyle: 'semibold',
-            align: 'center',
-        },
-    ];
-
-    const { dataLoading, loadUsersTable, DEFAULT_LIMIT, DEFAULT_SKIP, DEFAULT_SORT } = useLoadUsersTable(usersList);
+    const { loadUsersTable, DEFAULT_LIMIT, DEFAULT_SKIP, DEFAULT_SORT } = useLoadUsersTable(usersList);
+    const { loading } = useSelector(selectUsersState);
 
     const { currentUser } = useAuthContext();
 
@@ -106,7 +96,7 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
         <Fragment>
             <Table
                 tableName='usersTableConfig'
-                dataLoading={ dataLoading }
+                dataLoading={ loading }
                 dataCount={ usersCount }
                 defaultLimit={ DEFAULT_LIMIT }
                 defaultSkip={ DEFAULT_SKIP }

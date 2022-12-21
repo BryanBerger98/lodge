@@ -1,23 +1,12 @@
 import { Fragment, useState, memo, ReactNode } from 'react';
 import { FiArrowDown, FiArrowUp } from 'react-icons/fi';
+import { LoadingState } from '../../../types/loading.type';
+import { TableField, TableSort } from './table.type';
 import TablePageSelector from './TablePageSelector';
-
-export type TableSort = {
-	field: string;
-	direction: 1 | -1;
-};
-
-type TableField = {
-	title: string;
-	name: string;
-	sortable: boolean,
-	fontStyle: 'bold' | 'semibold' | 'medium' | 'light',
-	align: 'left' | 'right' | 'center',
-};
 
 type TableProperties = {
 	tableName: string;
-	dataLoading: boolean;
+	dataLoading: LoadingState;
 	dataCount: number;
 	fields: TableField[],
 	defaultLimit: number;
@@ -91,9 +80,9 @@ const Table = ({ tableName, dataLoading, dataCount, fields, defaultLimit, defaul
                     </tr>
                 </thead>
                 <tbody>
-                    {!dataLoading && children}
+                    { (dataLoading === 'succeded' || dataLoading === 'idle') && children}
                     {
-                        dataLoading &&
+                        dataLoading === 'pending' &&
                         Array.from(Array(limit), (element, index) => (
                             <tr
                                 className="animate-pulse"
@@ -134,7 +123,7 @@ const Table = ({ tableName, dataLoading, dataCount, fields, defaultLimit, defaul
                     }
                 </tbody>
             </table>
-            { !dataLoading &&
+            { (dataLoading === 'succeded' || dataLoading === 'idle') &&
 				<TablePageSelector
 				    arrayLength={ dataCount }
 				    limit={ limit }

@@ -1,13 +1,11 @@
 import { FiChevronLeft, FiUserPlus } from 'react-icons/fi';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import csrf from '../../../../utils/csrf.util';
 import { string } from 'prop-types';
-// import { isUserAbleToWatch } from '../../../../utils/permissions';
 import { GetServerSidePropsContextWithCsrf } from '../../../../types/ssr.type';
 import Button from '../../../../components/admin/ui/Button/Button';
-import { useCsrfContext } from '../../../../context/csrf.context';
 import EditUserForm, { EditUserFormInputs } from '../../../../components/admin/users/EditUserForm';
-import useUsersClientService from '../../../../services/users/users.client.service';
+import { createUser } from '../../../../services/users/users.client.service';
 import { useRouter } from 'next/router';
 import { IApiError } from '../../../../types/error.type';
 import useTranslate from '../../../../hooks/useTranslate';
@@ -23,13 +21,7 @@ const NewUserPage = ({ csrfToken }: NewUserPage) => {
 
     const router = useRouter();
 
-    const { dispatchCsrfToken } = useCsrfContext();
-    const { createUser } = useUsersClientService();
     const { getTranslatedError } = useTranslate({ locale: 'fr' });
-
-    useEffect(() => {
-        dispatchCsrfToken(csrfToken);
-    }, [ dispatchCsrfToken, csrfToken ]);
 
     const handleSubmit = (values: EditUserFormInputs) => {
         setSaving(true);
@@ -37,7 +29,7 @@ const NewUserPage = ({ csrfToken }: NewUserPage) => {
         createUser({
             ...values,
             provider_data: 'email',
-        })
+        }, csrfToken)
             .then(createdUser => {
                 router.replace(`/admin/users/edit/${ createdUser._id }`);
             })
@@ -48,7 +40,7 @@ const NewUserPage = ({ csrfToken }: NewUserPage) => {
                     setErrorCode(errorMessage);
                     return;
                 }
-                console.error(apiError);
+                // console.error(apiError);
             })
             .finally(() => {
                 setSaving(false);
