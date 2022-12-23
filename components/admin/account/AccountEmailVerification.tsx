@@ -2,9 +2,9 @@ import { FiAlertTriangle, FiCheck, FiSend, FiX } from 'react-icons/fi';
 import ButtonWithLoader from '../ui/Button/ButtonWithLoader';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import useAuthClientService from '../../../services/auth/auth.client.service';
 import useTranslate from '../../../hooks/useTranslate';
 import { IApiError } from '../../../types/error.type';
+import { sendVerifyAccountEmailToUser } from '../../../services/auth/auth.client.service';
 
 const AccountEmailVerification = () => {
 
@@ -13,7 +13,6 @@ const AccountEmailVerification = () => {
     const [ emailSent, setEmailSent ] = useState(false);
     const [ counter, setCounter ] = useState(60);
 
-    const { sendVerifyAccountEmailToUser } = useAuthClientService();
     const { getTranslatedError } = useTranslate({ locale: 'fr' });
 
     const startCountDown = (delay: number) => {

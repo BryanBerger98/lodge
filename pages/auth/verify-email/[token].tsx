@@ -9,7 +9,8 @@ import { useAuthContext } from '../../../context/auth.context';
 import { useCsrfContext } from '../../../context/csrf.context';
 import csrf from '../../../utils/csrf.util';
 import { GetServerSidePropsContextWithCsrf } from '../../../types/ssr.type';
-import useAuthClientService from '../../../services/auth/auth.client.service';
+import { verifyEmail } from '../../../services/auth/auth.client.service';
+import { IApiError } from '../../../types/error.type';
 
 type VerifyEmailPageProperties = {
 	csrfToken: string;
@@ -33,7 +34,6 @@ const VerifyEmailPage: FC<VerifyEmailPageProperties> = ({ csrfToken }) => {
     const { getCurrentUser } = useAuthContext();
     const { dispatchCsrfToken } = useCsrfContext();
     const { getTranslatedError } = useTranslate({ locale: 'fr' });
-    const { verifyEmail } = useAuthClientService();
     const { token } = router.query;
 
     useEffect(() => {
@@ -52,11 +52,11 @@ const VerifyEmailPage: FC<VerifyEmailPageProperties> = ({ csrfToken }) => {
                     }, 3000);
                 }).catch(err => {
                     setLoading(false);
-                    if (err.response && err.response.data) {
-                        const errorMessage = getTranslatedError(err.response.data.code);
-                        return setError(errorMessage);
+                    const apiError = err as IApiError;
+                    if (apiError.response && apiError.response.data) {
+                        const errorMessage = getTranslatedError(apiError.response.data.code);
+                        setError(errorMessage);
                     }
-                    console.error(err);
                 });
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps

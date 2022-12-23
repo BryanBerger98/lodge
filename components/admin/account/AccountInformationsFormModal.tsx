@@ -4,11 +4,12 @@ import Modal from '../ui/Modal';
 import * as Yup from 'yup';
 import Button from '../ui/Button/Button';
 import TextField from '../forms/TextField';
-import useAuthClientService from '../../../services/auth/auth.client.service';
 import { Dispatch, FC, SetStateAction } from 'react';
 import { IUser } from '../../../types/user.type';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { updateAccount } from '../../../services/auth/auth.client.service';
+import { useCsrfContext } from '../../../context/csrf.context';
 
 export type EditAccountInformationsFormInputs = {
 	username: string;
@@ -23,7 +24,7 @@ type AccountInformationsFormModalProperties = {
 
 const AccountInformationsFormModal: FC<AccountInformationsFormModalProperties> = ({ isOpen, setIsOpen, user, dispatchUser }) => {
 
-    const { updateAccount } = useAuthClientService();
+    const { csrfToken } = useCsrfContext();
 
     const accountInfosFormSchema = Yup.object().shape({ username: Yup.string().required('Champs requis') });
 
@@ -38,7 +39,7 @@ const AccountInformationsFormModal: FC<AccountInformationsFormModalProperties> =
         try {
 
             setIsOpen(false);
-            await updateAccount({ username });
+            await updateAccount({ username }, csrfToken);
             dispatchUser({
                 ...user,
                 username,

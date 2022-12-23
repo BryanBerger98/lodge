@@ -10,6 +10,5 @@ export const parsePhoneNumber = (phoneNumber: string): PhoneNumber => {
     const asYouType = new AsYouType();
     asYouType.input(phoneNumber);
     const country = asYouType.getCountry();
-    console.log(phoneNumber, country);
     return parse(phoneNumber, country);
 };

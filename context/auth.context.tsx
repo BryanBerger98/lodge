@@ -1,6 +1,6 @@
 import { node } from 'prop-types';
 import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import useAuthClientService from '../services/auth/auth.client.service';
+import { getCurrentLoggedInUser } from '../services/auth/auth.client.service';
 import { IUser } from '../types/user.type';
 
 type AuthContextValue = {
@@ -35,8 +35,6 @@ const AuthContextProvider: FC<AuthContextProviderProperties> = ({ children }) =>
 
     const [ csrfToken, setCsrfToken ] = useState<string | null>(null);
 
-    const { getCurrentLoggedInUser } = useAuthClientService();
-
     const getCurrentUser = useCallback(async () => {
         try {
             const user = await getCurrentLoggedInUser();
@@ -45,7 +43,7 @@ const AuthContextProvider: FC<AuthContextProviderProperties> = ({ children }) =>
         } catch (error) {
             throw error;
         }
-    }, [ setCurrentUser, getCurrentLoggedInUser ]);
+    }, [ setCurrentUser ]);
 
     const dispatchCurrentUser = useCallback((user: IUser) => {
         setCurrentUser({

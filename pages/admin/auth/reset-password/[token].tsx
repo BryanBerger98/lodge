@@ -9,10 +9,10 @@ import Loader from '../../../../components/admin/ui/Loader';
 import TextField from '../../../../components/admin/forms/TextField';
 import { GetServerSidePropsContextWithCsrf } from '../../../../types/ssr.type';
 import useTranslate from '../../../../hooks/useTranslate';
-import useAuthClientService from '../../../../services/auth/auth.client.service';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { IApiError } from '../../../../types/error.type';
+import { resetPassword } from '../../../../services/auth/auth.client.service';
 
 type ResetPasswordInputs = {
 	password: string;
@@ -34,7 +34,6 @@ const ResetPasswordPage: FC<ResetPasswordPageProperties> = ({ csrfToken }) => {
 
     const { dispatchCsrfToken } = useCsrfContext();
     const { getTranslatedError } = useTranslate({ locale: 'fr' });
-    const { resetPassword } = useAuthClientService();
 
     const { token } = router.query;
 
@@ -43,7 +42,7 @@ const ResetPasswordPage: FC<ResetPasswordPageProperties> = ({ csrfToken }) => {
         confirmPassword: Yup.string().oneOf([ Yup.ref('password'), null ], 'Doit être identique au mot de passe').required('Champs requis'),
     });
 
-    const { register, handleSubmit, formState: { errors }, setValue } = useForm<ResetPasswordInputs>({
+    const { register, handleSubmit, formState: { errors } } = useForm<ResetPasswordInputs>({
         resolver: yupResolver(resetPasswordFormSchema),
         mode: 'onTouched',
     });
@@ -59,17 +58,16 @@ const ResetPasswordPage: FC<ResetPasswordPageProperties> = ({ csrfToken }) => {
         const { password } = values;
         setLoading(true);
 
-        resetPassword(token, password).then(() => {
+        resetPassword(token, password, csrfToken).then(() => {
             setSuccess(true);
             setTimeout(() => {
-                router.replace('/admin/auth/signin');
+                router.replace('/admin/auth/login');
             }, 3000);
         }).catch((err: IApiError) => {
             if (err.response && err.response.data) {
                 const errorMessage = getTranslatedError(err.response.data.code);
                 return setError(errorMessage);
             }
-            console.error(err);
         }).finally(() => {
             setLoading(false);
         });

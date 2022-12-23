@@ -3,9 +3,11 @@ import { FiLock, FiSave } from 'react-icons/fi';
 import * as Yup from 'yup';
 import ButtonWithLoader from '../ui/Button/ButtonWithLoader';
 import TextField from '../forms/TextField';
-import useAuthClientService from '../../../services/auth/auth.client.service';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
+import { updatePassword } from '../../../services/auth/auth.client.service';
+import { useCsrfContext } from '../../../context/csrf.context';
+import { IApiError } from '../../../types/error.type';
 
 type ChangePasswordFormInputs = {
 	oldPassword: string;
@@ -16,9 +18,9 @@ type ChangePasswordFormInputs = {
 const AccountChangePasswordForm = () => {
 
     const [ saving, setSaving ] = useState<boolean>(false);
-    const [ errorCode, setErrorCode ] = useState(null);
+    const [ errorCode, setErrorCode ] = useState<string | null>(null);
 
-    const { updatePassword } = useAuthClientService();
+    const { csrfToken } = useCsrfContext();
 
     const changePasswordFormSchema = Yup.object().shape({
         oldPassword: Yup.string().required('Champs requis'),
@@ -37,15 +39,15 @@ const AccountChangePasswordForm = () => {
         const { newPassword, oldPassword } = values;
 
         try {
-            await updatePassword(oldPassword, newPassword);
+            await updatePassword(oldPassword, newPassword, csrfToken);
             setSaving(false);
         } catch (error) {
             setSaving(false);
-            if (error.response && error.response.data && error.response.data.code && error.response.data.code === 'auth/wrong-password') {
-                setErrorCode(error.response.data.code);
+            const apiError = error as IApiError;
+            if (apiError.response && apiError.response.data && apiError.response.data.code && apiError.response.data.code === 'auth/wrong-password') {
+                setErrorCode(apiError.response.data.code);
                 return;
             }
-            console.error(error);
         }
 
         setValue('oldPassword', '');

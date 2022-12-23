@@ -4,7 +4,8 @@ import { useAuthContext } from '../../../context/auth.context';
 import Image from 'next/image';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { IUser } from '../../../types/user.type';
-import useAuthClientService from '../../../services/auth/auth.client.service';
+import { useCsrfContext } from '../../../context/csrf.context';
+import { updateAvatar } from '../../../services/auth/auth.client.service';
 
 type AccountProfilePhotoInputProperties = {
 	currentUser: IUser;
@@ -14,9 +15,8 @@ const AccountProfilePhotoInput: FC<AccountProfilePhotoInputProperties> = ({ curr
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { dispatchCurrentUser } = useAuthContext();
+    const { csrfToken } = useCsrfContext();
     const [ saving, setSaving ] = useState(false);
-
-    const { updateAvatar } = useAuthClientService();
 
     const handleFileChange = async () => {
         try {
@@ -30,7 +30,7 @@ const AccountProfilePhotoInput: FC<AccountProfilePhotoInputProperties> = ({ curr
             setSaving(true);
 
 
-            const fileData = await updateAvatar(file);
+            const fileData = await updateAvatar(file, csrfToken);
             dispatchCurrentUser({
                 ...currentUser,
                 photo_url: fileData.path,

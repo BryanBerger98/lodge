@@ -7,11 +7,12 @@ import ButtonWithLoader from '../ui/Button/ButtonWithLoader';
 import TextField from '../forms/TextField';
 import PhoneField from '../forms/PhoneField';
 import { IUser } from '../../../types/user.type';
-import useAuthClientService from '../../../services/auth/auth.client.service';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { formatPhoneNumber, parsePhoneNumber, PhoneNumber } from '../../../utils/phone-number.util';
 import { IApiError } from '../../../types/error.type';
+import { useCsrfContext } from '../../../context/csrf.context';
+import { updateAccount, updateEmail } from '../../../services/auth/auth.client.service';
 
 type ContactInfosFormInputs = {
 	phoneNumber: string;
@@ -25,16 +26,16 @@ type AccountContactInformationsFormProperties = {
 const AccountContactInformationsForm: FC<AccountContactInformationsFormProperties> = ({ currentUser }) => {
 
     const { dispatchCurrentUser } = useAuthContext();
-    const { updateEmail, updateAccount } = useAuthClientService();
+    const { csrfToken } = useCsrfContext();
 
     const updateUser = async ({ email, password, phone_number }: { email?: string | null, phone_number?: string | null, password?: string | null }) => {
         try {
             if (email && password) {
-                await updateEmail(email, password);
+                await updateEmail(email, password, csrfToken);
             }
 
             if (phone_number) {
-                await updateAccount({ phone_number });
+                await updateAccount({ phone_number }, csrfToken);
             }
 
             return;

@@ -22,6 +22,10 @@ export default NextAuth({
                         throw new Error('No user registered.');
                     }
 
+                    if (user.disabled) {
+                        throw new Error('User disabled');
+                    }
+
                     const isPasswordValid = await verifyPassword(credentials.password, user.password);
 
                     if (!isPasswordValid) {

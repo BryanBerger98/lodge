@@ -9,9 +9,10 @@ import { useCsrfContext } from '../../context/csrf.context';
 import Loader from '../../components/admin/ui/Loader';
 import { GetServerSidePropsContextWithCsrf } from '../../types/ssr.type';
 import useTranslate from '../../hooks/useTranslate';
-import useAuthClientService from '../../services/auth/auth.client.service';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { sendResetPasswordEmailToUserByEmail } from '../../services/auth/auth.client.service';
+import { IApiError } from '../../types/error.type';
 
 type ForgotPasswordFormValues = {
 	email: string;
@@ -32,7 +33,6 @@ const ForgotPasswordPage: FC<ForgotPasswordPageProperties> = ({ csrfToken }) => 
 
     const { dispatchCsrfToken } = useCsrfContext();
     const { getTranslatedError } = useTranslate({ locale: 'fr' });
-    const { sendResetPasswordEmailToUserByEmail } = useAuthClientService();
 
     const forgotPasswordFormSchema = Yup.object().shape({ email: Yup.string().email('Email invalide').required('Champs requis') });
 
@@ -62,18 +62,17 @@ const ForgotPasswordPage: FC<ForgotPasswordPageProperties> = ({ csrfToken }) => 
         const { email } = values;
         setLoading(true);
         try {
-            await sendResetPasswordEmailToUserByEmail(email);
+            await sendResetPasswordEmailToUserByEmail(email, csrfToken);
             setLoading(false);
             setEmailSent(true);
             startCountDown(60);
         } catch (err) {
             setLoading(false);
-            if (err.response && err.response.data && err.response.data.code) {
-                const errorMessage = getTranslatedError(err.response.data.code);
+            const apiError = err as IApiError;
+            if (apiError.response && apiError.response.data && apiError.response.data.code) {
+                const errorMessage = getTranslatedError(apiError.response.data.code);
                 setError(errorMessage);
-                return;
             }
-            console.error(err);
         }
     };
 

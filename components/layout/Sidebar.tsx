@@ -47,24 +47,6 @@ const Sidebar: FC<SidebarProperties> = ({ isSidebarOpen, setIsSidebarOpen }) => 
 								    </Link>
 								</li>
                             }
-                            <li>
-                                <Link
-                                    href={ '/admin/skills' }
-                                    className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer"
-                                >
-                                    <FiAward />
-                                    <span>Compétences</span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href={ '/admin/productions' }
-                                    className="flex gap-2 items-center p-2 rounded-md hover:text-light-50 hover:bg-primary-light-tint dark:hover:bg-light-700 hover:cursor-pointer"
-                                >
-                                    <FiLayers />
-                                    <span>Productions</span>
-                                </Link>
-                            </li>
                         </ul>
                     </nav>
                     <small className="mt-auto mx-auto text-xs text-primary-dark-tint">Designed by WeBerger</small>

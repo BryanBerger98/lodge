@@ -1,6 +1,6 @@
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { FiLogOut, FiSettings, FiUser } from 'react-icons/fi';
+import { FiLogOut, FiUser } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { IUser } from '../../../types/user.type';
@@ -26,14 +26,14 @@ const AccountDropDownMenu = ({ currentUser }: AccountDropdownMenuProperties) => 
             <div>
                 <Menu.Button className='bg-primary-light-default dark:bg-primary-dark-default hover:bg-primary-light-shade dark:hover:bg-primary-dark-shade flex items-center justify-center text-md text-light-50 rounded-full w-9 h-9 hover:cursor-pointer  focus:outline-none overflow-hidden'>
                     {
-                        currentUser && currentUser.photo_url && currentUser.photo_url !== ''
-                            ? <Image
+                        currentUser && currentUser.photo_url && currentUser.photo_url !== '' ?
+                            <Image
                                 src={ `/${ currentUser.photo_url }` }
                                 alt={ `${ currentUser.username } profile photo` }
                                 width={ 36 }
                                 height={ 36 }
                                 className='rounded-full'
-                              />
+                            />
                             : <FiUser />
                     }
                 </Menu.Button>
@@ -71,31 +71,6 @@ const AccountDropDownMenu = ({ currentUser }: AccountDropdownMenuProperties) => 
                                         />
                                     )}
                         Mon compte
-                                </button>
-                            )}
-                        </Menu.Item>
-                        <Menu.Item>
-                            {({ active }) => (
-                                <button
-                                    className={ `${
-                                        active ? 'bg-primary-light-default text-white dark:bg-primary-dark-default dark:text-secondary-dark-default' : 'text-secondary-dark-shade dark:text-secondary-light-shade'
-                                    } group flex rounded-lg items-center w-full px-2 py-2 text-sm` }
-                                    onClick={ () => {
-                                        router.push('users/edit/'+currentUser._id);
-                                    } }
-                                >
-                                    {active ? (
-                                        <FiSettings
-                                            className="w-5 h-5 mr-2"
-                                            aria-hidden="true"
-                                        />
-                                    ) : (
-                                        <FiSettings
-                                            className="w-5 h-5 mr-2 text-primary-light-default dark:text-primary-dark-default"
-                                            aria-hidden="true"
-                                        />
-                                    )}
-                        Paramètres
                                 </button>
                             )}
                         </Menu.Item>
