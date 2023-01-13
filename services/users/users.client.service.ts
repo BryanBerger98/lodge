@@ -1,5 +1,6 @@
 import { ObjectId } from '../../infrastructure/types/database.type';
 import fetcher from '../../lib/fetcher';
+import { ILodgeFile } from '../../types/file.type';
 import { CreateUserDTO, UpdateUserDTO, IUser } from '../../types/user.type';
 
 const baseUrl = '/users';
@@ -30,13 +31,23 @@ export const updateUser = async (userToUpdate: UpdateUserDTO, csrfToken: string 
     }
 };
 
-export const updateUserAvatar = async (userId: ObjectId | string, file: File, csrfToken: string | null): Promise<any> => {
+export const updateUserAvatar = async (userId: ObjectId | string, file: File, csrfToken: string | null): Promise<{ file: ILodgeFile, photoUrl: string }> => {
     try {
         const formData = new FormData();
         formData.append('avatar', file);
         const response = await fetcher(csrfToken).put(`${ baseUrl }/${ userId }/avatar`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
         const { data: fileData } = response;
         return fileData;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getUserAvatar = async (userId: ObjectId | string): Promise<any> => {
+    try {
+        const response = await fetcher().get(`${ baseUrl }/${ userId }/avatar`);
+        const { data } = response;
+        return data;
     } catch (error) {
         throw error;
     }

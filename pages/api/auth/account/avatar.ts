@@ -6,6 +6,7 @@ import fs from 'fs/promises';
 import csurf from 'csurf';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
+import { sendApiError } from '../../../../utils/error.utils';
 
 const upload = multer({
     storage: multer.diskStorage({
@@ -60,10 +61,7 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: Ne
     const currentUser = await userDataAccess.findUserById(session.user._id);
 
     if (!currentUser) {
-        return res.status(404).json({
-            code: 'auth/user-not-found',
-            message: 'User not found.',
-        });
+        return sendApiError(res, 'auth', 'user-not-found');
     }
 
     if (currentUser.photo_url && currentUser.photo_url !== '') {
@@ -98,6 +96,18 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: Ne
     }
 
 });
+
+// apiRoute.get(async (req: NextApiRequest, res: NextApiResponse) => {
+//     const session = await getSession({ req });
+
+//     if (!session) {
+//         return res.status(401).json({
+//             code: 'auth/unauthorized',
+//             message: 'Unauthorized.',
+//         });
+//     }
+
+// });
 
 export default apiRoute;
 

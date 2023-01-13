@@ -3,9 +3,17 @@
 	"overrides": [
 		{
 			"files": ["**/*.ts", "**/*.tsx"],
-			"extends": ["plugin:@typescript-eslint/recommended", "plugin:react-hooks/recommended"],
+			"extends": [
+				"plugin:@typescript-eslint/recommended",
+				"plugin:react-hooks/recommended"
+			],
 			"parser": "@typescript-eslint/parser",
-			"plugins": ["@typescript-eslint", "react", "jsx-a11y", "react-hooks"],
+			"plugins": [
+				"@typescript-eslint",
+				"react",
+				"jsx-a11y",
+				"react-hooks"
+			],
 			"rules": {
 				"indent": [
 					"warn",
@@ -21,6 +29,7 @@
 				"semi": ["warn", "always"],
 				"quotes": ["warn", "single"],
 				"linebreak-style": ["warn", "unix"],
+				"object-curly-spacing": ["warn", "always"],
 				"array-bracket-spacing": ["warn", "always"],
 				"computed-property-spacing": ["warn", "always"],
 				"comma-dangle": [
@@ -47,6 +56,13 @@
 				"no-empty-function": "warn",
 				"require-await": "error",
 				"template-curly-spacing": ["warn", "always"],
+				"brace-style": ["warn", "1tbs"],
+				"no-param-reassign": [
+					"error",
+					{
+						"props": false
+					}
+				],
 				"prefer-destructuring": [
 					"warn",
 					{
