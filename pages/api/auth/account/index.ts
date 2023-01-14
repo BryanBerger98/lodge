@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
 import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../../infrastructure/database';
 import { getFileFromKey } from '../../../../lib/bucket';
+import { getSessionUser } from '../../../../services/auth/auth.api.service';
 import { IUser } from '../../../../types/user.type';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../../utils/csrf.util';
 import { sendApiError } from '../../../../utils/error.utils';
@@ -13,16 +13,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 
+    const currentUser = await getSessionUser(req);
+
+    if (!currentUser) {
+        return sendApiError(res, 'auth', 'unauthorized');
+    }
+
     if (req.method === 'PUT') {
-
-        const session = await getSession({ req });
-
-        if (!session) {
-            return res.status(401).json({
-                code: 'auth/unauthorized',
-                message: 'Unauthorized.',
-            });
-        }
 
         const { username, phone_number } = req.body;
 
@@ -41,7 +38,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
         const result = await userDataAccess.updateUser({
-            _id: session.user._id,
+            _id: currentUser._id,
             ...updateObject,
         }, true);
 
@@ -50,19 +47,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     if (req.method === 'GET') {
-        const session = await getSession({ req });
 
-        if (!session) {
-            return sendApiError(res, 'auth', 'unauthorized');
-        }
+        const currentUserData = await userDataAccess.findUserById(currentUser._id);
 
-        const currentUser = await userDataAccess.findUserById(session.user._id);
-
-        if (!currentUser) {
+        if (!currentUserData) {
             return sendApiError(res, 'auth', 'user-not-found');
         }
 
-        const photoFileObject = await fileDataAccess.findFileByUrl(currentUser.photo_url);
+        const photoFileObject = await fileDataAccess.findFileByUrl(currentUserData.photo_url);
 
         if (!photoFileObject) {
             return sendApiError(res, 'files', 'file-not-found');
@@ -70,16 +62,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         const photoUrl = await getFileFromKey(photoFileObject);
 
-        currentUser.photo_url = photoUrl ? photoUrl : '';
+        currentUserData.photo_url = photoUrl ? photoUrl : '';
 
         return res.status(200).json(currentUser);
     }
 
-    res.status(405).json({
-        code: 'auth/wrong-method',
-        message: 'This request method is not allowed.',
-    });
-
+    return sendApiError(res, 'auth', 'wrong-method');
 };
 
 export default handler;

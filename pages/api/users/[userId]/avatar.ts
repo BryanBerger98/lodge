@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
 import nextConnect from 'next-connect';
 import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
 import { deleteFileFromKey, getFileFromKey } from '../../../../lib/bucket';
@@ -22,9 +21,9 @@ const apiRoute = nextConnect({
 });
 
 apiRoute.get(async (req: NextApiRequest, res: NextApiResponse) => {
-    const session = await getSession({ req });
+    const currentUser = await getSessionUser(req);
 
-    if (!session) {
+    if (!currentUser) {
         return sendApiError(res, 'auth', 'unauthorized');
     }
 
@@ -55,9 +54,9 @@ apiRoute.get(async (req: NextApiRequest, res: NextApiResponse) => {
 apiRoute.use(csrfProtection);
 
 apiRoute.use(async (req, res, next) => {
-    const session = await getSession({ req });
+    const currentUser = await getSessionUser(req);
 
-    if (!session) {
+    if (!currentUser) {
         return sendApiError(res, 'auth', 'unauthorized');
     }
     next();

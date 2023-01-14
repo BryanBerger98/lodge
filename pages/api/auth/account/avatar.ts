@@ -1,4 +1,3 @@
-import { getSession } from 'next-auth/react';
 import nextConnect from 'next-connect';
 import { convertFileRequestObjetToModel } from '../../../../utils/file.utils';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -8,6 +7,7 @@ import { upload } from '../../../../lib/file-uploader';
 import { csrfProtection } from '../../../../lib/csrf';
 import { deleteFileFromKey, getFileFromKey } from '../../../../lib/bucket';
 import { findUserById } from '../../../../infrastructure/data-access/user.data-access';
+import { getSessionUser } from '../../../../services/auth/auth.api.service';
 
 const apiRoute = nextConnect({
     onError(error, req: NextApiRequest, res: NextApiResponse) {
@@ -22,25 +22,19 @@ const apiRoute = nextConnect({
 });
 
 apiRoute.get(async (req: NextApiRequest, res: NextApiResponse) => {
-    const session = await getSession({ req });
-
-    if (!session) {
-        return sendApiError(res, 'auth', 'unauthorized');
-    }
-
-    const { user } = session;
-
-    if (!user) {
-        return sendApiError(res, 'auth', 'unauthorized');
-    }
-
-    const currentUser = await findUserById(user._id);
+    const currentUser = await getSessionUser(req);
 
     if (!currentUser) {
+        return sendApiError(res, 'auth', 'unauthorized');
+    }
+
+    const currentUserData = await findUserById(currentUser._id);
+
+    if (!currentUserData) {
         return sendApiError(res, 'auth', 'user-not-found');
     }
 
-    const photoFileObject = await fileDataAccess.findFileByUrl(currentUser.photo_url);
+    const photoFileObject = await fileDataAccess.findFileByUrl(currentUserData.photo_url);
 
     if (!photoFileObject) {
         return sendApiError(res, 'files', 'file-not-found');
@@ -55,9 +49,9 @@ apiRoute.get(async (req: NextApiRequest, res: NextApiResponse) => {
 apiRoute.use(csrfProtection);
 
 apiRoute.use(async (req, res, next) => {
-    const session = await getSession({ req });
+    const currentUser = await getSessionUser(req);
 
-    if (!session) {
+    if (!currentUser) {
         return sendApiError(res, 'auth', 'unauthorized');
     }
     next();
@@ -66,20 +60,20 @@ apiRoute.use(async (req, res, next) => {
 apiRoute.use(upload.single('avatar'));
 
 apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: NextApiResponse) => {
-    const session = await getSession({ req });
+    const currentUser = await getSessionUser(req);
 
-    if (!session) {
+    if (!currentUser) {
         return sendApiError(res, 'auth', 'unauthorized');
     }
 
-    const currentUser = await userDataAccess.findUserById(session.user._id);
+    const currentUserData = await userDataAccess.findUserById(currentUser._id);
 
-    if (!currentUser) {
+    if (!currentUserData) {
         return sendApiError(res, 'auth', 'user-not-found');
     }
 
-    if (currentUser.photo_url && currentUser.photo_url !== '') {
-        const oldFile = await fileDataAccess.findFileByUrl(currentUser.photo_url);
+    if (currentUserData.photo_url && currentUserData.photo_url !== '') {
+        const oldFile = await fileDataAccess.findFileByUrl(currentUserData.photo_url);
         if (oldFile) {
             try {
                 await deleteFileFromKey(oldFile.key);
@@ -92,12 +86,12 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: 
 
     const file = {
         ...convertFileRequestObjetToModel(req.file),
-        created_by: currentUser._id,
+        created_by: currentUserData._id,
     };
     try {
         const savedFile = await fileDataAccess.createFile(file);
         await userDataAccess.updateUser({
-            _id: currentUser._id,
+            _id: currentUserData._id,
             photo_url: file.url,
         });
         const photoUrl = savedFile ? await getFileFromKey(savedFile) : null;

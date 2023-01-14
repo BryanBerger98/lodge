@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
 import { userDataAccess } from '../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../infrastructure/database';
+import { getSessionUser } from '../../../services/auth/auth.api.service';
+import { sendApiError } from '../../../utils/error.utils';
 import { hashPassword, verifyPassword } from '../../../utils/password.util';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -13,48 +14,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { oldPassword, newPassword } = req.body;
 
         if (!oldPassword || oldPassword.length < 8 || !newPassword || newPassword.length < 8) {
-            return res.status(422).json({
-                code: 'auth/invalid-input',
-                message: 'Invalid input.',
-            });
+            return sendApiError(res, 'auth', 'invalid-input');
         }
 
-        const session = await getSession({ req });
-        if (!session) {
-            return res.status(401).json({
-                code: 'auth/unauthorized',
-                message: 'Unauthorized.',
-            });
-        }
-
-        const currentUser = await userDataAccess.findUserWithPasswordById(session.user._id);
+        const currentUser = await getSessionUser(req);
 
         if (!currentUser) {
-            return res.status(401).json({
-                code: 'auth/user-not-found',
-                message: 'User not found.',
-            });
+            return sendApiError(res, 'auth', 'unauthorized');
         }
 
-        const isPasswordVerified = await verifyPassword(oldPassword, currentUser.password);
+        const currentUserData = await userDataAccess.findUserWithPasswordById(currentUser._id);
+
+        if (!currentUserData) {
+            return sendApiError(res, 'auth', 'user-not-found');
+        }
+
+        const isPasswordVerified = await verifyPassword(oldPassword, currentUserData.password);
         if (!isPasswordVerified) {
-            return res.status(403).json({
-                code: 'auth/wrong-password',
-                message: 'Wrong password.',
-            });
+            return sendApiError(res, 'auth', 'wrong-password');
         }
 
         const hashedNewPassword = await hashPassword(newPassword);
 
-        await userDataAccess.updateUserPassword(currentUser._id, hashedNewPassword);
+        await userDataAccess.updateUserPassword(currentUserData._id, hashedNewPassword);
 
         return res.status(200).json({ message: 'Password updated.' });
 
     }
 
-    res.status(405).json({
-        code: 'auth/wrong-method',
-        message: 'This request method is not allowed.',
-    });
+    return sendApiError(res, 'auth', 'wrong-method');
 
 }

@@ -5,6 +5,7 @@ import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
 import { tokenDataAccess, userDataAccess } from '../../../infrastructure/data-access';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDatabase } from '../../../infrastructure/database';
+import { sendApiError } from '../../../utils/error.utils';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
@@ -26,10 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const user = await userDataAccess.findUserByEmail(email);
 
         if (!user) {
-            return res.status(404).json({
-                code: 'auth/user-not-found',
-                message: 'User not found.',
-            });
+            return sendApiError(res, 'auth', 'user-not-found');
         }
 
         const expirationDate = Math.floor(Date.now() / 1000) + (60 * 60 * 2);
@@ -51,40 +49,27 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const { token, password } = req.body;
 
         if (!token) {
-            return res.status(401).json({
-                code: 'auth/invalid-token',
-                message: 'Invalid token.',
-            });
+            return sendApiError(res, 'auth', 'invalid-token');
         }
 
         if (!password || password.length < 8) {
-            return res.status(422).json({
-                code: 'auth/invalid-input',
-                message: 'Invalid input.',
-            });
+            return sendApiError(res, 'auth', 'invalid-input');
         }
 
         const savedToken = await tokenDataAccess.getTokenFromTokenString(token);
 
         if (!savedToken) {
-            return res.status(404).json({
-                code: 'auth/token-not-found',
-                message: 'Token not found.',
-            });
+            return sendApiError(res, 'auth', 'token-not-found');
         }
 
         const tokenPayload = verifyToken(savedToken.token);
         const user = await userDataAccess.findUserByEmail(tokenPayload.email);
 
         if (!user) {
-            return res.status(404).json({
-                code: 'auth/user-not-found',
-                message: 'User not found.',
-            });
+            return sendApiError(res, 'auth', 'user-not-found');
         }
 
         const hashedPassword = await hashPassword(password);
-        // const updatedUser = await User.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
         const updatedUser = await userDataAccess.updateUserPassword(user._id, hashedPassword);
 
         await tokenDataAccess.deleteTokenById(savedToken._id);
@@ -92,10 +77,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(200).json(updatedUser);
     }
 
-    res.status(405).json({
-        code: 'auth/wrong-method',
-        message: 'This request method is not allowed.',
-    });
+    return sendApiError(res, 'auth', 'wrong-method');
 
 };
 
