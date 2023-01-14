@@ -6,6 +6,7 @@ import csrf, { CsrfRequest, CsrfResponse } from '../../../../utils/csrf.util';
 import { sendApiError } from '../../../../utils/error.utils';
 import { setPermissions } from '../../../../utils/permissions.util';
 import { unlink } from 'fs/promises';
+import { deleteFileFromKey } from '../../../../lib/bucket';
 
 const handler: NextApiHandler = async (req, res) => {
 
@@ -41,7 +42,7 @@ const handler: NextApiHandler = async (req, res) => {
             const profilePhotoUrl = await fileDataAccess.findFileByPath(deletedUser.photo_url);
             if (profilePhotoUrl) {
                 try {
-                    await unlink(`./public/${ profilePhotoUrl.path }`);
+                    await deleteFileFromKey(profilePhotoUrl.file_name);
                     await fileDataAccess.deleteFileById(profilePhotoUrl._id);
                 } catch (error) {
                     console.error('ERROR - Deleting avatar >', error);

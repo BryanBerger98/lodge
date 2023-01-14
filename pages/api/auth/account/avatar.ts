@@ -1,27 +1,13 @@
 import { getSession } from 'next-auth/react';
-import multer from 'multer';
 import nextConnect from 'next-connect';
-import { convertFileRequestObjetToModel, generateUniqueNameFromFileName } from '../../../../utils/file.util';
-import fs from 'fs/promises';
-import csurf from 'csurf';
+import { convertFileRequestObjetToModel } from '../../../../utils/file.utils';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
 import { sendApiError } from '../../../../utils/error.utils';
-
-const upload = multer({
-    storage: multer.diskStorage({
-        destination: './public/uploads',
-        filename: async (req, file, cb) => {
-            try {
-                const generatedFileName = await generateUniqueNameFromFileName(file.originalname);
-                return cb(null, generatedFileName);
-            } catch (error) {
-                return cb(error as Error, '');
-            }
-        },
-    }),
-    limits: { fileSize: 2097152 },
-});
+import { upload } from '../../../../lib/file-uploader';
+import { csrfProtection } from '../../../../lib/csrf';
+import { deleteFileFromKey, getFileFromKey } from '../../../../lib/bucket';
+import { findUserById } from '../../../../infrastructure/data-access/user.data-access';
 
 const apiRoute = nextConnect({
     onError(error, req: NextApiRequest, res: NextApiResponse) {
@@ -30,32 +16,60 @@ const apiRoute = nextConnect({
             message: error.message,
         });
     },
-    onNoMatch(req, res) {
-        res.status(405).json({
-            code: 'auth/wrong-method',
-            message: 'This request method is not allowed.',
-        });
+    onNoMatch(req: NextApiRequest, res: NextApiResponse) {
+        return sendApiError(res, 'auth', 'wrong-method');
     },
 });
 
-const csrfProtection = csurf({
-    cookie: {
-        httpOnly: true,
-        sameSite: 'strict',
-    },
-});
-apiRoute.use(csrfProtection);
-
-apiRoute.use(upload.single('avatar'));
-
-apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: NextApiResponse) => {
+apiRoute.get(async (req: NextApiRequest, res: NextApiResponse) => {
     const session = await getSession({ req });
 
     if (!session) {
-        return res.status(401).json({
-            code: 'auth/unauthorized',
-            message: 'Unauthorized.',
-        });
+        return sendApiError(res, 'auth', 'unauthorized');
+    }
+
+    const { user } = session;
+
+    if (!user) {
+        return sendApiError(res, 'auth', 'unauthorized');
+    }
+
+    const currentUser = await findUserById(user._id);
+
+    if (!currentUser) {
+        return sendApiError(res, 'auth', 'user-not-found');
+    }
+
+    const photoFileObject = await fileDataAccess.findFileByPath(currentUser.photo_url);
+
+    if (!photoFileObject) {
+        return sendApiError(res, 'files', 'file-not-found');
+    }
+
+    const photoUrl = await getFileFromKey(photoFileObject);
+
+    return res.status(200).json({ photoUrl });
+
+});
+
+apiRoute.use(csrfProtection);
+
+apiRoute.use(async (req, res, next) => {
+    const session = await getSession({ req });
+
+    if (!session) {
+        return sendApiError(res, 'auth', 'unauthorized');
+    }
+    next();
+});
+
+apiRoute.use(upload.single('avatar'));
+
+apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: NextApiResponse) => {
+    const session = await getSession({ req });
+
+    if (!session) {
+        return sendApiError(res, 'auth', 'unauthorized');
     }
 
     const currentUser = await userDataAccess.findUserById(session.user._id);
@@ -68,7 +82,7 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: Ne
         const oldFile = await fileDataAccess.findFileByPath(currentUser.photo_url);
         if (oldFile) {
             try {
-                await fs.unlink(`./public/${ oldFile.path }`);
+                await deleteFileFromKey(oldFile.file_name);
                 await fileDataAccess.deleteFileById(oldFile._id);
             } catch (error) {
                 console.error('ERROR - Deleting avatar >', error);
@@ -86,7 +100,11 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: Ne
             _id: currentUser._id,
             photo_url: file.path,
         });
-        return res.status(200).json(savedFile);
+        const photoUrl = savedFile ? await getFileFromKey(savedFile) : null;
+        return res.status(200).json({
+            file: savedFile,
+            photoUrl,
+        });
     } catch (error) {
         console.error('ERROR - Saving avatar >', error);
         return res.status(500).json({
@@ -96,18 +114,6 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.Multer.File }, res: Ne
     }
 
 });
-
-// apiRoute.get(async (req: NextApiRequest, res: NextApiResponse) => {
-//     const session = await getSession({ req });
-
-//     if (!session) {
-//         return res.status(401).json({
-//             code: 'auth/unauthorized',
-//             message: 'Unauthorized.',
-//         });
-//     }
-
-// });
 
 export default apiRoute;
 

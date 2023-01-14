@@ -11,6 +11,15 @@ export const findFileByPath = async (path: string): Promise<ILodgeFile | null> =
     }
 };
 
+export const findMultipleFilesByPath = async (pathArray: string[]): Promise<ILodgeFile[] | null> => {
+    try {
+        const files = await FileModel.find({ path: { $in: pathArray } });
+        return files;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const deleteFileById = async (fileId: ObjectId | string): Promise<ILodgeFile | null> => {
     try {
         const file = await FileModel.findByIdAndDelete(fileId);

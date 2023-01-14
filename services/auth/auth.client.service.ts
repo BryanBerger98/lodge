@@ -1,4 +1,5 @@
 import fetcher from '../../lib/fetcher';
+import { ILodgeFile } from '../../types/file.type';
 import { IUser } from '../../types/user.type';
 
 const baseUrl = '/auth';
@@ -118,12 +119,23 @@ export const updateAccount = async (valuesToUpdate: { phone_number?: string, use
     }
 };
 
-export const updateAvatar = async (file: File, csrfToken?: string | null) => {
+export const updateAvatar = async (file: File, csrfToken?: string | null): Promise<{ file: ILodgeFile, photoUrl: string }> => {
     try {
         const formData = new FormData();
         formData.append('avatar', file);
         const response = await fetcher(csrfToken).put(`${ baseUrl }/account/avatar`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-        return response.data;
+        const { data: fileData } = response;
+        return fileData;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getAvatar = async (): Promise<{ photoUrl: string }> => {
+    try {
+        const response = await fetcher().get(`${ baseUrl }/account/avatar`);
+        const { data } = response;
+        return data;
     } catch (error) {
         throw error;
     }

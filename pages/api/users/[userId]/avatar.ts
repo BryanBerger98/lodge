@@ -1,37 +1,12 @@
-import { getSession } from 'next-auth/react';
-import multer from 'multer';
-import nextConnect from 'next-connect';
-import { convertFileRequestObjetToModel, generateUniqueNameFromFileName } from '../../../../utils/file.util';
-import fs from 'fs/promises';
-import csurf from 'csurf';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getSession } from 'next-auth/react';
+import nextConnect from 'next-connect';
 import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
-
-import multerS3 from 'multer-s3';
-import bucket, { deleteFileFromKey, getFileFromKey } from '../../../../lib/bucket';
+import { deleteFileFromKey, getFileFromKey } from '../../../../lib/bucket';
+import { csrfProtection } from '../../../../lib/csrf';
+import { upload } from '../../../../lib/file-uploader';
+import { convertFileRequestObjetToModel } from '../../../../utils/file.utils';
 import { sendApiError } from '../../../../utils/error.utils';
-
-const upload = multer({
-    storage: multerS3({
-        s3: bucket,
-        bucket: process.env.BUCKET_NAME as string,
-        metadata: function (req, file, cb) {
-            cb(null, {
-                fieldName: file.fieldname,
-                size: file.size,
-            });
-        },
-        key: async (req, file, cb) => {
-            try {
-                const generatedFileName = await generateUniqueNameFromFileName(file.originalname);
-                return cb(null, generatedFileName);
-            } catch (error) {
-                return cb(error as Error, '');
-            }
-        },
-    }),
-    limits: { fileSize: 2097152 },
-});
 
 const apiRoute = nextConnect({
     onError(error, req: NextApiRequest, res: NextApiResponse) {
@@ -41,10 +16,7 @@ const apiRoute = nextConnect({
         });
     },
     onNoMatch(req: NextApiRequest, res: NextApiResponse) {
-        res.status(405).json({
-            code: 'users/wrong-method',
-            message: 'This request method is not allowed.',
-        });
+        return sendApiError(res, 'users', 'wrong-method');
     },
 });
 
@@ -69,24 +41,16 @@ apiRoute.get(async (req: NextApiRequest, res: NextApiResponse) => {
 
     const photoFileObject = await fileDataAccess.findFileByPath(user.photo_url);
 
-    // TODO add error for photoFileObject NULL
-
     if (!photoFileObject) {
-        return sendApiError(res, 'default');
+        return sendApiError(res, 'files', 'file-not-found');
     }
 
-    const photoUrl = await getFileFromKey(photoFileObject?.file_name);
+    const photoUrl = await getFileFromKey(photoFileObject);
 
     return res.status(200).json({ photoUrl });
 
 });
 
-const csrfProtection = csurf({
-    cookie: {
-        httpOnly: true,
-        sameSite: 'strict',
-    },
-});
 apiRoute.use(csrfProtection);
 
 apiRoute.use(async (req, res, next) => {
@@ -124,7 +88,6 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: 
         if (oldFile) {
             try {
                 await deleteFileFromKey(oldFile.file_name);
-                // await fs.unlink(`./public/${ oldFile.path }`);
                 await fileDataAccess.deleteFileById(oldFile._id);
             } catch (error) {
                 console.error('ERROR - Deleting avatar >', error);
@@ -142,13 +105,12 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: 
             _id: userToEdit._id,
             photo_url: file.path,
         });
-        const photoUrl = savedFile ? await getFileFromKey(savedFile.file_name) : null;
+        const photoUrl = savedFile ? await getFileFromKey(savedFile) : null;
         return res.status(200).json({
             file: savedFile,
             photoUrl,
         });
     } catch (error) {
-        console.error('ERROR - Saving avatar >', error);
         return res.status(500).json({
             code: 'auth/error',
             message: (error as Error).message,

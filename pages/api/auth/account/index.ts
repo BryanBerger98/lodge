@@ -1,9 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import { userDataAccess } from '../../../../infrastructure/data-access';
+import { findFileByPath } from '../../../../infrastructure/data-access/file.data-access';
 import { connectToDatabase } from '../../../../infrastructure/database';
+import { getFileFromKey } from '../../../../lib/bucket';
 import { IUser } from '../../../../types/user.type';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../../utils/csrf.util';
+import { sendApiError } from '../../../../utils/error.utils';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
@@ -51,20 +54,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const session = await getSession({ req });
 
         if (!session) {
-            return res.status(401).json({
-                code: 'auth/unauthorized',
-                message: 'Unauthorized.',
-            });
+            return sendApiError(res, 'auth', 'unauthorized');
         }
 
         const currentUser = await userDataAccess.findUserById(session.user._id);
 
         if (!currentUser) {
-            return res.status(404).json({
-                code: 'auth/user-not-found',
-                message: 'User not found',
-            });
+            return sendApiError(res, 'auth', 'user-not-found');
         }
+
+        const photoFileObject = await findFileByPath(currentUser.photo_url);
+
+        if (!photoFileObject) {
+            return sendApiError(res, 'files', 'file-not-found');
+        }
+
+        const photoUrl = await getFileFromKey(photoFileObject);
+
+        currentUser.photo_url = photoUrl ? photoUrl : '';
 
         return res.status(200).json(currentUser);
     }

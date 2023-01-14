@@ -25,12 +25,12 @@ const UserProfilePhotoInput = ({ user, setUser }: UserProfilePhotoInputPropertie
 
     const handleFileChange = async () => {
         try {
-            setSaving(true);
             const files = fileInputRef?.current?.files ?? [ null ];
             const [ file ] = Array.from(files);
             if (!file) {
                 return;
             }
+            setSaving(true);
             const fileData = await updateUserAvatar(user._id, file, csrfToken);
             setUser({
                 ...user,

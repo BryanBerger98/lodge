@@ -3,8 +3,10 @@ import { getSession } from 'next-auth/react';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
 import { setPermissions } from '../../../utils/permissions.util';
 import { NextApiHandler } from 'next';
-import { userDataAccess } from '../../../infrastructure/data-access';
+import { fileDataAccess, userDataAccess } from '../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../infrastructure/database';
+import { getMultipleFiles } from '../../../lib/bucket';
+import { sendApiError } from '../../../utils/error.utils';
 
 const handler: NextApiHandler = async (req, res) => {
 
@@ -14,19 +16,13 @@ const handler: NextApiHandler = async (req, res) => {
 
     const session = await getSession({ req });
     if (!session) {
-        return res.status(401).json({
-            code: 'auth/unauthorized',
-            message: 'Unauthorized.',
-        });
+        return sendApiError(res, 'auth', 'unauthorized');
     }
 
     const { user } = session;
 
     if (!user) {
-        return res.status(401).json({
-            code: 'auth/unauthorized',
-            message: 'Unauthorized.',
-        });
+        return sendApiError(res, 'auth', 'unauthorized');
     }
 
     setPermissions(user.role, [ 'admin' ], res);
@@ -84,8 +80,22 @@ const handler: NextApiHandler = async (req, res) => {
         const count = users.length;
         const total = await userDataAccess.findUsersCount(searchRequest);
 
+        const usersPhotoKeys = users.map(user => user.photo_url);
+
+        const files = await fileDataAccess.findMultipleFilesByPath(usersPhotoKeys);
+
+        const usersPhotos = files ? await getMultipleFiles(files) : null;
+
+        const usersWithPhotos = users.map(user => {
+            const userPhoto = usersPhotos ? usersPhotos.find(photoData => photoData && photoData.path === user.photo_url) : null;
+            return {
+                ...user,
+                photo_url: userPhoto ? userPhoto.fileString : null,
+            };
+        });
+
         const result = {
-            users,
+            users: usersWithPhotos,
             count,
             total,
         };

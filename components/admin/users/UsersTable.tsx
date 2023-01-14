@@ -120,7 +120,7 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
                                             user.photo_url && user.photo_url !== '' ?
                                                 <Image
                                                     className="rounded-full"
-                                                    src={ `/${ user.photo_url }` }
+                                                    src={ user.photo_url }
                                                     alt={ `${ user.username ? user.username : user._id } profile photo` }
                                                     height={ 40 }
                                                     width={ 40 }

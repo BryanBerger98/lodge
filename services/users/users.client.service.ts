@@ -43,7 +43,7 @@ export const updateUserAvatar = async (userId: ObjectId | string, file: File, cs
     }
 };
 
-export const getUserAvatar = async (userId: ObjectId | string): Promise<any> => {
+export const getUserAvatar = async (userId: ObjectId | string): Promise<{ photoUrl: string }> => {
     try {
         const response = await fetcher().get(`${ baseUrl }/${ userId }/avatar`);
         const { data } = response;
@@ -82,7 +82,7 @@ export const getUsers = async ({ field, direction }: { field: string, direction:
 
 export const sendResetPasswordEmailToUser = async (userId: string | ObjectId, csrfToken: string | null) => {
     try {
-        const response = await fetcher().post(`${ baseUrl }/reset-password/`, { userId }, { withCredentials: true });
+        const response = await fetcher(csrfToken).post(`${ baseUrl }/reset-password/`, { userId }, { withCredentials: true });
         return response.data;
     } catch (error) {
         throw error;

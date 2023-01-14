@@ -1,6 +1,6 @@
 import { HttpStatusCode } from 'axios';
 import { NextApiResponse } from 'next';
-import { AuthErrorKey, ErrorDomain, UsersErrorKey } from '../types/error.type';
+import { AuthErrorKey, ErrorDomain, FilesErrorKey, UsersErrorKey } from '../types/error.type';
 
 type ApiErrorContent = {
 	status: HttpStatusCode;
@@ -10,6 +10,7 @@ type ApiErrorContent = {
 type ApiErrorReference = {
 	auth: Record<AuthErrorKey, ApiErrorContent>;
 	users: Record<UsersErrorKey, ApiErrorContent>;
+	files: Record<FilesErrorKey, ApiErrorContent>;
 	default: ApiErrorContent;
 };
 
@@ -86,6 +87,24 @@ const apiErrorsReference: ApiErrorReference = {
             message: 'This request method is not allowed.',
         },
     },
+    files: {
+        'invalid-input': {
+            status: 422,
+            message: 'Invalid input.',
+        },
+        'file-not-found': {
+            status: 404,
+            message: 'File not found.',
+        },
+        'error': {
+            status: 500,
+            message: 'An error occured.',
+        },
+        'wrong-method': {
+            status: 500,
+            message: 'This request method is not allowed.',
+        },
+    },
     default: {
         status: 500,
         message: 'An error occured.',
@@ -93,7 +112,7 @@ const apiErrorsReference: ApiErrorReference = {
 };
 
 type SelectedErrorKey<T extends ErrorDomain> = T extends 'auth'
-  ? AuthErrorKey : T extends 'users' ? UsersErrorKey : 'default';
+  ? AuthErrorKey : T extends 'users' ? UsersErrorKey : T extends 'files' ? FilesErrorKey : 'default';
 
 export const sendApiError = <T extends ErrorDomain>(response: NextApiResponse, errorDomain: T, errorKey?: SelectedErrorKey<T>) => {
 

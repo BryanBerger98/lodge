@@ -1,11 +1,11 @@
 import { FiUser } from 'react-icons/fi';
-import { FC, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { useAuthContext } from '../../../context/auth.context';
 import Image from 'next/image';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { IUser } from '../../../types/user.type';
 import { useCsrfContext } from '../../../context/csrf.context';
-import { updateAvatar } from '../../../services/auth/auth.client.service';
+import { getAvatar, updateAvatar } from '../../../services/auth/auth.client.service';
 
 type AccountProfilePhotoInputProperties = {
 	currentUser: IUser;
@@ -17,6 +17,7 @@ const AccountProfilePhotoInput: FC<AccountProfilePhotoInputProperties> = ({ curr
     const { dispatchCurrentUser } = useAuthContext();
     const { csrfToken } = useCsrfContext();
     const [ saving, setSaving ] = useState(false);
+    const [ photoUrl, setPhotoUrl ] = useState<string | null>(null);
 
     const handleFileChange = async () => {
         try {
@@ -28,27 +29,31 @@ const AccountProfilePhotoInput: FC<AccountProfilePhotoInputProperties> = ({ curr
                 return;
             }
             setSaving(true);
-
-
             const fileData = await updateAvatar(file, csrfToken);
             dispatchCurrentUser({
                 ...currentUser,
-                photo_url: fileData.path,
+                photo_url: fileData.photoUrl,
             });
+            setPhotoUrl(fileData.photoUrl);
             setSaving(false);
         } catch (error) {
             console.error(error);
         }
     };
 
+    useEffect(() => {
+        getAvatar()
+            .then(data => setPhotoUrl(data.photoUrl)).catch(console.error);
+    }, []);
+
     return(
         <div className="bg-light-50 rounded-full h-32 w-32 lg:h-20 lg:w-20 flex items-center justify-center text-3xl text-light-800 my-auto relative overflow-hidden group">
             {
-                currentUser && currentUser.photo_url && currentUser.photo_url !== '' ?
+                currentUser && currentUser.photo_url && currentUser.photo_url !== '' && photoUrl ?
                     <Image
-                        src={ `/${ currentUser.photo_url }` }
+                        src={ photoUrl }
                         alt={ `${ currentUser.username } profile photo` }
-                        layout='fill'
+                        fill
                     />
                     :
                     <FiUser />

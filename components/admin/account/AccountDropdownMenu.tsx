@@ -28,7 +28,7 @@ const AccountDropDownMenu = ({ currentUser }: AccountDropdownMenuProperties) => 
                     {
                         currentUser && currentUser.photo_url && currentUser.photo_url !== '' ?
                             <Image
-                                src={ `/${ currentUser.photo_url }` }
+                                src={ currentUser.photo_url }
                                 alt={ `${ currentUser.username } profile photo` }
                                 width={ 36 }
                                 height={ 36 }
