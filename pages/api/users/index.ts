@@ -1,5 +1,4 @@
 import { hashPassword, generatePassword } from '../../../utils/password.util';
-import { getSession } from 'next-auth/react';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
 import { setPermissions } from '../../../utils/permissions.util';
 import { NextApiHandler } from 'next';
@@ -7,6 +6,7 @@ import { fileDataAccess, userDataAccess } from '../../../infrastructure/data-acc
 import { connectToDatabase } from '../../../infrastructure/database';
 import { getMultipleFiles } from '../../../lib/bucket';
 import { sendApiError } from '../../../utils/error.utils';
+import { getSessionUser } from '../../../services/auth/auth.api.service';
 
 const handler: NextApiHandler = async (req, res) => {
 
@@ -14,12 +14,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 
-    const session = await getSession({ req });
-    if (!session) {
-        return sendApiError(res, 'auth', 'unauthorized');
-    }
-
-    const { user } = session;
+    const user = await getSessionUser(req);
 
     if (!user) {
         return sendApiError(res, 'auth', 'unauthorized');
@@ -38,10 +33,7 @@ const handler: NextApiHandler = async (req, res) => {
         let sortParams: Record<string, -1 | 1> = {};
         if (sortField && sortField !== '' && sortDirection && sortDirection !== '') {
             if (isNaN(+sortDirection) || (+sortDirection !== -1 && +sortDirection !== 1)) {
-                return res.status(422).json({
-                    code: 'users/invalid-input',
-                    message: 'Query param `sortDirection` must be -1 or 1',
-                });
+                return sendApiError(res, 'users', 'invalid-input', 'Query param `sortDirection` must be -1 or 1.');
             }
             sortParams[ sortField as string ] = +sortDirection as -1 | 1;
         } else {
@@ -49,31 +41,19 @@ const handler: NextApiHandler = async (req, res) => {
         }
 
         if (limit && isNaN(+limit)) {
-            return res.status(422).json({
-                code: 'users/invalid-input',
-                message: 'Query param `limit` is NaN',
-            });
+            return sendApiError(res, 'users', 'invalid-input', 'Query param `limit` is NaN.');
         }
 
         if (limit && +limit <= 0) {
-            return res.status(422).json({
-                code: 'users/invalid-input',
-                message: 'Query param `limit` must be greater than 0',
-            });
+            return sendApiError(res, 'users', 'invalid-input', 'Query param `limit` must be greater than 0.');
         }
 
         if (skip && isNaN(+skip)) {
-            return res.status(422).json({
-                code: 'users/invalid-input',
-                message: 'Query param `skip` is NaN',
-            });
+            return sendApiError(res, 'users', 'invalid-input', 'Query param `skip` is NaN.');
         }
 
         if (skip && +skip < 0) {
-            return res.status(422).json({
-                code: 'users/invalid-input',
-                message: 'Query param `skip` must be greater than or equal to 0',
-            });
+            return sendApiError(res, 'users', 'invalid-input', 'Query param `skip` must be greater than or equal to 0.');
         }
 
         const users = await userDataAccess.findUsers(searchRequest, sortParams, Number(skip), Number(limit));
@@ -104,20 +84,14 @@ const handler: NextApiHandler = async (req, res) => {
         const { email, username, role, phone_number } = req.body;
 
         if (!email || !email.includes('@')) {
-            return res.status(422).json({
-                code: 'users/invalid-input',
-                message: 'Invalid input on email.',
-            });
+            return sendApiError(res, 'users', 'invalid-input', 'Invalid input on email.');
         }
 
         const password = generatePassword(12);
         const existingUser = await userDataAccess.findUserByEmail(email);
 
         if (existingUser) {
-            return res.status(422).json({
-                code: 'users/email-already-in-use',
-                message: 'This email is already in use.',
-            });
+            return sendApiError(res, 'users', 'email-already-in-use');
         }
 
         const hashedPassword = await hashPassword(password);
@@ -140,10 +114,7 @@ const handler: NextApiHandler = async (req, res) => {
         const userToUpdate = req.body;
 
         if (!userToUpdate || !userToUpdate._id) {
-            return res.status(500).json({
-                code: 'users/no-user-provided',
-                message: 'A valid user must be provided.',
-            });
+            return sendApiError(res, 'users', 'no-user-provided');
         }
 
         if (userToUpdate.password) {
@@ -156,10 +127,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     }
 
-    res.status(405).json({
-        code: 'users/wrong-method',
-        message: 'This request method is not allowed.',
-    });
+    return sendApiError(res, 'users', 'wrong-method');
 
 };
 

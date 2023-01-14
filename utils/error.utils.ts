@@ -86,6 +86,10 @@ const apiErrorsReference: ApiErrorReference = {
             status: 405,
             message: 'This request method is not allowed.',
         },
+        'no-user-provided': {
+            status: 422,
+            message: 'A valid user must be provided.',
+        },
     },
     files: {
         'invalid-input': {
@@ -114,7 +118,7 @@ const apiErrorsReference: ApiErrorReference = {
 type SelectedErrorKey<T extends ErrorDomain> = T extends 'auth'
   ? AuthErrorKey : T extends 'users' ? UsersErrorKey : T extends 'files' ? FilesErrorKey : 'default';
 
-export const sendApiError = <T extends ErrorDomain>(response: NextApiResponse, errorDomain: T, errorKey?: SelectedErrorKey<T>) => {
+export const sendApiError = <T extends ErrorDomain>(response: NextApiResponse, errorDomain: T, errorKey?: SelectedErrorKey<T>, customMessage?: string) => {
 
     const errorDomainRef = apiErrorsReference[ errorDomain ];
 
@@ -140,6 +144,6 @@ export const sendApiError = <T extends ErrorDomain>(response: NextApiResponse, e
     const [ , { message, status } ] = foundError;
     return response.status(status).json({
         code: `${ errorDomain }/${ errorKey }`,
-        message: message,
+        message: customMessage ? customMessage : message,
     });
 };

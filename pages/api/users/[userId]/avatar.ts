@@ -7,6 +7,7 @@ import { csrfProtection } from '../../../../lib/csrf';
 import { upload } from '../../../../lib/file-uploader';
 import { convertFileRequestObjetToModel } from '../../../../utils/file.utils';
 import { sendApiError } from '../../../../utils/error.utils';
+import { getSessionUser } from '../../../../services/auth/auth.api.service';
 
 const apiRoute = nextConnect({
     onError(error, req: NextApiRequest, res: NextApiResponse) {
@@ -65,9 +66,9 @@ apiRoute.use(async (req, res, next) => {
 apiRoute.use(upload.single('avatar'));
 
 apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: NextApiResponse) => {
-    const session = await getSession({ req });
+    const user = await getSessionUser(req);
 
-    if (!session) {
+    if (!user) {
         return sendApiError(res, 'auth', 'unauthorized');
     }
 
@@ -97,7 +98,7 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: 
 
     const file = {
         ...convertFileRequestObjetToModel(req.file),
-        created_by: session.user._id,
+        created_by: user._id,
     };
     try {
         const savedFile = await fileDataAccess.createFile(file);

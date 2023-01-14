@@ -1,12 +1,11 @@
 import { NextApiHandler } from 'next';
-import { getSession } from 'next-auth/react';
 import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../../infrastructure/database';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../../utils/csrf.util';
 import { sendApiError } from '../../../../utils/error.utils';
 import { setPermissions } from '../../../../utils/permissions.util';
-import { unlink } from 'fs/promises';
 import { deleteFileFromKey } from '../../../../lib/bucket';
+import { getSessionUser } from '../../../../services/auth/auth.api.service';
 
 const handler: NextApiHandler = async (req, res) => {
 
@@ -14,13 +13,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 
-    const session = await getSession({ req });
-
-    if (!session) {
-        return sendApiError(res, 'auth', 'unauthorized');
-    }
-
-    const { user } = session;
+    const user = await getSessionUser(req);
 
     if (!user) {
         return sendApiError(res, 'auth', 'unauthorized');

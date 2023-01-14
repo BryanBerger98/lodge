@@ -1,8 +1,9 @@
 import { NextApiHandler } from 'next';
-import { getSession } from 'next-auth/react';
 import { userDataAccess } from '../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../infrastructure/database';
+import { getSessionUser } from '../../../services/auth/auth.api.service';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
+import { sendApiError } from '../../../utils/error.utils';
 import { setPermissions } from '../../../utils/permissions.util';
 
 const handler: NextApiHandler = async (req, res) => {
@@ -11,22 +12,10 @@ const handler: NextApiHandler = async (req, res) => {
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 
-    const session = await getSession({ req });
-
-    if (!session) {
-        return res.status(401).json({
-            code: 'auth/unauthorized',
-            message: 'Unauthorized.',
-        });
-    }
-
-    const { user } = session;
+    const user = await getSessionUser(req);
 
     if (!user) {
-        return res.status(401).json({
-            code: 'auth/unauthorized',
-            message: 'Unauthorized.',
-        });
+        return sendApiError(res, 'auth', 'unauthorized');
     }
 
     setPermissions(user.role, [ 'admin' ], res);
@@ -36,19 +25,13 @@ const handler: NextApiHandler = async (req, res) => {
         const { userId } = req.body;
 
         if (!userId || typeof userId !== 'string' || userId.length === 0) {
-            return res.status(422).json({
-                code: 'users/missing-id',
-                message: 'A user id must be provided.',
-            });
+            return sendApiError(res, 'users', 'missing-id');
         }
 
         const userToEdit = await userDataAccess.findUserById(userId);
 
         if (!userToEdit) {
-            return res.status(404).json({
-                code: 'users/user-not-found',
-                message: 'User not found.',
-            });
+            return sendApiError(res, 'users', 'user-not-found');
         }
 
         const updatedUser = await userDataAccess.updateUser({
@@ -60,10 +43,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     }
 
-    res.status(405).json({
-        code: 'users/wrong-method',
-        message: 'This request method is not allowed.',
-    });
+    return sendApiError(res, 'users', 'wrong-method');
 
 };
 

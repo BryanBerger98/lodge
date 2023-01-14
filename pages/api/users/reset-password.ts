@@ -1,4 +1,3 @@
-import { getSession } from 'next-auth/react';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
 import { sendResetPasswordEmail } from '../../../utils/email.util';
 import { setPermissions } from '../../../utils/permissions.util';
@@ -6,6 +5,8 @@ import { generateToken } from '../../../utils/jwt.util';
 import { NextApiHandler } from 'next';
 import { tokenDataAccess, userDataAccess } from '../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../infrastructure/database';
+import { sendApiError } from '../../../utils/error.utils';
+import { getSessionUser } from '../../../services/auth/auth.api.service';
 
 const handler: NextApiHandler = async (req, res) => {
 
@@ -13,22 +14,10 @@ const handler: NextApiHandler = async (req, res) => {
 
     await csrf(req as CsrfRequest, res as CsrfResponse);
 
-    const session = await getSession({ req });
-
-    if (!session) {
-        return res.status(401).json({
-            code: 'auth/unauthorized',
-            message: 'Unauthorized.',
-        });
-    }
-
-    const { user } = session;
+    const user = await getSessionUser(req);
 
     if (!user) {
-        return res.status(401).json({
-            code: 'auth/unauthorized',
-            message: 'Unauthorized.',
-        });
+        return sendApiError(res, 'auth', 'unauthorized');
     }
 
     setPermissions(user.role, [ 'admin' ], res);
@@ -38,19 +27,13 @@ const handler: NextApiHandler = async (req, res) => {
         const { userId } = req.body;
 
         if (!userId) {
-            return res.status(422).json({
-                code: 'users/missing-id',
-                message: 'A user id must be provided.',
-            });
+            return sendApiError(res, 'users', 'missing-id');
         }
 
         const userToResetPassword = await userDataAccess.findUserById(userId);
 
         if (!userToResetPassword) {
-            return res.status(404).json({
-                code: 'users/user-not-found',
-                message: 'User not found.',
-            });
+            return sendApiError(res, 'users', 'user-not-found');
         }
 
         const expirationDate = Math.floor(Date.now() / 1000) + (60 * 60 * 2);
@@ -67,10 +50,7 @@ const handler: NextApiHandler = async (req, res) => {
         return res.status(200).json(emailResponse);
     }
 
-    res.status(405).json({
-        code: 'users/wrong-method',
-        message: 'This request method is not allowed.',
-    });
+    return sendApiError(res, 'users', 'wrong-method');
 
 };
 
