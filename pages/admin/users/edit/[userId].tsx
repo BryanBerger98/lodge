@@ -9,9 +9,10 @@ import { IUser } from '../../../../types/user.type';
 import EditUserForm, { EditUserFormInputs } from '../../../../components/admin/users/EditUserForm';
 import { useAuthContext } from '../../../../context/auth.context';
 import { wrapper } from '../../../../store';
-import { findUserById } from '../../../../infrastructure/data-access/user.data-access';
 import { getSession } from 'next-auth/react';
 import { updateUser } from '../../../../services/users/users.client.service';
+import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
+import { getFileFromKey } from '../../../../lib/bucket';
 
 type EditUserPageProperties = {
 	csrfToken: string;
@@ -39,6 +40,7 @@ const EditUserPage = ({ csrfToken, userToEdit }: EditUserPageProperties) => {
                 ...values,
             }, csrfToken)
                 .then(userData => {
+                    userData.photo_url = user.photo_url;
                     setUser(userData);
                 })
                 .catch(console.error)
@@ -115,7 +117,14 @@ const getServerSideProps = wrapper.getServerSideProps(store => async ({ req, res
 
     const { userId } = params as { userId: string };
 
-    const user = await findUserById(userId);
+    const user = await userDataAccess.findUserById(userId);
+    if (user && user.photo_url) {
+        const userPhotoData = await fileDataAccess.findFileByUrl(user.photo_url);
+        if (userPhotoData) {
+            const userPhotoUrl = await getFileFromKey(userPhotoData);
+            user.photo_url = userPhotoUrl ? userPhotoUrl : '';
+        }
+    }
 
     return {
         props: {

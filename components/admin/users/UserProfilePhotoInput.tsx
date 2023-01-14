@@ -1,9 +1,9 @@
 import Image from 'next/image';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { FiUser } from 'react-icons/fi';
 import { useCsrfContext } from '../../../context/csrf.context';
-import { getUserAvatar, updateUserAvatar } from '../../../services/users/users.client.service';
+import { updateUserAvatar } from '../../../services/users/users.client.service';
 import { IUser } from '../../../types/user.type';
 
 type UserProfilePhotoInputProperties = {
@@ -16,12 +16,6 @@ const UserProfilePhotoInput = ({ user, setUser }: UserProfilePhotoInputPropertie
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [ saving, setSaving ] = useState(false);
     const { csrfToken } = useCsrfContext();
-    const [ photoUrl, setPhotoUrl ] = useState<string>('');
-
-    useEffect(() => {
-        getUserAvatar(user._id)
-            .then(data => setPhotoUrl(data.photoUrl)).catch(console.error);
-    }, []);
 
     const handleFileChange = async () => {
         try {
@@ -34,9 +28,8 @@ const UserProfilePhotoInput = ({ user, setUser }: UserProfilePhotoInputPropertie
             const fileData = await updateUserAvatar(user._id, file, csrfToken);
             setUser({
                 ...user,
-                photo_url: fileData.file.url,
+                photo_url: fileData.photoUrl,
             });
-            setPhotoUrl(fileData.photoUrl);
             setSaving(false);
         } catch (error) {
             console.error(error);
@@ -46,9 +39,9 @@ const UserProfilePhotoInput = ({ user, setUser }: UserProfilePhotoInputPropertie
     return(
         <div className="bg-light-50 rounded-full h-32 w-32 lg:h-20 lg:w-20 flex items-center justify-center text-3xl text-secondary-dark-default my-auto relative overflow-hidden group">
             {
-                user && user.photo_url && user.photo_url !== '' && photoUrl ?
+                user && user.photo_url && user.photo_url !== '' ?
                     <Image
-                        src={ photoUrl }
+                        src={ user.photo_url }
                         alt={ `${ user.username } profile photo` }
                         fill
                     />
