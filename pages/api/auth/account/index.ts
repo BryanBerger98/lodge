@@ -64,7 +64,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         currentUserData.photo_url = photoUrl ? photoUrl : '';
 
-        return res.status(200).json(currentUser);
+        return res.status(200).json(currentUserData);
     }
 
     return sendApiError(res, 'auth', 'wrong-method');
