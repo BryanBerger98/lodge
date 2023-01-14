@@ -16,7 +16,7 @@ export const bucket = new S3Client(config);
 export const getFileFromKey = async (file: ILodgeFile) => {
     const command = new GetObjectCommand({
         Bucket: process.env.BUCKET_NAME as string,
-        Key: file.file_name,
+        Key: file.key,
     });
     const res = await bucket.send(command);
     const fileBuffer = await res.Body?.transformToByteArray();
@@ -27,14 +27,14 @@ export const getMultipleFiles = (files: ILodgeFile[]) => {
     const retrievedFiles = files.map(async file => {
         const command = new GetObjectCommand({
             Bucket: process.env.BUCKET_NAME as string,
-            Key: file.file_name,
+            Key: file.key,
         });
         const fileData = await bucket.send(command);
         const fileBuffer = await fileData.Body?.transformToByteArray();
         return {
             fileString: fileBuffer ? `data:${ file.mimetype };base64,${ Buffer.from(fileBuffer).toString('base64') }` : null,
-            key: file.file_name,
-            path: file.path,
+            key: file.key,
+            url: file.url,
         };
     });
     return Promise.all(retrievedFiles);

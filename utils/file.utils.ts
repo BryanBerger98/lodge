@@ -21,10 +21,6 @@ export const generateUniqueNameFromFileName = (filename: string): Promise<string
 
 export const convertFileRequestObjetToModel = (fileObj: Express.MulterS3.File): Omit<ILodgeFile, '_id' | 'created_by' | 'created_on'> => {
 
-    // const pathArray = fileObj.path.split('/');
-    // pathArray.splice(0, 1);
-    // const path = pathArray.join('/');
-
     const file = {
         original_name: fileObj.originalname,
         custom_name: fileObj.originalname,
@@ -32,9 +28,8 @@ export const convertFileRequestObjetToModel = (fileObj: Express.MulterS3.File): 
         encoding: fileObj.encoding,
         extension: fileObj.originalname.split('.')[ fileObj.originalname.split('.').length - 1 ],
         size: fileObj.size,
-        file_name: fileObj.key,
-        // path: path.replace(/\s/g,''),
-        path: fileObj.location,
+        key: fileObj.key,
+        url: fileObj.location,
         destination: fileObj.destination,
     };
     return file;

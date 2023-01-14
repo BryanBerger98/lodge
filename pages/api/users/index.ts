@@ -80,18 +80,16 @@ const handler: NextApiHandler = async (req, res) => {
         const count = users.length;
         const total = await userDataAccess.findUsersCount(searchRequest);
 
-        const usersPhotoKeys = users.map(user => user.photo_url);
+        const usersPhotoUrls = users.map(user => user.photo_url);
 
-        const files = await fileDataAccess.findMultipleFilesByPath(usersPhotoKeys);
+        const files = await fileDataAccess.findMultipleFilesByUrl(usersPhotoUrls);
 
         const usersPhotos = files ? await getMultipleFiles(files) : null;
 
         const usersWithPhotos = users.map(user => {
-            const userPhoto = usersPhotos ? usersPhotos.find(photoData => photoData && photoData.path === user.photo_url) : null;
-            return {
-                ...user,
-                photo_url: userPhoto ? userPhoto.fileString : null,
-            };
+            const userPhoto = usersPhotos ? usersPhotos.find(photoData => photoData && photoData.url === user.photo_url) : null;
+            user.photo_url = userPhoto && userPhoto.fileString ? userPhoto.fileString : '';
+            return user;
         });
 
         const result = {

@@ -8,8 +8,8 @@ export interface ILodgeFile {
 	extension: string;
 	encoding: string;
 	size: number;
-	file_name: string;
-	path: string;
+	key: string;
+	url: string;
 	destination: string;
 	created_on: Date;
 	created_by: ObjectId | string | null;

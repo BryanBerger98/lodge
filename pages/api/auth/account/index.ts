@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import { userDataAccess } from '../../../../infrastructure/data-access';
-import { findFileByPath } from '../../../../infrastructure/data-access/file.data-access';
+import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../../infrastructure/database';
 import { getFileFromKey } from '../../../../lib/bucket';
 import { IUser } from '../../../../types/user.type';
@@ -63,7 +62,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             return sendApiError(res, 'auth', 'user-not-found');
         }
 
-        const photoFileObject = await findFileByPath(currentUser.photo_url);
+        const photoFileObject = await fileDataAccess.findFileByUrl(currentUser.photo_url);
 
         if (!photoFileObject) {
             return sendApiError(res, 'files', 'file-not-found');

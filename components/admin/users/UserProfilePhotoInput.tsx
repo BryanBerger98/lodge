@@ -34,7 +34,7 @@ const UserProfilePhotoInput = ({ user, setUser }: UserProfilePhotoInputPropertie
             const fileData = await updateUserAvatar(user._id, file, csrfToken);
             setUser({
                 ...user,
-                photo_url: fileData.file.path,
+                photo_url: fileData.file.url,
             });
             setPhotoUrl(fileData.photoUrl);
             setSaving(false);

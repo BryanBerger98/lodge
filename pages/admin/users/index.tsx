@@ -12,11 +12,10 @@ import { useRouter } from 'next/router';
 import { connect, useSelector } from 'react-redux';
 import { selectUsersState, setUsersState } from '../../../store/users.slice';
 import { wrapper } from '../../../store';
-import { findUsers, findUsersCount } from '../../../infrastructure/data-access/user.data-access';
 import useLoadUsersTable from '../../../hooks/useLoadUsersTable';
 import { IUser } from '../../../types/user.type';
-import { findMultipleFilesByPath } from '../../../infrastructure/data-access/file.data-access';
 import { getMultipleFiles } from '../../../lib/bucket';
+import { fileDataAccess, userDataAccess } from '../../../infrastructure/data-access';
 
 type UsersPageProperties = {
 	csrfToken: string;
@@ -89,19 +88,19 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async ({ r
         };
     }
 
-    const usersData = await findUsers({}, { 'created_at': -1 }, 0, 10);
-    const usersCount = await findUsersCount({});
+    const usersData = await userDataAccess.findUsers({}, { 'created_at': -1 }, 0, 10);
+    const usersCount = await userDataAccess.findUsersCount({});
 
     const serializedUsersData: IUser[] = JSON.parse(JSON.stringify(usersData));
 
-    const usersPhotoKeys = serializedUsersData.map(user => user.photo_url);
+    const usersPhotoUrls = serializedUsersData.map(user => user.photo_url);
 
-    const files = await findMultipleFilesByPath(usersPhotoKeys);
+    const files = await fileDataAccess.findMultipleFilesByUrl(usersPhotoUrls);
 
     const usersPhotos = files ? await getMultipleFiles(files) : null;
 
     const usersWithPhotos: IUser[] = serializedUsersData.map(user => {
-        const userPhoto = usersPhotos ? usersPhotos.find(photoData => photoData && photoData.path === user.photo_url) : null;
+        const userPhoto = usersPhotos ? usersPhotos.find(photoData => photoData && photoData.url === user.photo_url) : null;
         return {
             ...user,
             photo_url: userPhoto ? userPhoto.fileString : null,

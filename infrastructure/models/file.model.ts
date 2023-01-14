@@ -26,14 +26,14 @@ const fileSchema = new Schema<ILodgeFile>({
         type: Number,
         default: 0,
     },
-    file_name: {
+    key: {
         type: String,
         default: '',
         unique: true,
         required: true,
         trim: true,
     },
-    path: {
+    url: {
         type: String,
         default: '',
         index: true,
