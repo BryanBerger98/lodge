@@ -34,12 +34,8 @@ const handler: NextApiHandler = async (req, res) => {
         if (deletedUser && deletedUser.photo_url && deletedUser.photo_url !== '') {
             const profilePhotoUrl = await fileDataAccess.findFileByUrl(deletedUser.photo_url);
             if (profilePhotoUrl) {
-                try {
-                    await deleteFileFromKey(profilePhotoUrl.key);
-                    await fileDataAccess.deleteFileById(profilePhotoUrl._id);
-                } catch (error) {
-                    console.error('ERROR - Deleting avatar >', error);
-                }
+                await deleteFileFromKey(profilePhotoUrl.key);
+                await fileDataAccess.deleteFileById(profilePhotoUrl._id);
             }
         }
 

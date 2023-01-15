@@ -41,7 +41,7 @@ const ResetPasswordPage: FC<ResetPasswordPageProperties> = ({ csrfToken }) => {
         confirmPassword: Yup.string().oneOf([ Yup.ref('password'), null ], 'Doit être identique au mot de passe').required('Champs requis'),
     });
 
-    const { register, handleSubmit, formState: { errors }, setValue } = useForm<ResetPasswordInputs>({
+    const { register, handleSubmit, formState: { errors } } = useForm<ResetPasswordInputs>({
         resolver: yupResolver(resetPasswordFormSchema),
         mode: 'onTouched',
     });
@@ -67,7 +67,6 @@ const ResetPasswordPage: FC<ResetPasswordPageProperties> = ({ csrfToken }) => {
                 const errorMessage = getTranslatedError(err.response.data.code);
                 return setError(errorMessage);
             }
-            console.error(error);
         }).finally(() => {
             setLoading(false);
         });

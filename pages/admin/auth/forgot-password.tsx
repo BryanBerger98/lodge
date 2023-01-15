@@ -74,7 +74,6 @@ const ForgotPasswordPage: FC<ForgotPasswordPageProperties> = ({ csrfToken }) => 
                 setError(errorMessage);
                 return;
             }
-            console.error(apiError);
         }
     };
 

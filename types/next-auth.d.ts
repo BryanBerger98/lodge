@@ -1,4 +1,3 @@
-import NextAuth from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import { ObjectId } from '../infrastructure/types/database.type';
 import { IUser } from './user.type';

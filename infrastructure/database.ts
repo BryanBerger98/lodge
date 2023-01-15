@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // /lib/dbConnect.js
 import mongoose from 'mongoose';
 

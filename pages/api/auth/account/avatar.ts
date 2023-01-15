@@ -75,12 +75,8 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: 
     if (currentUserData.photo_url && currentUserData.photo_url !== '') {
         const oldFile = await fileDataAccess.findFileByUrl(currentUserData.photo_url);
         if (oldFile) {
-            try {
-                await deleteFileFromKey(oldFile.key);
-                await fileDataAccess.deleteFileById(oldFile._id);
-            } catch (error) {
-                console.error('ERROR - Deleting avatar >', error);
-            }
+            await deleteFileFromKey(oldFile.key);
+            await fileDataAccess.deleteFileById(oldFile._id);
         }
     }
 
@@ -100,7 +96,6 @@ apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: 
             photoUrl,
         });
     } catch (error) {
-        console.error('ERROR - Saving avatar >', error);
         return res.status(500).json({
             code: 'auth/error',
             message: (error as Error).message,
