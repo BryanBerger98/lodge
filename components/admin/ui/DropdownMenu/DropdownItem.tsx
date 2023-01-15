@@ -13,7 +13,9 @@ type DropdownItemProperties = {
 const defaultVariant: DropdownVariant = 'primary';
 const defaultIcon = <FiChevronRight />;
 const defaultName = 'Button';
-const defaultOnClick: MouseEventHandler<HTMLButtonElement> = (e) => console.log(e);
+const defaultOnClick: MouseEventHandler<HTMLButtonElement> = () => {
+    return;
+};
 
 const DropdownItem = ({ variant = defaultVariant, onClick = defaultOnClick, icon = defaultIcon, name = defaultName }: DropdownItemProperties) => {
 

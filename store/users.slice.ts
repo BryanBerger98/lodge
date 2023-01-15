@@ -98,7 +98,6 @@ export const usersSlice = createSlice({
             };
         });
         builder.addCase(fetchUsers.rejected, (state, action) => {
-            console.log(action.error);
             return {
                 ...state,
                 loading: 'failed',
