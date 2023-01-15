@@ -17,8 +17,8 @@ const ButtonWithLoader = ({
     uiOptions = defaultUIOptions,
     saving = false,
     loaderOrientation = 'right',
-    error = null,
-    displayErrorMessage = false,
+    errorCode = null,
+    displayErrorMessage = 'none',
     children = null,
 }: ButtonWithLoaderProperties) => {
 
@@ -32,14 +32,14 @@ const ButtonWithLoader = ({
             setSaved(false);
             if (savedDelay) clearTimeout(savedDelay);
         }
-        if (!saving && !error && !firstLoad) {
+        if (!saving && !errorCode && !firstLoad) {
             setSaved(true);
             const delay = setTimeout(() => {
                 setSaved(false);
             }, 3000);
             setSavedDelay(delay);
         }
-    }, [ saving, firstLoad, error, savedDelay ]);
+    }, [ saving, firstLoad, errorCode, savedDelay ]);
 
     useEffect(() => {
         triggerLoader();
@@ -64,7 +64,7 @@ const ButtonWithLoader = ({
                 saved={ saved }
                 saving={ saving }
                 loaderOrientation={ loaderOrientation }
-                error={ error }
+                errorCode={ errorCode }
                 displayErrorMessage={ displayErrorMessage }
             />
         </div>

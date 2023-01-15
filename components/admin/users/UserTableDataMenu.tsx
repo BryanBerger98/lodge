@@ -10,6 +10,8 @@ import DeleteUserModal from './DeleteUserModal';
 import { IUser } from '../../../types/user.type';
 import { sendResetPasswordEmailToUser } from '../../../services/users/users.client.service';
 import { useCsrfContext } from '../../../context/csrf.context';
+import useTranslate from '../../../hooks/useTranslate';
+import { IApiError } from '../../../types/error.type';
 
 type UserTableDataMenuProperties = {
 	user: IUser,
@@ -24,14 +26,23 @@ const UserTableDataMenu: FC<UserTableDataMenuProperties> = ({ user, currentUser 
     const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
     const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
 
+    const { getTranslatedError } = useTranslate({ locale: 'fr' });
+
+    const triggerErrorToast = (errorMessage: string) => {
+        toast.custom(<Toast variant='danger'><FiX /><span>{ errorMessage }</span></Toast>);
+    };
+
     const onSendResetPasswordEmail = () => {
         sendResetPasswordEmailToUser(user._id, csrfToken)
             .then(() => {
                 toast.custom(<Toast><FiSend /><span>Email envoyé !</span></Toast>);
             })
             .catch(error => {
-                toast.custom(<Toast variant='danger'><FiX /><span>Une erreur est survenue</span></Toast>);
-                console.error(error);
+                const apiError = error as IApiError;
+                if (apiError.response && apiError.response.data && apiError.response.data.code) {
+                    const errorMessage = getTranslatedError(apiError.response.data.code);
+                    triggerErrorToast(errorMessage ?? 'Une erreur est survenue');
+                }
             });
     };
 

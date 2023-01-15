@@ -10,7 +10,7 @@ import { IUser } from '../../../types/user.type';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { formatPhoneNumber, parsePhoneNumber, PhoneNumber } from '../../../utils/phone-number.util';
-import { IApiError } from '../../../types/error.type';
+import { ErrorCode, ErrorDomain, IApiError } from '../../../types/error.type';
 import { useCsrfContext } from '../../../context/csrf.context';
 import { updateAccount, updateEmail } from '../../../services/auth/auth.client.service';
 
@@ -45,7 +45,7 @@ const AccountContactInformationsForm: FC<AccountContactInformationsFormPropertie
     };
 
     const [ isPasswordFormModalOpen, setIsPasswordFormModalOpen ] = useState(false);
-    const [ passwordError, setPasswordError ] = useState<string | null>(null);
+    const [ errorCode, setErrorCode ] = useState<ErrorCode<ErrorDomain> | null>(null);
     const [ saving, setSaving ] = useState(false);
     const [ phoneNumberValues, setPhoneNumberValues ] = useState<PhoneNumber | null>(currentUser.phone_number ? parsePhoneNumber(currentUser.phone_number) : null);
 
@@ -64,8 +64,7 @@ const AccountContactInformationsForm: FC<AccountContactInformationsFormPropertie
     });
 
     const handleContactInfosFormSubmit = async (values: ContactInfosFormInputs) => {
-        const { phoneNumber, email } = values;
-        // const formattedNumber = formatPhoneNumber(phoneNumberValues?.number ?? '');
+        const { email } = values;
 
         if (currentUser.email.toLowerCase().trim() !== email.toLowerCase().trim()) {
             setIsPasswordFormModalOpen(true);
@@ -82,13 +81,17 @@ const AccountContactInformationsForm: FC<AccountContactInformationsFormPropertie
             setSaving(false);
         } catch (error) {
             setSaving(false);
-            console.error(error);
+            const apiError = error as IApiError;
+            if (apiError.response && apiError.response.data && apiError.response.data.code) {
+                setErrorCode(apiError.response.data.code);
+                return;
+            }
         }
     };
 
     const handlePasswordFormSubmit = async (password: string) => {
         setSaving(true);
-        setPasswordError(null);
+        setErrorCode(null);
         const { email } = getValues();
         const { number } = phoneNumberValues ?? { number: '' };
         const updateObject = {
@@ -116,11 +119,10 @@ const AccountContactInformationsForm: FC<AccountContactInformationsFormPropertie
         } catch (err) {
             setSaving(false);
             const apiError = err as IApiError;
-            if (apiError.response && apiError.response.data && apiError.response.data.code && apiError.response.data.code === 'auth/wrong-password') {
-                setPasswordError(apiError.response.data.code);
+            if (apiError.response && apiError.response.data && apiError.response.data.code) {
+                setErrorCode(apiError.response.data.code);
                 return;
             }
-            console.error(err);
         }
     };
 
@@ -159,9 +161,9 @@ const AccountContactInformationsForm: FC<AccountContactInformationsFormPropertie
                         variant='success'
                         type='submit'
                         saving={ saving }
-                        displayErrorMessage={ false }
+                        displayErrorMessage={ 'aside' }
                         loaderOrientation='right'
-                        error={ passwordError }
+                        errorCode={ errorCode }
                     >
                         <FiSave />
                         <span>Enregistrer</span>
@@ -172,7 +174,7 @@ const AccountContactInformationsForm: FC<AccountContactInformationsFormPropertie
                 isOpen={ isPasswordFormModalOpen }
                 setIsOpen={ setIsPasswordFormModalOpen }
                 submitFunction={ handlePasswordFormSubmit }
-                error={ passwordError }
+                errorCode={ errorCode }
             />
         </Fragment>
     );

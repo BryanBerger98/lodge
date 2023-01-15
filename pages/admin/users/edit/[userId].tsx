@@ -13,6 +13,7 @@ import { getSession } from 'next-auth/react';
 import { updateUser } from '../../../../services/users/users.client.service';
 import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
 import { getFileFromKey } from '../../../../lib/bucket';
+import { ErrorCode, ErrorDomain, IApiError } from '../../../../types/error.type';
 
 type EditUserPageProperties = {
 	csrfToken: string;
@@ -23,7 +24,7 @@ const EditUserPage = ({ csrfToken, userToEdit }: EditUserPageProperties) => {
 
     const [ user, setUser ] = useState<IUser | null>(userToEdit);
     const [ saving, setSaving ] = useState<boolean>(false);
-    const [ errorCode, setErrorCode ] = useState<string | null>(null);
+    const [ errorCode, setErrorCode ] = useState<ErrorCode<ErrorDomain> | null>(null);
     const { dispatchCsrfToken } = useCsrfContext();
 
     const { currentUser } = useAuthContext();
@@ -43,7 +44,12 @@ const EditUserPage = ({ csrfToken, userToEdit }: EditUserPageProperties) => {
                     userData.photo_url = user.photo_url;
                     setUser(userData);
                 })
-                .catch(console.error)
+                .catch(error => {
+                    const apiError = error as IApiError;
+                    if (apiError.response && apiError.response.data && apiError.response.data.code) {
+                        setErrorCode(apiError.response.data.code);
+                    }
+                })
                 .finally(() => {
                     setSaving(false);
                 });
@@ -99,7 +105,7 @@ const EditUserPage = ({ csrfToken, userToEdit }: EditUserPageProperties) => {
 
 export default EditUserPage;
 
-const getServerSideProps = wrapper.getServerSideProps(store => async ({ req, res, params }) => {
+const getServerSideProps = wrapper.getServerSideProps(() => async ({ req, res, params }) => {
     const request = req as CsrfRequest;
     const response = res as CsrfResponse;
     await csrf(request, response);

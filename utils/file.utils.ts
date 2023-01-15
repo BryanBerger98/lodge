@@ -1,6 +1,8 @@
 import crypto from 'crypto';
 import path from 'path';
-import { ILodgeFile } from '../types/file.type';
+import { ILodgeFile, ImageMimetype } from '../types/file.type';
+
+const imageMimetypes: string[] = [ 'image/gif', 'image/jpeg', 'image/png', 'image/webp' ] as ImageMimetype[];
 
 export const getExtensionFromFileName = (filename: string) => {
     const fileNameArray = filename.split('.');
@@ -33,4 +35,8 @@ export const convertFileRequestObjetToModel = (fileObj: Express.MulterS3.File): 
         destination: fileObj.destination,
     };
     return file;
+};
+
+export const checkIfFileIsAnImage = (fileType: string): fileType is ImageMimetype => {
+    return typeof fileType === 'string' && imageMimetypes.includes(fileType);
 };

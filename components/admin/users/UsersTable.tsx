@@ -1,6 +1,6 @@
 import { FiCheckCircle, FiLock, FiRotateCw, FiUser } from 'react-icons/fi';
 import { getStringSlashedDateFromDate } from '../../../utils/date.utils';
-import { Fragment, useEffect } from 'react';
+import { Fragment } from 'react';
 import UserTableDataMenu from './UserTableDataMenu';
 import Image from 'next/image';
 import Table from '../tables/Table';
@@ -86,11 +86,6 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
     const onEditUser = (userId: string | ObjectId) => {
         router.push(`/admin/users/edit/${ userId }`);
     };
-
-    useEffect(() => {
-        // loadUsersTable(limit, skip, sort as TableSort, searchString);
-    	// eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ searchString ]);
 
     return(
         <Fragment>

@@ -5,8 +5,10 @@ export type AuthErrorKey = 'invalid-input' | 'wrong-password' | 'invalid-token' 
 export type UsersErrorKey = 'invalid-input' | 'missing-id' | 'user-not-found' | 'email-already-in-use' | 'error' | 'wrong-method' | 'no-user-provided';
 export type FilesErrorKey = 'invalid-input' | 'file-not-found' | 'error' | 'wrong-method';
 
+export type ErrorCode<T extends ErrorDomain> = `${ T }/${ T extends 'auth' ? AuthErrorKey : T extends 'users' ? UsersErrorKey : T extends 'files' ? FilesErrorKey : 'default' }`;
+
 export type ErrorContent = {
-	code: string;
+	code: ErrorCode<ErrorDomain>;
 	message: string;
 }
 

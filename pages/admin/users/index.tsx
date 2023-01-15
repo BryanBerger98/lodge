@@ -1,5 +1,5 @@
 import { FiPlus, FiUsers } from 'react-icons/fi';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect } from 'react';
 import UsersTable from '../../../components/admin/users/UsersTable';
 import Button from '../../../components/admin/ui/Button/Button';
 import { getSession } from 'next-auth/react';
@@ -23,8 +23,7 @@ type UsersPageProperties = {
 
 const UsersPage: FC<UsersPageProperties> = ({ csrfToken }) => {
 
-    const [ searchString, setSearchString ] = useState('');
-    const { users, total, count } = useSelector(selectUsersState);
+    const { users, total } = useSelector(selectUsersState);
     const { dispatchCsrfToken } = useCsrfContext();
     const { loadUsersTable } = useLoadUsersTable();
     const router = useRouter();
@@ -60,7 +59,6 @@ const UsersPage: FC<UsersPageProperties> = ({ csrfToken }) => {
             </div>
             <div className="w-full min-h-96 bg-white dark:bg-secondary-dark-shade drop-shadow rounded-md p-3 text-sm">
                 <UsersTable
-                    searchString={ searchString }
                     usersList={ users }
                     usersCount={ total }
                 />

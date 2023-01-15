@@ -3,8 +3,10 @@ import toast from 'react-hot-toast';
 import { FiCheck, FiLock, FiUnlock, FiX } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import { useCsrfContext } from '../../../context/csrf.context';
+import useTranslate from '../../../hooks/useTranslate';
 import { switchDisabledUser } from '../../../services/users/users.client.service';
 import { updateUser } from '../../../store/users.slice';
+import { IApiError } from '../../../types/error.type';
 import { IUser } from '../../../types/user.type';
 import Button from '../ui/Button/Button';
 import Modal from '../ui/Modal';
@@ -22,6 +24,12 @@ const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, 
     const { csrfToken } = useCsrfContext();
     const dispatch = useDispatch();
 
+    const { getTranslatedError } = useTranslate({ locale: 'fr' });
+
+    const triggerErrorToast = (errorMessage: string) => {
+        toast.custom(<Toast variant='danger'><FiX /><span>{ errorMessage }</span></Toast>);
+    };
+
     const onConfirmSwitchDisableUser = () => {
         switchDisabledUser(user._id, csrfToken)
             .then(() => {
@@ -37,8 +45,11 @@ const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, 
                     });
                 }
             }).catch(error => {
-                toast.custom(<Toast variant='danger'><FiX /><span>Une erreur est survenue</span></Toast>);
-                console.error(error);
+                const apiError = error as IApiError;
+                if (apiError.response && apiError.response.data && apiError.response.data.code) {
+                    const errorMessage = getTranslatedError(apiError.response.data.code);
+                    triggerErrorToast(errorMessage ?? 'Une erreur est survenue');
+                }
             }).finally(() => {
                 setIsOpen(false);
             });

@@ -1,3 +1,4 @@
+import type { ErrorCode, ErrorDomain, IApiError } from '../../../types/error.type';
 import { useState } from 'react';
 import { FiLock, FiSave } from 'react-icons/fi';
 import * as Yup from 'yup';
@@ -7,7 +8,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { updatePassword } from '../../../services/auth/auth.client.service';
 import { useCsrfContext } from '../../../context/csrf.context';
-import { IApiError } from '../../../types/error.type';
 
 type ChangePasswordFormInputs = {
 	oldPassword: string;
@@ -18,7 +18,7 @@ type ChangePasswordFormInputs = {
 const AccountChangePasswordForm = () => {
 
     const [ saving, setSaving ] = useState<boolean>(false);
-    const [ errorCode, setErrorCode ] = useState<string | null>(null);
+    const [ errorCode, setErrorCode ] = useState<ErrorCode<ErrorDomain> | null>(null);
 
     const { csrfToken } = useCsrfContext();
 
@@ -44,7 +44,7 @@ const AccountChangePasswordForm = () => {
         } catch (error) {
             setSaving(false);
             const apiError = error as IApiError;
-            if (apiError.response && apiError.response.data && apiError.response.data.code && apiError.response.data.code === 'auth/wrong-password') {
+            if (apiError.response && apiError.response.data && apiError.response.data.code) {
                 setErrorCode(apiError.response.data.code);
                 return;
             }
@@ -93,8 +93,8 @@ const AccountChangePasswordForm = () => {
                     type='submit'
                     saving={ saving }
                     loaderOrientation='right'
-                    error={ errorCode }
-                    displayErrorMessage={ true }
+                    errorCode={ errorCode }
+                    displayErrorMessage={ 'aside' }
                 >
                     <FiSave />
                     <span>Enregistrer</span>

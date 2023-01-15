@@ -1,15 +1,15 @@
-import { bool, func, string, shape } from 'prop-types';
 import { FiSave, FiUser } from 'react-icons/fi';
 import Modal from '../ui/Modal';
 import * as Yup from 'yup';
-import Button from '../ui/Button/Button';
 import TextField from '../forms/TextField';
-import { Dispatch, FC, SetStateAction } from 'react';
+import { Dispatch, FC, SetStateAction, useState } from 'react';
 import { IUser } from '../../../types/user.type';
 import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { updateAccount } from '../../../services/auth/auth.client.service';
 import { useCsrfContext } from '../../../context/csrf.context';
+import ButtonWithLoader from '../ui/Button/ButtonWithLoader';
+import { ErrorCode, ErrorDomain, IApiError } from '../../../types/error.type';
 
 export type EditAccountInformationsFormInputs = {
 	username: string;
@@ -26,6 +26,9 @@ const AccountInformationsFormModal: FC<AccountInformationsFormModalProperties> =
 
     const { csrfToken } = useCsrfContext();
 
+    const [ saving, setSaving ] = useState<boolean>(false);
+    const [ errorCode, setErrorCode ] = useState<ErrorCode<ErrorDomain> | null>(null);
+
     const accountInfosFormSchema = Yup.object().shape({ username: Yup.string().required('Champs requis') });
 
     const { register, handleSubmit, formState: { errors } } = useForm<EditAccountInformationsFormInputs>({
@@ -37,15 +40,21 @@ const AccountInformationsFormModal: FC<AccountInformationsFormModalProperties> =
     const handleAccountInfosFormSubmit = async (values: EditAccountInformationsFormInputs) => {
         const { username } = values;
         try {
-
-            setIsOpen(false);
+            setSaving(true);
             await updateAccount({ username }, csrfToken);
             dispatchUser({
                 ...user,
                 username,
             });
+            setSaving(false);
+            setIsOpen(false);
         } catch (error) {
-            throw error;
+            setSaving(false);
+            const apiError = error as IApiError;
+            if (apiError.response && apiError.response.data && apiError.response.data.code) {
+                setErrorCode(apiError.response.data.code);
+                return;
+            }
         }
     };
 
@@ -69,13 +78,17 @@ const AccountInformationsFormModal: FC<AccountInformationsFormModalProperties> =
                         errors={ errors as DeepMap<EditAccountInformationsFormInputs, FieldError> }
                     />
                     <div className="mt-4 flex text-sm justify-end">
-                        <Button
-                            variant={ 'success' }
+                        <ButtonWithLoader
+                            variant='success'
                             type='submit'
+                            saving={ saving }
+                            loaderOrientation='left'
+                            errorCode={ errorCode }
+                            displayErrorMessage={ 'toast' }
                         >
                             <FiSave />
                             <span>Enregistrer</span>
-                        </Button>
+                        </ButtonWithLoader>
                     </div>
                 </form>
             </div>

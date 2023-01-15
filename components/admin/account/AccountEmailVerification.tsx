@@ -1,19 +1,16 @@
-import { FiAlertTriangle, FiCheck, FiSend, FiX } from 'react-icons/fi';
+import { FiAlertTriangle, FiCheck, FiSend } from 'react-icons/fi';
 import ButtonWithLoader from '../ui/Button/ButtonWithLoader';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import useTranslate from '../../../hooks/useTranslate';
-import { IApiError } from '../../../types/error.type';
+import { ErrorCode, ErrorDomain, IApiError } from '../../../types/error.type';
 import { sendVerifyAccountEmailToUser } from '../../../services/auth/auth.client.service';
 
 const AccountEmailVerification = () => {
 
-    const [ error, setError ] = useState<string | null>(null);
+    const [ errorCode, setErrorCode ] = useState<ErrorCode<ErrorDomain> | null>(null);
     const [ loading, setLoading ] = useState(false);
     const [ emailSent, setEmailSent ] = useState(false);
     const [ counter, setCounter ] = useState(60);
-
-    const { getTranslatedError } = useTranslate({ locale: 'fr' });
 
     const startCountDown = (delay: number) => {
         setCounter(delay);
@@ -30,7 +27,7 @@ const AccountEmailVerification = () => {
 
     const handleSendVerificationEmail = async () => {
         setLoading(true);
-        setError(null);
+        setErrorCode(null);
         try {
             await sendVerifyAccountEmailToUser();
             toast.custom(
@@ -41,24 +38,11 @@ const AccountEmailVerification = () => {
             setLoading(false);
             startCountDown(60);
             setEmailSent(true);
-        } catch (err) {
+        } catch (error) {
             setLoading(false);
-            const apiError = err as IApiError;
-            if (apiError.response && apiError.response.data && apiError.response.data.code) {
-                const errorMessage = getTranslatedError(apiError.response.data.code);
-                setError(errorMessage);
-                toast.custom(
-                    <div className='flex items-center gap-4 bg-danger-light-default text-light-50 text-medium text-base px-5 py-3 rounded-md drop-shadow'>
-                        <FiX /><span>{errorMessage}</span>
-                    </div>
-                );
-            } else {
-                console.error(err);
-                toast.custom(
-                    <div className='flex items-center gap-4 bg-danger-light-default text-light-50 text-medium text-base px-5 py-3 rounded-md drop-shadow'>
-                        <FiX /><span>Une erreur est survenue</span>
-                    </div>
-                );
+            const { response } = error as IApiError;
+            if (response && response.data && response.data.code) {
+                setErrorCode(response.data.code);
             }
         }
     };
@@ -72,7 +56,7 @@ const AccountEmailVerification = () => {
                 </h3>
             </div>
             {
-                emailSent && !error &&
+                emailSent && !errorCode &&
                 <div className="px-3 py-2 bg-light-300 dark:bg-light-700 dark:text-light-200 rounded-md">
                     Renvoyer un email dans {counter} secondes
                 </div>
@@ -84,9 +68,9 @@ const AccountEmailVerification = () => {
                     type={ 'button' }
                     variant={ 'primary' }
                     saving={ loading }
-                    error={ error }
+                    errorCode={ errorCode }
                     onClick={ handleSendVerificationEmail }
-                    displayErrorMessage={ false }
+                    displayErrorMessage={ 'toast' }
                 >
                     <FiCheck/>
                     <span>Vérifier mon adresse email</span>

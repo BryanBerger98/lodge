@@ -9,6 +9,7 @@ import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatPhoneNumber, parsePhoneNumber, PhoneNumber } from '../../../utils/phone-number.util';
 import { IUser } from '../../../types/user.type';
+import { ErrorCode, ErrorDomain } from '../../../types/error.type';
 
 export type EditUserFormInputs = {
 	email: string;
@@ -23,7 +24,7 @@ type EditUserFormProperties = {
 	user?: IUser | null;
 	onSubmit: (values: EditUserFormInputs) => void;
 	saving: boolean;
-	errorCode: string | null;
+	errorCode: ErrorCode<ErrorDomain> | null;
 };
 
 const defaultUser = null;
@@ -52,7 +53,6 @@ const EditUserForm = ({ user = defaultUser, onSubmit, saving, errorCode }: EditU
 
     const handleSubmitEditUserForm = (values: EditUserFormInputs) => {
         const { number } = phoneNumberValues ?? { number: '' };
-        console.log(values);
         onSubmit({
             ...values,
             phone_number: number as string,
@@ -125,8 +125,8 @@ const EditUserForm = ({ user = defaultUser, onSubmit, saving, errorCode }: EditU
                     type='submit'
                     saving={ saving }
                     loaderOrientation={ 'right' }
-                    error={ errorCode }
-                    displayErrorMessage={ true }
+                    errorCode={ errorCode }
+                    displayErrorMessage={ 'aside' }
                 >
                     <FiSave />
                     <span>Enregistrer</span>

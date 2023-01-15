@@ -7,8 +7,7 @@ import Button from '../../../../components/admin/ui/Button/Button';
 import EditUserForm, { EditUserFormInputs } from '../../../../components/admin/users/EditUserForm';
 import { createUser } from '../../../../services/users/users.client.service';
 import { useRouter } from 'next/router';
-import { IApiError } from '../../../../types/error.type';
-import useTranslate from '../../../../hooks/useTranslate';
+import { ErrorCode, ErrorDomain, IApiError } from '../../../../types/error.type';
 
 type NewUserPage = {
 	csrfToken: string;
@@ -17,11 +16,9 @@ type NewUserPage = {
 const NewUserPage = ({ csrfToken }: NewUserPage) => {
 
     const [ saving, setSaving ] = useState<boolean>(false);
-    const [ errorCode, setErrorCode ] = useState<string | null>(null);
+    const [ errorCode, setErrorCode ] = useState<ErrorCode<ErrorDomain> | null>(null);
 
     const router = useRouter();
-
-    const { getTranslatedError } = useTranslate({ locale: 'fr' });
 
     const handleSubmit = (values: EditUserFormInputs) => {
         setSaving(true);
@@ -36,11 +33,9 @@ const NewUserPage = ({ csrfToken }: NewUserPage) => {
             .catch(error => {
                 const apiError = error as IApiError;
                 if (apiError.response && apiError.response.data && apiError.response.data.code) {
-                    const errorMessage = getTranslatedError(apiError.response.data.code);
-                    setErrorCode(errorMessage);
+                    setErrorCode(apiError.response.data.code);
                     return;
                 }
-                // console.error(apiError);
             })
             .finally(() => {
                 setSaving(false);

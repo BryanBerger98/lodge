@@ -1,5 +1,7 @@
 import { ObjectId } from '../infrastructure/types/database.type';
 
+export type ImageMimetype = 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp';
+
 export interface ILodgeFile {
 	_id: ObjectId | string;
 	original_name: string;

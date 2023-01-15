@@ -1,26 +1,29 @@
-import { Fragment, useState, useEffect, useCallback } from 'react';
+import { Fragment, useState, useEffect, useCallback, memo } from 'react';
+import { toast } from 'react-hot-toast';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { FiCheck, FiX } from 'react-icons/fi';
 import useTranslate from '../../../../hooks/useTranslate';
+import type { ErrorCode, ErrorDomain } from '../../../../types/error.type';
+import Toast from '../Toast';
 
 export type ButtonSavingLoaderProperties = {
 	saving: boolean;
 	saved: boolean;
 	loaderOrientation: 'left' | 'right';
-	error: string | null;
-	displayErrorMessage: boolean;
+	errorCode: ErrorCode<ErrorDomain> | null;
+	displayErrorMessage: 'aside' | 'toast' | 'none';
 };
 
 const defaultSaving = false;
 const defaultSaved = false;
 const defaultError = null;
 const defaultLoaderOrientation = 'right';
-const defaultDisplayErrorMessage = false;
+const defaultDisplayErrorMessage = 'none';
 
 const ButtonSavingLoader = ({
     saving = defaultSaving,
     saved = defaultSaved,
-    error = defaultError,
+    errorCode = defaultError,
     loaderOrientation = defaultLoaderOrientation,
     displayErrorMessage = defaultDisplayErrorMessage,
 }: ButtonSavingLoaderProperties) => {
@@ -29,16 +32,21 @@ const ButtonSavingLoader = ({
     const { getTranslatedError } = useTranslate({ locale: 'fr' });
 
     const triggerGetError = useCallback(() => {
-        if (error && displayErrorMessage) {
-            const errMsg = getTranslatedError(error);
-            setErrorMessage(errMsg);
+        if (errorCode && displayErrorMessage) {
+            const errMsg = getTranslatedError(errorCode);
+            if (displayErrorMessage === 'aside') {
+                setErrorMessage(errMsg);
+            }
+            return errMsg;
         }
-    }, [ error, displayErrorMessage, getTranslatedError ]);
+    }, [ errorCode, displayErrorMessage, getTranslatedError ]);
 
     useEffect(() => {
-        triggerGetError();
-    }, [ error, triggerGetError ]);
-
+        const errMsg = triggerGetError();
+        if (displayErrorMessage === 'toast' && errorCode) {
+            toast.custom(<Toast variant='danger'><FiX /><span>{ errMsg }</span></Toast>);
+        }
+    }, [ errorCode, triggerGetError, displayErrorMessage ]);
     return(
         <Fragment>
             <div className={ `flex items-center transition ease-in-out duration-300 absolute z-0 inset-y-0 ${ loaderOrientation === 'left' ? 'left-0' : 'right-0' } ${ saving && !saved && loaderOrientation === 'left' ? '-translate-x-9' : saving && !saved ? 'translate-x-9' : '' }` }>
@@ -47,12 +55,12 @@ const ButtonSavingLoader = ({
             <div className={ `flex items-center gap-1 transition ease-in-out duration-300 absolute z-0 inset-y-0 ${ loaderOrientation === 'left' ? 'left-0' : 'right-0' } ${ !saving && saved && loaderOrientation === 'left' ? '-translate-x-9' : !saving && saved ? 'translate-x-9' : '' }` }>
                 <FiCheck className={ 'text-2xl text-success-light-default dark:text-success-dark-default' } />
             </div>
-            <div className={ `flex items-center gap-1 transition ease-in-out duration-300 absolute z-0 inset-y-0 ${ loaderOrientation === 'left' ? 'left-0' : 'right-0' } ${ !saving && !saved && error && loaderOrientation === 'left' ? '-translate-x-9' : !saving && !saved && error ? 'translate-x-9' : '' }` }>
+            <div className={ `flex items-center gap-1 transition ease-in-out duration-300 absolute z-0 inset-y-0 ${ loaderOrientation === 'left' ? 'left-0' : 'right-0' } ${ !saving && !saved && errorCode && loaderOrientation === 'left' ? '-translate-x-9' : !saving && !saved && errorCode ? 'translate-x-9' : '' }` }>
                 <FiX className={ 'text-2xl text-danger-light-default dark:text-danger-dark-default' } />
-                { displayErrorMessage && error && errorMessage && <span className='text-danger-light-default dark:text-danger-dark-default text-sm absolute left-7 whitespace-nowrap'>{errorMessage}</span> }
+                { displayErrorMessage === 'aside' && errorCode && errorMessage && <span className='text-danger-light-default dark:text-danger-dark-default text-sm absolute left-7 whitespace-nowrap'>{errorMessage}</span> }
             </div>
         </Fragment>
     );
 };
 
-export default ButtonSavingLoader;
+export default memo(ButtonSavingLoader);

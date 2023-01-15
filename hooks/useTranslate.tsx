@@ -1,4 +1,4 @@
-import { AuthErrorKey, ErrorDomain, UsersErrorKey } from '../types/error.type';
+import { AuthErrorKey, ErrorCode, ErrorDomain, FilesErrorKey, UsersErrorKey } from '../types/error.type';
 import { UserRole } from '../types/user.type';
 
 type TranslateLocale = 'fr' | 'en';
@@ -35,6 +35,7 @@ const roles: Record<UserRole, Record<TranslateLocale, string>> = {
 type Errors = {
 	auth: Record<AuthErrorKey, Record<TranslateLocale, string>>;
 	users: Record<UsersErrorKey, Record<TranslateLocale, string>>;
+	files: Record<FilesErrorKey, Record<TranslateLocale, string>>;
 	default: Record<TranslateLocale, string>;
 }
 
@@ -87,33 +88,55 @@ const errors: Errors = {
     },
     users: {
         'invalid-input': {
-            fr: 'Saisie invalide',
-            en: 'Invalid input',
+            fr: 'Saisie invalide.',
+            en: 'Invalid input.',
         },
         'missing-id': {
-            fr: 'Un id utilisateur doit être fourni',
-            en: 'A user id must be provided',
+            fr: 'Un id utilisateur doit être fourni.',
+            en: 'A user id must be provided.',
         },
         'user-not-found': {
-            fr: 'Utilisateur inconnu',
-            en: 'User not found',
+            fr: 'Utilisateur inconnu.',
+            en: 'User not found.',
         },
         'email-already-in-use': {
-            fr: 'Adresse email déjà attribuée',
-            en: 'Email already in use',
+            fr: 'Adresse email déjà attribuée.',
+            en: 'Email already in use.',
         },
         'error': {
-            fr: 'Une erreur est survenue',
-            en: 'An error occured',
+            fr: 'Une erreur est survenue.',
+            en: 'An error occured.',
         },
         'wrong-method': {
-            fr: 'Une erreur est survenue',
-            en: 'An error occured',
+            fr: 'Une erreur est survenue.',
+            en: 'An error occured.',
+        },
+        'no-user-provided': {
+            fr: 'Aucun utilisateur fourni.',
+            en: 'No user provided.',
+        },
+    },
+    files: {
+        'error': {
+            fr: 'Une erreur est survenue.',
+            en: 'An error occured.',
+        },
+        'file-not-found': {
+            fr: 'Fichier introuvable.',
+            en: 'File not found.',
+        },
+        'invalid-input': {
+            fr: 'Saisie invalide.',
+            en: 'Invalid input.',
+        },
+        'wrong-method': {
+            fr: 'Une erreur est survenue.',
+            en: 'An error occured.',
         },
     },
     default: {
-        fr: 'Une erreur est survenue',
-        en: 'An error occured',
+        fr: 'Une erreur est survenue.',
+        en: 'An error occured.',
     },
 };
 
@@ -147,7 +170,7 @@ const useTranslate = (options: TranslateHookOptions) => {
         return roles[ role ][ locale ];
     }
 
-    function getTranslatedError(errorCode: string): string | null {
+    function getTranslatedError(errorCode: ErrorCode<ErrorDomain>): string | null {
         if (!errorCode) {
             throw new Error('Please set an error code');
         }
