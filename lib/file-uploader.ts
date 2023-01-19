@@ -1,6 +1,6 @@
 import multer from 'multer';
 import multerS3 from 'multer-s3';
-import { generateUniqueNameFromFileName } from '../utils/file.utils';
+import { generateUniqueNameFromFileName } from '../utils/file.util';
 import bucket from './bucket';
 
 export const upload = multer({

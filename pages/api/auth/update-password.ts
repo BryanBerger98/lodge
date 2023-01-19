@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { userDataAccess } from '../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../infrastructure/database';
 import { getSessionUser } from '../../../services/auth/auth.api.service';
-import { sendApiError } from '../../../utils/error.utils';
+import { sendApiError } from '../../../utils/error.util';
 import { hashPassword, verifyPassword } from '../../../utils/password.util';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

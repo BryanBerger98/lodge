@@ -1,8 +1,8 @@
 import nextConnect from 'next-connect';
-import { convertFileRequestObjetToModel } from '../../../../utils/file.utils';
+import { convertFileRequestObjetToModel } from '../../../../utils/file.util';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
-import { sendApiError } from '../../../../utils/error.utils';
+import { sendApiError } from '../../../../utils/error.util';
 import { upload } from '../../../../lib/file-uploader';
 import { csrfProtection } from '../../../../lib/csrf';
 import { deleteFileFromKey, getFileFromKey } from '../../../../lib/bucket';

@@ -2,7 +2,7 @@ import { NextApiHandler } from 'next';
 import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../../infrastructure/database';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../../utils/csrf.util';
-import { sendApiError } from '../../../../utils/error.utils';
+import { sendApiError } from '../../../../utils/error.util';
 import { setPermissions } from '../../../../utils/permissions.util';
 import { deleteFileFromKey } from '../../../../lib/bucket';
 import { getSessionUser } from '../../../../services/auth/auth.api.service';

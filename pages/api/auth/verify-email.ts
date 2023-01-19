@@ -3,7 +3,7 @@ import { tokenDataAccess, userDataAccess } from '../../../infrastructure/data-ac
 import { connectToDatabase } from '../../../infrastructure/database';
 import { getSessionUser } from '../../../services/auth/auth.api.service';
 import { sendAccountVerificationEmail } from '../../../utils/email.util';
-import { sendApiError } from '../../../utils/error.utils';
+import { sendApiError } from '../../../utils/error.util';
 import { generateToken, verifyToken } from '../../../utils/jwt.util';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

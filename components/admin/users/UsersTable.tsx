@@ -1,5 +1,5 @@
 import { FiCheckCircle, FiLock, FiRotateCw, FiUser } from 'react-icons/fi';
-import { getStringSlashedDateFromDate } from '../../../utils/date.utils';
+import { getStringSlashedDateFromDate } from '../../../utils/date.util';
 import { Fragment } from 'react';
 import UserTableDataMenu from './UserTableDataMenu';
 import Image from 'next/image';

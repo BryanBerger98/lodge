@@ -5,7 +5,7 @@ import { generateToken } from '../../../utils/jwt.util';
 import { NextApiHandler } from 'next';
 import { tokenDataAccess, userDataAccess } from '../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../infrastructure/database';
-import { sendApiError } from '../../../utils/error.utils';
+import { sendApiError } from '../../../utils/error.util';
 import { getSessionUser } from '../../../services/auth/auth.api.service';
 
 const handler: NextApiHandler = async (req, res) => {

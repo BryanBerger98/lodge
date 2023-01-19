@@ -7,7 +7,7 @@ import { useCsrfContext } from '../../../context/csrf.context';
 import { IUser } from '../../../types/user.type';
 import { IApiError } from '../../../types/error.type';
 import { updateAvatar } from '../../../services/auth/auth.client.service';
-import { checkIfFileIsAnImage } from '../../../utils/file.utils';
+import { checkIfFileIsAnImage } from '../../../utils/file.util';
 import useToast from '../../../hooks/useToast';
 
 type AccountProfilePhotoInputProperties = {

@@ -4,8 +4,8 @@ import { fileDataAccess, userDataAccess } from '../../../../infrastructure/data-
 import { deleteFileFromKey, getFileFromKey } from '../../../../lib/bucket';
 import { csrfProtection } from '../../../../lib/csrf';
 import { upload } from '../../../../lib/file-uploader';
-import { convertFileRequestObjetToModel } from '../../../../utils/file.utils';
-import { sendApiError } from '../../../../utils/error.utils';
+import { convertFileRequestObjetToModel } from '../../../../utils/file.util';
+import { sendApiError } from '../../../../utils/error.util';
 import { getSessionUser } from '../../../../services/auth/auth.api.service';
 
 const apiRoute = nextConnect({

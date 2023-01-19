@@ -5,7 +5,7 @@ import { getFileFromKey } from '../../../../lib/bucket';
 import { getSessionUser } from '../../../../services/auth/auth.api.service';
 import { IUser } from '../../../../types/user.type';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../../utils/csrf.util';
-import { sendApiError } from '../../../../utils/error.utils';
+import { sendApiError } from '../../../../utils/error.util';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 

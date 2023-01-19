@@ -3,7 +3,7 @@ import { userDataAccess } from '../../../infrastructure/data-access';
 import { connectToDatabase } from '../../../infrastructure/database';
 import { getSessionUser } from '../../../services/auth/auth.api.service';
 import csrf, { CsrfRequest, CsrfResponse } from '../../../utils/csrf.util';
-import { sendApiError } from '../../../utils/error.utils';
+import { sendApiError } from '../../../utils/error.util';
 import { setPermissions } from '../../../utils/permissions.util';
 
 const handler: NextApiHandler = async (req, res) => {

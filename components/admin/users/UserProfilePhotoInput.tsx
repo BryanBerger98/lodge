@@ -7,7 +7,7 @@ import useToast from '../../../hooks/useToast';
 import { updateUserAvatar } from '../../../services/users/users.client.service';
 import { IApiError } from '../../../types/error.type';
 import { IUser } from '../../../types/user.type';
-import { checkIfFileIsAnImage } from '../../../utils/file.utils';
+import { checkIfFileIsAnImage } from '../../../utils/file.util';
 
 type UserProfilePhotoInputProperties = {
 	user: IUser;
