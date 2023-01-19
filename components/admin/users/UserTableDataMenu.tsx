@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { FiEdit, FiKey, FiLock, FiSend, FiTrash, FiUnlock, FiX } from 'react-icons/fi';
+import { FiEdit, FiKey, FiLock, FiSend, FiTrash, FiUnlock } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import DropdownItem from '../ui/DropdownMenu/DropdownItem';
@@ -10,8 +10,8 @@ import DeleteUserModal from './DeleteUserModal';
 import { IUser } from '../../../types/user.type';
 import { sendResetPasswordEmailToUser } from '../../../services/users/users.client.service';
 import { useCsrfContext } from '../../../context/csrf.context';
-import useTranslate from '../../../hooks/useTranslate';
 import { IApiError } from '../../../types/error.type';
+import useToast from '../../../hooks/useToast';
 
 type UserTableDataMenuProperties = {
 	user: IUser,
@@ -26,11 +26,7 @@ const UserTableDataMenu: FC<UserTableDataMenuProperties> = ({ user, currentUser 
     const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
     const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
 
-    const { getTranslatedError } = useTranslate({ locale: 'fr' });
-
-    const triggerErrorToast = (errorMessage: string) => {
-        toast.custom(<Toast variant='danger'><FiX /><span>{ errorMessage }</span></Toast>);
-    };
+    const { triggerErrorToast } = useToast({ locale: 'fr' });
 
     const onSendResetPasswordEmail = () => {
         sendResetPasswordEmailToUser(user._id, csrfToken)
@@ -38,11 +34,7 @@ const UserTableDataMenu: FC<UserTableDataMenuProperties> = ({ user, currentUser 
                 toast.custom(<Toast><FiSend /><span>Email envoyé !</span></Toast>);
             })
             .catch(error => {
-                const apiError = error as IApiError;
-                if (apiError.response && apiError.response.data && apiError.response.data.code) {
-                    const errorMessage = getTranslatedError(apiError.response.data.code);
-                    triggerErrorToast(errorMessage ?? 'Une erreur est survenue');
-                }
+                triggerErrorToast(error as IApiError);
             });
     };
 

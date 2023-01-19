@@ -1,16 +1,14 @@
-import { FiUser, FiX } from 'react-icons/fi';
 import { FC, useRef, useState } from 'react';
-import { useAuthContext } from '../../../context/auth.context';
 import Image from 'next/image';
+import { FiUser } from 'react-icons/fi';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import { IUser } from '../../../types/user.type';
+import { useAuthContext } from '../../../context/auth.context';
 import { useCsrfContext } from '../../../context/csrf.context';
-import { updateAvatar } from '../../../services/auth/auth.client.service';
-import { toast } from 'react-hot-toast';
-import Toast from '../ui/Toast';
-import { checkIfFileIsAnImage } from '../../../utils/file.utils';
+import { IUser } from '../../../types/user.type';
 import { IApiError } from '../../../types/error.type';
-import useTranslate from '../../../hooks/useTranslate';
+import { updateAvatar } from '../../../services/auth/auth.client.service';
+import { checkIfFileIsAnImage } from '../../../utils/file.utils';
+import useToast from '../../../hooks/useToast';
 
 type AccountProfilePhotoInputProperties = {
 	currentUser: IUser;
@@ -23,11 +21,7 @@ const AccountProfilePhotoInput: FC<AccountProfilePhotoInputProperties> = ({ curr
     const { csrfToken } = useCsrfContext();
     const [ saving, setSaving ] = useState(false);
 
-    const { getTranslatedError } = useTranslate({ locale: 'fr' });
-
-    const triggerErrorToast = (errorMessage: string) => {
-        toast.custom(<Toast variant='danger'><FiX /><span>{ errorMessage }</span></Toast>);
-    };
+    const { triggerErrorToast } = useToast({ locale: 'fr' });
 
     const handleFileChange = async () => {
         try {
@@ -45,11 +39,7 @@ const AccountProfilePhotoInput: FC<AccountProfilePhotoInputProperties> = ({ curr
                 photo_url: fileData.photoUrl,
             });
         } catch (error) {
-            const apiError = error as IApiError;
-            if (apiError.response && apiError.response.data && apiError.response.data.code) {
-                const errorMessage = getTranslatedError(apiError.response.data.code);
-                triggerErrorToast(errorMessage ?? 'Une erreur est survenue');
-            }
+            triggerErrorToast(error as IApiError);
         } finally {
             setSaving(false);
         }

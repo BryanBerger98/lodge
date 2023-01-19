@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router';
 import { Dispatch, SetStateAction, useState } from 'react';
 import toast from 'react-hot-toast';
-import { FiTrash, FiX } from 'react-icons/fi';
+import { FiTrash } from 'react-icons/fi';
 import { useCsrfContext } from '../../../context/csrf.context';
 import useLoadUsersTable from '../../../hooks/useLoadUsersTable';
-import useTranslate from '../../../hooks/useTranslate';
+import useToast from '../../../hooks/useToast';
 import { deleteUserById } from '../../../services/users/users.client.service';
 import { IApiError } from '../../../types/error.type';
 import { IUser } from '../../../types/user.type';
@@ -24,13 +24,9 @@ const DeleteUserModal = ({ isOpen, setIsOpen, user }: DeleteUserModalProperties)
     const [ confirmDeleteUserInputValue, setConfirmDeleteUserInputValue ] = useState('');
     const { loadUsersTable } = useLoadUsersTable();
 
-    const { getTranslatedError } = useTranslate({ locale: 'fr' });
-
     const { csrfToken } = useCsrfContext();
 
-    const triggerErrorToast = (errorMessage: string) => {
-        toast.custom(<Toast variant='danger'><FiX /><span>{ errorMessage }</span></Toast>);
-    };
+    const { triggerErrorToast } = useToast({ locale: 'fr' });
 
     const onConfirmDeleteUser = async () => {
         try {
@@ -39,11 +35,7 @@ const DeleteUserModal = ({ isOpen, setIsOpen, user }: DeleteUserModalProperties)
             loadUsersTable();
             router.push('/admin/users');
         } catch (error) {
-            const apiError = error as IApiError;
-            if (apiError.response && apiError.response.data && apiError.response.data.code) {
-                const errorMessage = getTranslatedError(apiError.response.data.code);
-                triggerErrorToast(errorMessage ?? 'Une erreur est survenue');
-            }
+            triggerErrorToast(error as IApiError);
         }
         setIsOpen(false);
         setConfirmDeleteUserInputValue('');

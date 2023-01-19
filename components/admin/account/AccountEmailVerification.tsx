@@ -35,15 +35,15 @@ const AccountEmailVerification = () => {
                     <FiSend /><span>Email envoyé !</span>
                 </div>
             );
-            setLoading(false);
             startCountDown(60);
             setEmailSent(true);
         } catch (error) {
-            setLoading(false);
             const { response } = error as IApiError;
             if (response && response.data && response.data.code) {
                 setErrorCode(response.data.code);
             }
+        } finally {
+            setLoading(false);
         }
     };
 

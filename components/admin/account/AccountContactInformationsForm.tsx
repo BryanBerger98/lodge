@@ -115,14 +115,14 @@ const AccountContactInformationsForm: FC<AccountContactInformationsFormPropertie
 
             dispatchCurrentUser(currentUser);
             setIsPasswordFormModalOpen(false);
-            setSaving(false);
         } catch (err) {
-            setSaving(false);
             const apiError = err as IApiError;
             if (apiError.response && apiError.response.data && apiError.response.data.code) {
                 setErrorCode(apiError.response.data.code);
                 return;
             }
+        } finally {
+            setSaving(false);
         }
     };
 

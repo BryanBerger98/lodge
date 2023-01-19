@@ -1,9 +1,9 @@
 import { Dispatch, FC, SetStateAction } from 'react';
 import toast from 'react-hot-toast';
-import { FiCheck, FiLock, FiUnlock, FiX } from 'react-icons/fi';
+import { FiCheck, FiLock, FiUnlock } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import { useCsrfContext } from '../../../context/csrf.context';
-import useTranslate from '../../../hooks/useTranslate';
+import useToast from '../../../hooks/useToast';
 import { switchDisabledUser } from '../../../services/users/users.client.service';
 import { updateUser } from '../../../store/users.slice';
 import { IApiError } from '../../../types/error.type';
@@ -24,11 +24,7 @@ const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, 
     const { csrfToken } = useCsrfContext();
     const dispatch = useDispatch();
 
-    const { getTranslatedError } = useTranslate({ locale: 'fr' });
-
-    const triggerErrorToast = (errorMessage: string) => {
-        toast.custom(<Toast variant='danger'><FiX /><span>{ errorMessage }</span></Toast>);
-    };
+    const { triggerErrorToast } = useToast({ locale: 'fr' });
 
     const onConfirmSwitchDisableUser = () => {
         switchDisabledUser(user._id, csrfToken)
@@ -45,11 +41,7 @@ const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, 
                     });
                 }
             }).catch(error => {
-                const apiError = error as IApiError;
-                if (apiError.response && apiError.response.data && apiError.response.data.code) {
-                    const errorMessage = getTranslatedError(apiError.response.data.code);
-                    triggerErrorToast(errorMessage ?? 'Une erreur est survenue');
-                }
+                triggerErrorToast(error as IApiError);
             }).finally(() => {
                 setIsOpen(false);
             });

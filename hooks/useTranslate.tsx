@@ -1,7 +1,7 @@
 import { AuthErrorKey, ErrorCode, ErrorDomain, FilesErrorKey, UsersErrorKey } from '../types/error.type';
 import { UserRole } from '../types/user.type';
 
-type TranslateLocale = 'fr' | 'en';
+export type TranslateLocale = 'fr' | 'en';
 export type TranslateTitle = 'dashboard' | 'users' | 'account';
 
 type TranslateErrorKey = AuthErrorKey | UsersErrorKey;
@@ -140,7 +140,7 @@ const errors: Errors = {
     },
 };
 
-type TranslateHookOptions = {
+export type TranslateHookOptions = {
 	locale: TranslateLocale;
 };
 

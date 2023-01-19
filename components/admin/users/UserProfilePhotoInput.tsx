@@ -1,15 +1,13 @@
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useRef, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import { FiUser, FiX } from 'react-icons/fi';
+import { FiUser } from 'react-icons/fi';
 import { useCsrfContext } from '../../../context/csrf.context';
-import useTranslate from '../../../hooks/useTranslate';
+import useToast from '../../../hooks/useToast';
 import { updateUserAvatar } from '../../../services/users/users.client.service';
 import { IApiError } from '../../../types/error.type';
 import { IUser } from '../../../types/user.type';
 import { checkIfFileIsAnImage } from '../../../utils/file.utils';
-import Toast from '../ui/Toast';
 
 type UserProfilePhotoInputProperties = {
 	user: IUser;
@@ -22,11 +20,7 @@ const UserProfilePhotoInput = ({ user, setUser }: UserProfilePhotoInputPropertie
     const [ saving, setSaving ] = useState(false);
     const { csrfToken } = useCsrfContext();
 
-    const { getTranslatedError } = useTranslate({ locale: 'fr' });
-
-    const triggerErrorToast = (errorMessage: string) => {
-        toast.custom(<Toast variant='danger'><FiX /><span>{ errorMessage }</span></Toast>);
-    };
+    const { triggerErrorToast } = useToast({ locale: 'fr' });
 
     const handleFileChange = async () => {
         try {
@@ -43,11 +37,7 @@ const UserProfilePhotoInput = ({ user, setUser }: UserProfilePhotoInputPropertie
                 photo_url: fileData.photoUrl,
             });
         } catch (error) {
-            const apiError = error as IApiError;
-            if (apiError.response && apiError.response.data && apiError.response.data.code) {
-                const errorMessage = getTranslatedError(apiError.response.data.code);
-                triggerErrorToast(errorMessage ?? 'Une erreur est survenue');
-            }
+            triggerErrorToast(error as IApiError);
         } finally {
             setSaving(false);
         }

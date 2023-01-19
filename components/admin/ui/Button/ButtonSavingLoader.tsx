@@ -32,21 +32,21 @@ const ButtonSavingLoader = ({
     const { getTranslatedError } = useTranslate({ locale: 'fr' });
 
     const triggerGetError = useCallback(() => {
-        if (errorCode && displayErrorMessage) {
+        if (errorCode) {
             const errMsg = getTranslatedError(errorCode);
             if (displayErrorMessage === 'aside') {
                 setErrorMessage(errMsg);
             }
-            return errMsg;
+            if (displayErrorMessage === 'toast') {
+                toast.custom(<Toast variant='danger'><FiX /><span>{ errMsg }</span></Toast>);
+            }
         }
     }, [ errorCode, displayErrorMessage, getTranslatedError ]);
 
     useEffect(() => {
-        const errMsg = triggerGetError();
-        if (displayErrorMessage === 'toast' && errorCode) {
-            toast.custom(<Toast variant='danger'><FiX /><span>{ errMsg }</span></Toast>);
-        }
-    }, [ errorCode, triggerGetError, displayErrorMessage ]);
+        triggerGetError();
+    }, [ errorCode, triggerGetError ]);
+
     return(
         <Fragment>
             <div className={ `flex items-center transition ease-in-out duration-300 absolute z-0 inset-y-0 ${ loaderOrientation === 'left' ? 'left-0' : 'right-0' } ${ saving && !saved && loaderOrientation === 'left' ? '-translate-x-9' : saving && !saved ? 'translate-x-9' : '' }` }>

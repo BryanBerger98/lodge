@@ -1,7 +1,7 @@
 import UserProfilePhotoInput from './UserProfilePhotoInput';
 import DropdownMenu from '../ui/DropdownMenu/DropdownMenu';
 import DropdownItem from '../ui/DropdownMenu/DropdownItem';
-import { FiKey, FiLock, FiSend, FiTrash, FiUnlock, FiX } from 'react-icons/fi';
+import { FiKey, FiLock, FiSend, FiTrash, FiUnlock } from 'react-icons/fi';
 import { Dispatch, SetStateAction, useState } from 'react';
 import toast from 'react-hot-toast';
 import Toast from '../ui/Toast';
@@ -12,6 +12,7 @@ import { IUser } from '../../../types/user.type';
 import useTranslate from '../../../hooks/useTranslate';
 import { useCsrfContext } from '../../../context/csrf.context';
 import { IApiError } from '../../../types/error.type';
+import useToast from '../../../hooks/useToast';
 
 type EditUserInformationsSectionProperties = {
 	user: IUser | null;
@@ -22,14 +23,11 @@ type EditUserInformationsSectionProperties = {
 const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInformationsSectionProperties) => {
 
     const { csrfToken } = useCsrfContext();
-    const { getTranslatedRole, getTranslatedError } = useTranslate({ locale: 'fr' });
+    const { getTranslatedRole } = useTranslate({ locale: 'fr' });
+    const { triggerErrorToast } = useToast({ locale: 'fr' });
 
     const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
     const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
-
-    const triggerErrorToast = (errorMessage: string) => {
-        toast.custom(<Toast variant='danger'><FiX /><span>{ errorMessage }</span></Toast>);
-    };
 
     const onSendResetPasswordEmail = () => {
         if (user) {
@@ -38,11 +36,7 @@ const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInf
                     toast.custom(<Toast variant='success'><FiSend /><span>Email envoyé !</span></Toast>);
                 })
                 .catch(error => {
-                    const apiError = error as IApiError;
-                    if (apiError.response && apiError.response.data && apiError.response.data.code) {
-                        const errorMessage = getTranslatedError(apiError.response.data.code);
-                        triggerErrorToast(errorMessage ?? 'Une erreur est survenue');
-                    }
+                    triggerErrorToast(error as IApiError);
                 });
         }
     };
