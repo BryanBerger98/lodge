@@ -3,7 +3,7 @@ import multerS3 from 'multer-s3';
 import { generateUniqueNameFromFileName } from '../utils/file.util';
 import bucket from './bucket';
 
-export const upload = multer({
+export const upload = (folderPath = '') => multer({
     storage: multerS3({
         s3: bucket,
         bucket: process.env.BUCKET_NAME as string,
@@ -16,7 +16,7 @@ export const upload = multer({
         key: async (req, file, cb) => {
             try {
                 const generatedFileName = await generateUniqueNameFromFileName(file.originalname);
-                return cb(null, generatedFileName);
+                return cb(null, folderPath + generatedFileName);
             } catch (error) {
                 return cb(error as Error, '');
             }

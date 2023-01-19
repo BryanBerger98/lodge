@@ -62,8 +62,8 @@ apiRoute.use(async (req, res, next) => {
     next();
 });
 
-apiRoute.use(upload.single('avatar'));
 
+apiRoute.use(upload('avatars/').single('avatar'));
 apiRoute.put(async (req: NextApiRequest & { file: Express.MulterS3.File }, res: NextApiResponse) => {
     const user = await getSessionUser(req);
 
