@@ -16,6 +16,7 @@ import useLoadUsersTable from '../../../hooks/useLoadUsersTable';
 import { IUser } from '../../../types/user.type';
 import { getMultipleFiles } from '../../../lib/bucket';
 import { fileDataAccess, userDataAccess } from '../../../infrastructure/data-access';
+import { connectToDatabase } from '../../../infrastructure/database';
 
 type UsersPageProperties = {
 	csrfToken: string;
@@ -85,6 +86,8 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async ({ r
             },
         };
     }
+
+    await connectToDatabase();
 
     const usersData = await userDataAccess.findUsers({}, { 'created_at': -1 }, 0, 10);
     const usersCount = await userDataAccess.findUsersCount({});
