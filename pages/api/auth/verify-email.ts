@@ -10,6 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await connectToDatabase();
 
+    console.log(req.method, 'VERIFY EMAIL');
+
     if (req.method === 'GET') {
 
         const currentUser = await getSessionUser(req);
@@ -44,6 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'PUT') {
         const { token } = req.body;
+
+        console.log(req.method, token, 'VERIFY EMAIL');
 
         const currentUser = await getSessionUser(req);
 
