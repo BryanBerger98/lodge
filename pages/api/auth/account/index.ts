@@ -11,13 +11,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     await connectToDatabase();
 
-    await csrf(req as CsrfRequest, res as CsrfResponse);
-
     const currentUser = await getSessionUser(req);
 
     if (!currentUser) {
         return sendApiError(res, 'auth', 'unauthorized');
     }
+
+    if (req.method === 'GET') {
+
+        const currentUserData = await userDataAccess.findUserById(currentUser._id);
+
+        if (!currentUserData) {
+            return sendApiError(res, 'auth', 'user-not-found');
+        }
+
+        const photoFileObject = await fileDataAccess.findFileByUrl(currentUserData.photo_url);
+
+        if (photoFileObject) {
+            const photoUrl = await getFileFromKey(photoFileObject);
+            currentUserData.photo_url = photoUrl ? photoUrl : '';
+        }
+
+
+        return res.status(200).json(currentUserData);
+    }
+
+    await csrf(req as CsrfRequest, res as CsrfResponse);
 
     if (req.method === 'PUT') {
 
@@ -46,26 +65,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     }
 
-    if (req.method === 'GET') {
-
-        const currentUserData = await userDataAccess.findUserById(currentUser._id);
-
-        if (!currentUserData) {
-            return sendApiError(res, 'auth', 'user-not-found');
-        }
-
-        const photoFileObject = await fileDataAccess.findFileByUrl(currentUserData.photo_url);
-
-        if (!photoFileObject) {
-            return sendApiError(res, 'files', 'file-not-found');
-        }
-
-        const photoUrl = await getFileFromKey(photoFileObject);
-
-        currentUserData.photo_url = photoUrl ? photoUrl : '';
-
-        return res.status(200).json(currentUserData);
-    }
 
     return sendApiError(res, 'auth', 'wrong-method');
 };
