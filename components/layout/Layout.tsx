@@ -1,12 +1,13 @@
 import { useRouter } from 'next/router';
 import { ReactNode, useEffect, useState } from 'react';
-import { ThemeValue, useThemeContext } from '../../context/theme.context';
-import { Toaster } from 'react-hot-toast';
-import Loader from '../admin/ui/Loader';
-import Sidebar from './Sidebar';
 import { useAuthContext } from '../../context/auth.context';
-import AdminHeader from './AdminHeader';
 import { useSession } from 'next-auth/react';
+import { Breadcrumb, Layout as AntLayout, theme as antTheme } from 'antd';
+import Sider from './Sider';
+import Header from './Header';
+import Loader from '../admin/ui/Loader';
+
+const { Content, Footer } = AntLayout;
 
 type LayoutProperties = {
 	children: ReactNode;
@@ -17,13 +18,14 @@ const Layout = ({ children = null }: LayoutProperties) => {
     const { data: session, status } = useSession();
 
     const { currentUser, getCurrentUser } = useAuthContext();
-    const { theme, toggleTheme } = useThemeContext();
     const [ showLayout, setShowLayout ] = useState<boolean>(true);
     const [ showHeader, setShowHeader ] = useState<boolean>(false);
     const [ showAdminHeader, setShowAdminHeader ] = useState<boolean>(false);
     const [ showSidebar, setShowSidebar ] = useState<boolean>(false);
     const [ isSidebarOpen, setIsSidebarOpen ] = useState<boolean>(false);
     const router = useRouter();
+
+    const [ collapsed, setCollapsed ] = useState(false);
 
     useEffect(() => {
         if (session) {
@@ -50,25 +52,72 @@ const Layout = ({ children = null }: LayoutProperties) => {
         }
     }, [ router, currentUser ]);
 
-    useEffect(() => {
-        const darkMode = localStorage.getItem('theme') as ThemeValue | null;
-        toggleTheme(darkMode ? darkMode : 'light');
-    }, [ toggleTheme ]);
-
-    useEffect(() => {
-        const body = document.getElementsByTagName('body').item(0);
-        if (body) {
-            body.className = theme === 'dark' ? 'dark text-secondary-light-shade bg-secondary-dark-default' : 'text-secondary-dark-default bg-secondary-light-shade';
-        }
-    }, [ theme ]);
+    const { token } = antTheme.useToken();
 
     return (
-        <div className={ 'h-full' }>
+        <>
+            <AntLayout
+                style={ {
+                    minHeight: '100vh',
+                    flexFlow: 'row',
+                } }
+            >
+                {
+                    status === 'loading' ? <Loader isLoading={ true } /> :
+                        <>
+                            {
+                                currentUser && showSidebar &&
+								<Sider
+                                	collapsed={ collapsed }
+                                	setCollapsed={ setCollapsed }
+								/>
+                            }
+                            <AntLayout
+                                style={ {
+                                    flexFlow: 'column',
+                                    flexGrow: 1,
+                                } }
+                            >
+                                {
+                                    currentUser && showAdminHeader &&
+									<Header
+									    token={ token }
+									    collapsed={ collapsed }
+									    setCollapsed={ setCollapsed }
+									/>
+                                }
+                                <Content
+                                    style={ {
+                                        flexGrow: 1,
+                                        margin: 24,
+                                    } }
+                                >
+                                    <div
+                                        style={ {
+                                            padding: 24,
+                                            minHeight: '100%',
+                                            background: token.colorBgContainer,
+                                        } }
+                                    >
+                                        { children }
+                                    </div>
+                                </Content>
+                            </AntLayout>
+                        </>
+                }
+            </AntLayout>
+            {/* <div
+            style={ { height: '100%' } }
+            className={ 'h-full' }
+        >
             {
                 status === 'loading' ?
                     <Loader isLoading={ true } />
                     : <>
-                        <div className='flex h-full'>
+                        <div
+                            className='flex h-full'
+                            style={ { height: '100%' } }
+                        >
                             {
                                 currentUser && showSidebar &&
                                 <Sidebar
@@ -76,7 +125,14 @@ const Layout = ({ children = null }: LayoutProperties) => {
                                     isSidebarOpen={ isSidebarOpen }
                                 />
                             }
-                            <div className='grow h-full flex flex-col'>
+                            <div
+                                style={ {
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                } }
+                                className='grow h-full flex flex-col'
+                            >
                                 {
                                     showAdminHeader &&
 									<AdminHeader
@@ -96,7 +152,8 @@ const Layout = ({ children = null }: LayoutProperties) => {
                         />
                     </>
             }
-        </div>
+        </div> */}
+        </>
     );
 
 };

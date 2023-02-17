@@ -1,9 +1,11 @@
 import { useForm, FieldValues, DeepMap, FieldError } from 'react-hook-form';
 import TextField from '../forms/TextField';
-import Button from '../ui/Button/Button';
+// import Button from '../ui/Button/Button';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { FiLogIn } from 'react-icons/fi';
+import { Button } from 'antd';
+import { LoginOutlined } from '@ant-design/icons';
+// import { FiLogIn } from 'react-icons/fi';
 
 export type LoginFormInputs = {
 	email: string;
@@ -50,24 +52,32 @@ const LoginForm = ({ onSubmit, requestError = null }: LoginFormProperties) => {
             <div className="flex flex-col justify-center items-center text-sm">
                 { requestError && <p className='text-sm text-danger-light-default dark:text-danger-dark-default mb-5'>{ requestError }</p> }
                 <Button
+                    type='primary'
+                    htmlType='submit'
+                    icon={ <LoginOutlined /> }
+                >
+					Connexion
+                </Button>
+                {/* <Button
                     variant={ 'primary-gradient' }
                     type='submit'
                 >
                     <FiLogIn />
                     <span>Connexion</span>
-                </Button>
+                </Button> */}
+
                 {/* <Button
                     variant={ 'link' }
                     href='/admin/auth/signup'
                 >
 					Pas de compte ? S'inscrire ici
                 </Button> */}
-                <Button
+                {/* <Button
                     variant={ 'link' }
                     href='/admin/auth/forgot-password'
                 >
 					Mot de passe oublié ?
-                </Button>
+                </Button> */}
             </div>
         </form>
     );

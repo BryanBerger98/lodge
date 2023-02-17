@@ -7,6 +7,7 @@ import csrf from '../../../utils/csrf.util';
 import { GetServerSidePropsContextWithCsrf } from '../../../types/ssr.type';
 import { useCsrfContext } from '../../../context/csrf.context';
 import { signIn } from 'next-auth/react';
+import { Space } from 'antd';
 
 type LoginPageProperties = {
 	csrfToken: string;
@@ -48,22 +49,26 @@ const LoginPage = ({ csrfToken }: LoginPageProperties) => {
             });
     };
 
-    return <div className='flex justify-center items-center h-full'>
-        <Loader isLoading={ loading } />
-        <>
-            <div className='absolute top-5 right-5'>
-                <ThemeToggleSwitch />
-            </div>
-            <div className="w-11/12 md:w-1/2 lg:w-1/3 xl:w-1/4 bg-white dark:bg-secondary-dark-shade dark:text-secondary-light-shade drop-shadow rounded-md p-6 relative">
-                <h1 className='text-primary-light-default dark:text-primary-dark-tint text-center text-3xl mb-3'>{ appName }</h1>
-                <h2 className='text-secondary-dark-tint dark:text-secondary-light-default text-center text-2xl mb-5'>Connexion</h2>
-                <LoginForm
-                    onSubmit={ handleSubmitLoginForm }
-                    requestError={ error }
-                />
-            </div>
-        </>
-    </div>;
+    return (
+        <Space
+            align='center'
+        >
+            <Loader isLoading={ loading } />
+            <>
+                <div className='absolute top-5 right-5'>
+                    <ThemeToggleSwitch />
+                </div>
+                <div className="w-11/12 md:w-1/2 lg:w-1/3 xl:w-1/4 bg-white dark:bg-secondary-dark-shade dark:text-secondary-light-shade drop-shadow rounded-md p-6 relative">
+                    <h1 className='text-primary-light-default dark:text-primary-dark-tint text-center text-3xl mb-3'>{ appName }</h1>
+                    <h2 className='text-secondary-dark-tint dark:text-secondary-light-default text-center text-2xl mb-5'>Connexion</h2>
+                    <LoginForm
+                        onSubmit={ handleSubmitLoginForm }
+                        requestError={ error }
+                    />
+                </div>
+            </>
+        </Space>
+    );
 };
 
 export default LoginPage;
