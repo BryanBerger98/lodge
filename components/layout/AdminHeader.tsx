@@ -1,11 +1,12 @@
-import { FiLogIn, FiMenu } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
-import AccountDropDownMenu from '../admin/account/AccountDropdownMenu';
+import { FiLogIn, FiMenu } from 'react-icons/fi';
+
 import useTranslate, { TranslateTitle } from '../../hooks/useTranslate';
-import ThemeToggleSwitch from '../admin/ui/ThemeToggleSwitch';
-import Button from '../admin/ui/Button/Button';
 import { IUser } from '../../types/user.type';
+import AccountDropDownMenu from '../admin/account/AccountDropdownMenu';
+import Button from '../admin/ui/Button/Button';
+import ThemeToggleSwitch from '../admin/ui/ThemeToggleSwitch';
 
 type AdminHeaderProperties = {
 	currentUser: IUser | null;
@@ -17,46 +18,46 @@ const appName = process.env.NEXT_PUBLIC_APP_NAME;
 
 const AdminHeader: FC<AdminHeaderProperties> = ({ currentUser, isSidebarOpen, setIsSidebarOpen }) => {
 
-    const [ pageTitle, setPageTitle ] = useState('');
-    const { getTranslatedTitle } = useTranslate({ locale: 'fr' });
+	const [ pageTitle, setPageTitle ] = useState('');
+	const { getTranslatedTitle } = useTranslate({ locale: 'fr' });
 
-    const router = useRouter();
+	const router = useRouter();
 
-    useEffect(() => {
-        if (currentUser) {
-            const path = router.pathname;
-            const pathArray = path.split('/').filter(el => el !== '') as TranslateTitle[];
-            const title = pathArray.length === 0 ? appName : getTranslatedTitle(pathArray[ 1 ] ? pathArray[ 1 ] : pathArray[ 0 ]);
-            setPageTitle(title ?? 'App');
-        } else {
-            setPageTitle(appName ?? 'App');
-        }
-    }, [ router, getTranslatedTitle, currentUser ]);
+	useEffect(() => {
+		if (currentUser) {
+			const path = router.pathname;
+			const pathArray = path.split('/').filter(el => el !== '') as TranslateTitle[];
+			const title = pathArray.length === 0 ? appName : getTranslatedTitle(pathArray[ 1 ] ? pathArray[ 1 ] : pathArray[ 0 ]);
+			setPageTitle(title ?? 'App');
+		} else {
+			setPageTitle(appName ?? 'App');
+		}
+	}, [ router, getTranslatedTitle, currentUser ]);
 
-    return(
-        <div className="w-full bg-white dark:bg-light-700 drop-shadow p-3 flex gap-2 text-sm relative z-10">
-            <button
-                className="lg:hidden text-xl text-light-400 dark:text-light-50"
-                onClick={ () => setIsSidebarOpen(!isSidebarOpen) }
-            ><FiMenu /></button>
-            <p className="my-auto lg:block text-light-400 dark:text-light-50">{ pageTitle.toUpperCase() }</p>
-            <div className="ml-auto flex justify-end gap-4 items-center lg:gap-8">
-                <div className="">
-                    <ThemeToggleSwitch />
-                </div>
-                { currentUser && <AccountDropDownMenu currentUser={ currentUser } /> }
-                { !currentUser &&
+	return(
+		<div className="w-full bg-white dark:bg-light-700 drop-shadow p-3 flex gap-2 text-sm relative z-10">
+			<button
+				className="lg:hidden text-xl text-light-400 dark:text-light-50"
+				onClick={ () => setIsSidebarOpen(!isSidebarOpen) }
+			><FiMenu />
+			</button>
+			<p className="my-auto lg:block text-light-400 dark:text-light-50">{ pageTitle.toUpperCase() }</p>
+			<div className="ml-auto flex justify-end gap-4 items-center lg:gap-8">
+				<div className="">
+					<ThemeToggleSwitch />
+				</div>
+				{ currentUser ? <AccountDropDownMenu currentUser={ currentUser } /> : null }
+				{ !currentUser &&
 					<Button
-					    href='/auth/signin'
-					    variant='primary'
+						href="/auth/signin"
+						variant="primary"
 					>
-					    <FiLogIn />
-					    <span>Connexion</span>
-					</Button>
-                }
-            </div>
-        </div>
-    );
+						<FiLogIn />
+						<span>Connexion</span>
+					</Button> }
+			</div>
+		</div>
+	);
 };
 
 export default AdminHeader;

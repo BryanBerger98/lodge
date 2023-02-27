@@ -1,44 +1,50 @@
-import { DesktopOutlined, FileOutlined, PieChartOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { TeamOutlined, HomeOutlined } from '@ant-design/icons';
 import { Menu, MenuProps } from 'antd';
+import { useRouter } from 'next/router';
+import { BaseSyntheticEvent } from 'react';
 
 type MenuItem = Required<MenuProps>['items'][number];
+type MenuClickEventHandler = {
+	key: string;
+	keyPath: string[];
+	domEvent: BaseSyntheticEvent;
+}
 
 function getItem(
-    label: React.ReactNode,
-    key: React.Key,
-    icon?: React.ReactNode,
-    children?: MenuItem[]
+	label: React.ReactNode,
+	key: React.Key,
+	icon?: React.ReactNode,
+	children?: MenuItem[]
 ): MenuItem {
-    return {
-        key,
-        icon,
-        children,
-        label,
-    } as MenuItem;
+	return {
+		key,
+		icon,
+		children,
+		label,
+	} as MenuItem;
 }
 
 const items: MenuItem[] = [
-    getItem('Option 1', '1', <PieChartOutlined />),
-    getItem('Option 2', '2', <DesktopOutlined />),
-    getItem('User', 'sub1', <UserOutlined />, [
-        getItem('Tom', '3'),
-        getItem('Bill', '4'),
-        getItem('Alex', '5'),
-    ]),
-    getItem('Team', 'sub2', <TeamOutlined />, [ getItem('Team 1', '6'), getItem('Team 2', '8') ]),
-    getItem('Files', '9', <FileOutlined />),
+	getItem('Tableau de bord', 'dashboard', <HomeOutlined />),
+	getItem('Utilisateurs', 'users', <TeamOutlined />),
 ];
 
 const SiderMenu = () => {
 
-    return (
-        <Menu
-            theme="dark"
-            defaultSelectedKeys={ [ '1' ] }
-            mode="inline"
-            items={ items }
-        />
-    );
+	const router = useRouter();
+
+	const handleMenuClick = ({ key }: MenuClickEventHandler) => router.push(`/admin/${ key }`);
+
+	return (
+		<Menu
+			defaultSelectedKeys={ [ 'dashboard' ] }
+			items={ items }
+			mode="inline"
+			style={ { padding: '0 0.5rem' } }
+			theme="dark"
+			onClick={ handleMenuClick }
+		/>
+	);
 };
 
 export default SiderMenu;

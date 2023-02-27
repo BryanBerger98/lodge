@@ -1,32 +1,42 @@
 import { Layout } from 'antd';
 import { Dispatch, FC, SetStateAction } from 'react';
+
 import SiderMenu from './SiderMenu';
 
 const { Sider: AntSider } = Layout;
 
 type SiderProperties = {
-	collapsed: boolean;
+	isCollapsed: boolean;
 	setCollapsed: Dispatch<SetStateAction<boolean>>;
 }
 
-const Sider: FC<SiderProperties> = ({ collapsed, setCollapsed }) => {
+const Sider: FC<SiderProperties> = ({ isCollapsed, setCollapsed }) => {
 
-    return (
-        <AntSider
-            collapsible
-            collapsed={ collapsed }
-            onCollapse={ (value) => setCollapsed(value) }
-        >
-            <div
-                style={ {
-                    height: 32,
-                    margin: 16,
-                    background: 'rgba(255, 255, 255, 0.2)',
-                } }
-            />
-            <SiderMenu />
-        </AntSider>
-    );
+	const handleCollapse = (value: boolean) => setCollapsed(value);
+
+	return (
+		<AntSider
+			collapsed={ isCollapsed }
+			collapsible
+			onCollapse={ handleCollapse }
+		>
+			<div
+				style={ {
+					padding: '0.8rem',
+					margin: 16,
+					background: 'rgba(255, 255, 255, 0.2)',
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+					color: '#fff',
+					fontSize: '1rem',
+				} }
+			>
+				Lodge
+			</div>
+			<SiderMenu />
+		</AntSider>
+	);
 };
 
 export default Sider;

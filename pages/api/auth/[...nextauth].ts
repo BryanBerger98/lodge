@@ -1,8 +1,9 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { verifyPassword } from '../../../utils/password.util';
-import { connectToDatabase } from '../../../infrastructure/database';
+
 import { userDataAccess } from '../../../infrastructure/data-access';
+import { connectToDatabase } from '../../../infrastructure/database';
+import { verifyPassword } from '../../../utils/password.util';
 
 export default NextAuth({
     session: { strategy: 'jwt' },

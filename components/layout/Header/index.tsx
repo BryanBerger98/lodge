@@ -7,37 +7,37 @@ const { Header: AntHeader } = Layout;
 
 type HeaderProperties = {
 	token: GlobalToken;
-	collapsed: boolean;
+	isCollapsed: boolean;
 	setCollapsed: Dispatch<SetStateAction<boolean>>;
 }
 
-const Header: FC<HeaderProperties> = ({ token, collapsed, setCollapsed }) => {
+const Header: FC<HeaderProperties> = ({ token, isCollapsed, setCollapsed }) => {
 
-    const { colorBgContainer } = token;
+	const { colorBgContainer } = token;
 
-    return (
-        <AntHeader
-            style={ {
-                padding: 0,
-                background: colorBgContainer,
-            } }
-        >
-            {
-                createElement(
-                    collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
-                    {
-                        style: {
-                            padding: '0 24px',
-                            fontSize: '18px',
-                            lineHeight: '64px',
-                            cursor: 'pointer',
-                        },
-                        onClick: () => setCollapsed(!collapsed),
-                    }
-                )
-            }
-        </AntHeader>
-    );
+	return (
+		<AntHeader
+			style={ {
+				padding: 0,
+				background: colorBgContainer,
+			} }
+		>
+			{
+				createElement(
+					isCollapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
+					{
+						style: {
+							padding: '0 24px',
+							fontSize: '18px',
+							lineHeight: '64px',
+							cursor: 'pointer',
+						},
+						onClick: () => setCollapsed(!isCollapsed),
+					}
+				)
+			}
+		</AntHeader>
+	);
 };
 
 export default Header;
