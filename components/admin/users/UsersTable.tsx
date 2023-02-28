@@ -1,14 +1,14 @@
-import { Table } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
+import { Avatar, Table } from 'antd';
 import { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { FilterValue, SorterResult } from 'antd/es/table/interface';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 
 import { useAuthContext } from '@context/auth.context';
-import useLoadUsersTable from '@hooks/useLoadUsersTable';
+import useLoadReduxTable from '@hooks/useLoadReduxTable';
 import { ObjectId } from '@infrastructure/types/database.type';
-import { selectUsersState } from '@store/users.slice';
+import { fetchUsers, selectUsersState, setUsersTableConfig } from '@store/users.slice';
 import { getStringSlashedDateFromDate } from '@utils/date.util';
 import { formatPhoneNumber } from '@utils/phone-number.util';
 import { IUser } from 'types/user.type';
@@ -25,10 +25,19 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 
 	const router = useRouter();
 
-	const { loadUsersTable, DEFAULT_LIMIT, DEFAULT_SKIP, DEFAULT_SORT } = useLoadUsersTable(usersList);
+	const { loadTable: loadUsersTable } = useLoadReduxTable({
+		dataList: usersList,
+		dataFetcher: fetchUsers,
+		stateSelector: selectUsersState,
+		tableConfigSetter: setUsersTableConfig,
+	});
 	const { loading } = useSelector(selectUsersState);
 
 	const { currentUser } = useAuthContext();
+
+	const handleEditUser = (userId: string | ObjectId) => () => {
+		router.push(`/admin/users/edit/${ userId }`);
+	};
 
 	const columns: ColumnsType<IUser> = [
 		{
@@ -37,6 +46,26 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 			key: 'username',
 			sorter: true,
 			sortDirections: [ 'ascend', 'descend' ],
+			render: (_, record) => (
+				<span
+					style={ {
+						display: 'flex',
+						alignItems: 'center',
+						gap: '0.5rem',
+					} }
+				>
+					<Avatar
+						icon={ <UserOutlined /> }
+						size="large"
+						src={ record.photo_url }
+					/>
+					<span>{ record.username }</span>
+				</span>
+			),
+			onCell: (data) => ({
+				onClick: handleEditUser(data._id),
+				style: { cursor: 'pointer' },
+			}),
 		},
 		{
 			title: 'Adresse email',
@@ -44,6 +73,10 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 			key: 'email',
 			sorter: true,
 			sortDirections: [ 'ascend', 'descend' ],
+			onCell: (data) => ({
+				onClick: handleEditUser(data._id),
+				style: { cursor: 'pointer' },
+			}),
 		},
 		{
 			title: 'Téléphone',
@@ -52,6 +85,10 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 			render: (value) => value && value.length > 0 ? <span>{ formatPhoneNumber(value) }</span> : '',
 			sorter: true,
 			sortDirections: [ 'ascend', 'descend' ],
+			onCell: (data) => ({
+				onClick: handleEditUser(data._id),
+				style: { cursor: 'pointer' },
+			}),
 		},
 		{
 			title: 'Rôle',
@@ -60,6 +97,10 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 			render: (value) => value === 'admin' ? 'Administrateur' : value === 'user' ? 'Utilisateur' : '',
 			sorter: true,
 			sortDirections: [ 'ascend', 'descend' ],
+			onCell: (data) => ({
+				onClick: handleEditUser(data._id),
+				style: { cursor: 'pointer' },
+			}),
 		  },
 		  {
 			title: 'Date de création',
@@ -69,6 +110,10 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 			sorter: true,
 			sortDirections: [ 'ascend', 'descend' ],
 			defaultSortOrder: 'descend',
+			onCell: (data) => ({
+				onClick: handleEditUser(data._id),
+				style: { cursor: 'pointer' },
+			}),
 		  },
 		  {
 			title: 'Dernière connexion',
@@ -76,6 +121,10 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 			key: 'last_login_on',
 			sorter: true,
 			sortDirections: [ 'ascend', 'descend' ],
+			onCell: (data) => ({
+				onClick: handleEditUser(data._id),
+				style: { cursor: 'pointer' },
+			}),
 		  },
 		  {
 			title: 'Actions',
@@ -101,10 +150,6 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 			},
 			searchString,
 		});
-	};
-
-	const handleEditUser = (userId: string | ObjectId) => () => {
-		router.push(`/admin/users/edit/${ userId }`);
 	};
 
 	return(

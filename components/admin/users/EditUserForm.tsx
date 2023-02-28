@@ -1,15 +1,12 @@
+import { SaveOutlined } from '@ant-design/icons';
+import { Button, Col, Form, Input, Row, Select } from 'antd';
 import { useState } from 'react';
-import * as yup from 'yup';
-import { FiSave } from 'react-icons/fi';
-import ButtonWithLoader from '../ui/Button/ButtonWithLoader';
-import TextField from '../forms/TextField';
-import SelectField from '../forms/SelectField';
-import PhoneField from '../forms/PhoneField';
-import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { formatPhoneNumber, parsePhoneNumber, PhoneNumber } from '../../../utils/phone-number.util';
-import { IUser } from '../../../types/user.type';
+import { FieldValues } from 'react-hook-form';
+
 import { ErrorCode, ErrorDomain } from '../../../types/error.type';
+import { IUser } from '../../../types/user.type';
+import { parsePhoneNumber, PhoneNumber } from '../../../utils/phone-number.util';
+import PhoneInput from '../forms/PhoneInput';
 
 export type EditUserFormInputs = {
 	email: string;
@@ -23,117 +20,121 @@ export type EditUserFormInputs = {
 type EditUserFormProperties = {
 	user?: IUser | null;
 	onSubmit: (values: EditUserFormInputs) => void;
-	saving: boolean;
+	isSaving: boolean;
 	errorCode: ErrorCode<ErrorDomain> | null;
 };
 
 const defaultUser = null;
 
-const EditUserForm = ({ user = defaultUser, onSubmit, saving, errorCode }: EditUserFormProperties) => {
+const EditUserForm = ({ user = defaultUser, onSubmit, isSaving, errorCode }: EditUserFormProperties) => {
 
-    const [ phoneNumberValues, setPhoneNumberValues ] = useState<PhoneNumber | null>(user && user.phone_number ? parsePhoneNumber(user.phone_number) : null);
+	const [ phoneNumberValues, setPhoneNumberValues ] = useState<PhoneNumber | null>(user && user.phone_number ? parsePhoneNumber(user.phone_number) : null);
 
-    const userFormSchema = yup.object({
-        username: yup.string().required('Ce champs est requis.'),
-        email: yup.string().email('Merci de saisir une adresse valide.').required('Ce champs est requis.'),
-        phone_number: yup.string(),
-        role: yup.string(),
-    }).required();
+	const handleSubmitEditUserForm = (values: EditUserFormInputs) => {
+		const { number } = phoneNumberValues ?? { number: '' };
+		onSubmit({
+			...values,
+			phone_number: number as string,
+			disabled: false,
+			emailVerified: false,
+		});
+	};
 
-    const { register, handleSubmit, formState: { errors } } = useForm<EditUserFormInputs>({
-        resolver: yupResolver(userFormSchema),
-        mode: 'onTouched',
-        defaultValues: {
-            username: user ? user.username : '',
-            email: user ? user.email : '',
-            phone_number: user && user.phone_number ? formatPhoneNumber(user.phone_number) : '',
-            role: user ? user.role : 'user',
-        },
-    });
+	const handleChangePhoneNumber = (values: PhoneNumber | null) => {
+		setPhoneNumberValues(values);
+	};
 
-    const handleSubmitEditUserForm = (values: EditUserFormInputs) => {
-        const { number } = phoneNumberValues ?? { number: '' };
-        onSubmit({
-            ...values,
-            phone_number: number as string,
-            disabled: false,
-            emailVerified: false,
-        });
-    };
+	return (
+		<>
+			<Form
+				className="text-sm"
+				layout="vertical"
+			>
+				<Form.Item
+					label="Nom d'utilisateur"
+					name="username"
+					rules={ [
+						{
+							required: true,
+							message: 'Champ requis.',
+						},
+					] }
+				>
+					<Input
+						placeholder="Ex: John DOE"
+						type="text"
+					/>
+				</Form.Item>
+				<Row gutter={ 8 }>
+					<Col span={ 12 }>
+						<Form.Item
+							label="Adresse email"
+							name="email"
+							rules={ [
+								{
+									required: true,
+									message: 'Champ requis.',
+								},
+								{
+									type: 'email',
+									message: 'Merci de saisir une adresse valide.',
+								},
+							] }
+						>
+							<Input
+								placeholder="example@example.com"
+								type="email"
+							/>
+						</Form.Item>
+					</Col>
+					<Col span={ 12 }>
+						{ /* <PhoneField
+							errors={ errors as DeepMap<EditUserFormInputs, FieldError> }
+							label="Téléphone"
+							name="phone_number"
+							placeholder="+33 6 01 02 03 04"
+							register={ register }
+							onChangePhoneNumber={ handleChangePhoneNumber }
+						/> */ }
+						<PhoneInput onChangePhoneNumber={ handleChangePhoneNumber } />
+					</Col>
+				</Row>
+				<Form.Item
+					initialValue="user"
+					label="Role"
+					name="role"
+					rules={ [
+						{
+							required: true,
+							message: 'Champ requis.',
+						},
+					] }
+				>
+					<Select
+						options={ [
+							{
+								value: 'user',
+								label: 'Utilisateur',
+							},
+							{
+								value: 'admin',
+								label: 'Administrateur',
+							},
+						] }
+					/>
+				</Form.Item>
 
-    const onChangePhoneNumber = (values: PhoneNumber | null) => {
-        setPhoneNumberValues(values);
-    };
-
-    return (
-        <>
-            <form
-                className='text-sm'
-                onSubmit={ handleSubmit(handleSubmitEditUserForm) }
-            >
-                <TextField
-                    name='username'
-                    type='text'
-                    register={ register }
-                    label="Nom d'utilisateur"
-                    placeholder='Ex: John DOE'
-                    errors={ errors as DeepMap<EditUserFormInputs, FieldError> }
-                    required
-                />
-                <div className="flex gap-2 flex-wrap">
-                    <div className='grow'>
-                        <TextField
-                            name='email'
-                            type='email'
-                            label={ 'Adresse email' }
-                            placeholder={ 'example@example.com' }
-                            required
-                            register={ register }
-                            errors={ errors as DeepMap<EditUserFormInputs, FieldError> }
-                            inputStyle={ { default: { className: 'grow' } } }
-                        />
-                    </div>
-                    <div className="grow">
-                        <PhoneField
-                            name='phone_number'
-                            onChangePhoneNumber={ onChangePhoneNumber }
-                            label={ 'Téléphone' }
-                            placeholder={ '+33 6 01 02 03 04' }
-                            register={ register }
-                            errors={ errors as DeepMap<EditUserFormInputs, FieldError> }
-                        />
-                    </div>
-                </div>
-                <div className="mb-5">
-                    <SelectField
-                        name='role'
-                        label={ 'Role' }
-                        required={ true }
-                        errors={ errors as DeepMap<EditUserFormInputs, FieldError> }
-                        options={ [ {
-                            value: 'admin',
-                            label: 'Administrateur',
-                        }, {
-                            value: 'user',
-                            label: 'Utilisateur',
-                        } ] }
-                        register={ register }
-                    />
-                </div>
-                <ButtonWithLoader
-                    variant={ 'success' }
-                    type='submit'
-                    saving={ saving }
-                    loaderOrientation={ 'right' }
-                    errorCode={ errorCode }
-                    displayErrorMessage={ 'aside' }
-                >
-                    <FiSave />
-                    <span>Enregistrer</span>
-                </ButtonWithLoader>
-            </form>
-        </>
-    );
+				<Button
+					htmlType="submit"
+					icon={ <SaveOutlined /> }
+					loading={ isSaving }
+					type="primary"
+				>
+					Enregistrer
+				</Button>
+			</Form>
+		</>
+	);
 };
 
 export default EditUserForm;

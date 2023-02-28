@@ -106,16 +106,6 @@
 				"no-const-assign": "error",
 				"no-multi-assign": "warn",
 				"no-self-assign": ["warn", { "props": true }],
-				"no-magic-numbers": [
-					"warn",
-					{
-						"detectObjects": false,
-						"ignoreArrayIndexes": true,
-						"ignoreDefaultValues": true,
-						"ignoreClassFieldInitialValues": true,
-						"ignore": [-1, 0, 1]
-					}
-				],
 				"no-use-before-define": "warn",
 				// Classes and constructors
 				"new-cap": [

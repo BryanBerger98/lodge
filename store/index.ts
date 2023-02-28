@@ -1,13 +1,25 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import { usersSlice } from './users.slice';
+import { configureStore, ThunkAction, Action, Dispatch } from '@reduxjs/toolkit';
 import { createWrapper } from 'next-redux-wrapper';
 
+import { usersSlice } from './users.slice';
+
 export const store = configureStore({
-    reducer: { [ usersSlice.name ]: usersSlice.reducer },
-    devTools: true,
+	reducer: { [ usersSlice.name ]: usersSlice.reducer },
+	devTools: true,
 });
 
 const makeStore = () => store;
+
+export type AsyncThunkConfig = {
+    state?: unknown;
+    dispatch?: Dispatch;
+    extra?: unknown;
+    rejectValue?: unknown;
+    serializedErrorType?: unknown;
+    pendingMeta?: unknown;
+    fulfilledMeta?: unknown;
+    rejectedMeta?: unknown;
+};
 
 export type AppStore = ReturnType<typeof makeStore>;
 export type AppState = ReturnType<AppStore['getState']>;

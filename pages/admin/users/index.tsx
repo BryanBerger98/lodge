@@ -1,15 +1,10 @@
-import { PlusOutlined, TeamOutlined } from '@ant-design/icons';
-import { Button, Col, Row } from 'antd';
-import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
 import { FC, useEffect } from 'react';
 import { connect, useSelector } from 'react-redux';
 
-import SearchField from '@components/admin/forms/SearchField';
-import PageTitle from '@components/admin/ui/PageTitle';
+import UsersPageHeader from '@components/admin/users/UsersPageHeader';
 import UsersTable from '@components/admin/users/UsersTable';
 import { useCsrfContext } from '@context/csrf.context';
-import useLoadUsersTable from '@hooks/useLoadUsersTable';
 import { fileDataAccess, userDataAccess } from '@infrastructure/data-access';
 import { connectToDatabase } from '@infrastructure/database';
 import { getMultipleFiles } from '@lib/bucket';
@@ -27,46 +22,14 @@ const UsersPage: FC<UsersPageProperties> = ({ csrfToken }) => {
 
 	const { users, total } = useSelector(selectUsersState);
 	const { dispatchCsrfToken } = useCsrfContext();
-	const { loadUsersTable } = useLoadUsersTable();
-	const router = useRouter();
 
 	useEffect(() => {
 		dispatchCsrfToken(csrfToken);
 	}, [ dispatchCsrfToken, csrfToken ]);
 
-	const handleSearchUsers = (value: string) => {
-		loadUsersTable({ searchString: value });
-	};
-
-	const handleCreateNewUser = () => {
-		router.push('/admin/users/edit');
-	};
-
 	return(
 		<>
-			<PageTitle><TeamOutlined /><span>{ total } Utilisateur{ total > 1 ? 's' : '' }</span></PageTitle>
-			<Row>
-				<Col span={ 12 }>
-					<SearchField onSearchElements={ handleSearchUsers } />
-				</Col>
-				<Col
-					span={ 12 }
-					style={ {
-						display: 'flex',
-						justifyContent: 'flex-end',
-					} }
-				>
-					<Button
-						htmlType="button"
-						icon={ <PlusOutlined /> }
-						style={ { marginBottom: 16 } }
-						type="primary"
-						onClick= { handleCreateNewUser }
-					>
-						Nouveau
-					</Button>
-				</Col>
-			</Row>
+			<UsersPageHeader total={ total } />
 			<div
 				className="drop-shadow"
 				style={ {
