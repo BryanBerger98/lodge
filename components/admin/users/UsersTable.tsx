@@ -1,5 +1,5 @@
-import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Table } from 'antd';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Space, Table, Tag, Typography } from 'antd';
 import { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { FilterValue, SorterResult } from 'antd/es/table/interface';
 import { useRouter } from 'next/router';
@@ -20,6 +20,8 @@ type UserTableProperties = {
 	usersList: IUser[];
 	usersCount: number;
 };
+
+const { Text } = Typography;
 
 const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties) => {
 
@@ -59,7 +61,21 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 						size="large"
 						src={ record.photo_url }
 					/>
-					<span>{ record.username }</span>
+					<Space
+						direction="vertical"
+						size={ 0 }
+					>
+						<Text strong>{ record.username }</Text>
+						{
+							record.disabled ?
+								<Tag
+									color="warning"
+									icon={ <LockOutlined /> }
+								>
+									Compte suspendu
+								</Tag> : null
+						}
+					</Space>
 				</span>
 			),
 			onCell: (data) => ({

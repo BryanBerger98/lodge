@@ -1,13 +1,14 @@
 import { Typography } from 'antd';
-import { ReactNode } from 'react';
+import { CSSProperties, ReactNode } from 'react';
 
 const { Title } = Typography;
 
 type PageTitleProperties = {
 	children: ReactNode;
+	style?: CSSProperties;
 }
 
-const PageTitle = ({ children = null }: PageTitleProperties) => {
+const PageTitle = ({ children = null, style = {} }: PageTitleProperties) => {
 
 	return (
 		<Title
@@ -17,6 +18,7 @@ const PageTitle = ({ children = null }: PageTitleProperties) => {
 				display: 'flex',
 				gap: '1rem',
 				alignItems: 'center',
+				...style,
 			} }
 		>
 			{ children }

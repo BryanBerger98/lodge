@@ -1,17 +1,20 @@
 import { Form, Input } from 'antd';
 import { AsYouType, CountryCode, PhoneNumber } from 'libphonenumber-js';
-import { BaseSyntheticEvent, FC, useState } from 'react';
+import { BaseSyntheticEvent, FC, ReactNode, useState } from 'react';
 
 import PhonePrefixSelector from './PhonePrefixSelector';
 
 type PhoneInputProperties = {
+	name: string;
+	label?: ReactNode;
 	onChangePhoneNumber: (phoneNumber: PhoneNumber | null) => void;
 }
 
-const PhoneInput: FC<PhoneInputProperties> = ({ onChangePhoneNumber }) => {
+const PhoneInput: FC<PhoneInputProperties> = ({ name, label, onChangePhoneNumber }) => {
 
 	const [ countrySelectValue, setCountrySelectValue ] = useState<CountryCode>('FR');
-	const [ phoneNumberValue, setPhoneNumberValue ] = useState<string>('06 01 02 03 04');
+
+	const form = Form.useFormInstance();
 
 	const handleChangeCountyValue = (value: CountryCode) => setCountrySelectValue(value);
 
@@ -20,16 +23,15 @@ const PhoneInput: FC<PhoneInputProperties> = ({ onChangePhoneNumber }) => {
 		if (value) {
 			const asYouType = new AsYouType(countrySelectValue);
 			const input = asYouType.input(value);
-			setPhoneNumberValue(input);
+			form.setFieldValue(name, input);
 			onChangePhoneNumber(asYouType.getNumber() ?? null);
 		}
 	};
 
 	return (
 		<Form.Item
-			initialValue={ phoneNumberValue }
-			label="Téléphone"
-			name="phone_number"
+			label={ label }
+			name={ name }
 			rules={ [ {
 				required: true,
 				message: 'Champ requis.',
@@ -43,7 +45,6 @@ const PhoneInput: FC<PhoneInputProperties> = ({ onChangePhoneNumber }) => {
 					/>
 				}
 				style={ { width: '100%' } }
-				value={ phoneNumberValue }
 				onChange={ handleChangePhoneNumber }
 			/>
 		</Form.Item>

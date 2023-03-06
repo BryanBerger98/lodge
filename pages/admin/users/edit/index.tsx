@@ -22,6 +22,10 @@ const NewUserPage = ({ csrfToken }: NewUserPage) => {
 
 	const router = useRouter();
 
+	const handleGoBack = () => {
+		router.push('/admin/users');
+	};
+
 	const handleSubmit = (values: EditUserFormInputs) => {
 		setSaving(true);
 
@@ -47,9 +51,9 @@ const NewUserPage = ({ csrfToken }: NewUserPage) => {
 	return(
 		<>
 			<Button
-				href="/admin/users"
 				style={ { width: 'fit-content' } }
 				type="link"
+				onClick={ handleGoBack }
 			>
 				<ArrowLeftOutlined />
 				<span>Retour</span>

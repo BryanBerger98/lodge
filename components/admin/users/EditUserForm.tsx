@@ -1,11 +1,13 @@
 import { SaveOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, Row, Select } from 'antd';
+import { Button, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
 import { useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 
-import { ErrorCode, ErrorDomain } from '../../../types/error.type';
-import { IUser } from '../../../types/user.type';
-import { parsePhoneNumber, PhoneNumber } from '../../../utils/phone-number.util';
+import useTranslate from '@hooks/useTranslate';
+import { formatPhoneNumber, parsePhoneNumber, PhoneNumber } from '@utils/phone-number.util';
+import { ErrorCode, ErrorDomain } from 'types/error.type';
+import { IUser } from 'types/user.type';
+
 import PhoneInput from '../forms/PhoneInput';
 
 export type EditUserFormInputs = {
@@ -25,10 +27,14 @@ type EditUserFormProperties = {
 };
 
 const defaultUser = null;
+const { Text } = Typography;
 
 const EditUserForm = ({ user = defaultUser, onSubmit, isSaving, errorCode }: EditUserFormProperties) => {
 
 	const [ phoneNumberValues, setPhoneNumberValues ] = useState<PhoneNumber | null>(user && user.phone_number ? parsePhoneNumber(user.phone_number) : null);
+	const { getTranslatedError } = useTranslate({ locale: 'fr' });
+
+	const [ form ] = Form.useForm();
 
 	const handleSubmitEditUserForm = (values: EditUserFormInputs) => {
 		const { number } = phoneNumberValues ?? { number: '' };
@@ -44,11 +50,21 @@ const EditUserForm = ({ user = defaultUser, onSubmit, isSaving, errorCode }: Edi
 		setPhoneNumberValues(values);
 	};
 
+	console.log(user);
+
 	return (
 		<>
 			<Form
 				className="text-sm"
+				form={ form }
+				initialValues={ {
+					username: user?.username || '',
+					email: user?.email || '',
+					role: user?.role || 'user',
+					phone_number: user && user.phone_number ? formatPhoneNumber(user.phone_number, 'NATIONAL') : '',
+				} }
 				layout="vertical"
+				onFinish={ handleSubmitEditUserForm }
 			>
 				<Form.Item
 					label="Nom d'utilisateur"
@@ -88,19 +104,14 @@ const EditUserForm = ({ user = defaultUser, onSubmit, isSaving, errorCode }: Edi
 						</Form.Item>
 					</Col>
 					<Col span={ 12 }>
-						{ /* <PhoneField
-							errors={ errors as DeepMap<EditUserFormInputs, FieldError> }
+						<PhoneInput
 							label="Téléphone"
 							name="phone_number"
-							placeholder="+33 6 01 02 03 04"
-							register={ register }
 							onChangePhoneNumber={ handleChangePhoneNumber }
-						/> */ }
-						<PhoneInput onChangePhoneNumber={ handleChangePhoneNumber } />
+						/>
 					</Col>
 				</Row>
 				<Form.Item
-					initialValue="user"
 					label="Role"
 					name="role"
 					rules={ [
@@ -124,14 +135,21 @@ const EditUserForm = ({ user = defaultUser, onSubmit, isSaving, errorCode }: Edi
 					/>
 				</Form.Item>
 
-				<Button
-					htmlType="submit"
-					icon={ <SaveOutlined /> }
-					loading={ isSaving }
-					type="primary"
+				<Space
+					size="middle"
+					wrap
 				>
-					Enregistrer
-				</Button>
+					<Button
+						htmlType="submit"
+						icon={ <SaveOutlined /> }
+						loading={ isSaving }
+						type="primary"
+					>
+						Enregistrer
+					</Button>
+
+					{ errorCode ? <Text type="danger">{ getTranslatedError(errorCode) }</Text> : null }
+				</Space>
 			</Form>
 		</>
 	);
