@@ -32,12 +32,13 @@ const items: MenuItem[] = [
 const SiderMenu = () => {
 
 	const router = useRouter();
+	const [ ,, pageKey ] = router.pathname.split('/');
 
 	const handleMenuClick = ({ key }: MenuClickEventHandler) => router.push(`/admin/${ key }`);
 
 	return (
 		<Menu
-			defaultSelectedKeys={ [ 'dashboard' ] }
+			defaultSelectedKeys={ [ pageKey ] }
 			items={ items }
 			mode="inline"
 			style={ { padding: '0 0.5rem' } }

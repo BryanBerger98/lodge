@@ -3,6 +3,8 @@ import { Layout } from 'antd';
 import { GlobalToken } from 'antd/es/theme';
 import { createElement, Dispatch, FC, SetStateAction } from 'react';
 
+import AccountDropDownMenu from '@components/admin/account/AccountDropdownMenu';
+
 const { Header: AntHeader } = Layout;
 
 type HeaderProperties = {
@@ -18,8 +20,11 @@ const Header: FC<HeaderProperties> = ({ token, isCollapsed, setCollapsed }) => {
 	return (
 		<AntHeader
 			style={ {
-				padding: 0,
+				padding: '0 24px',
 				background: colorBgContainer,
+				display: 'flex',
+				justifyContent: 'space-between',
+				alignItems: 'center',
 			} }
 		>
 			{
@@ -27,7 +32,7 @@ const Header: FC<HeaderProperties> = ({ token, isCollapsed, setCollapsed }) => {
 					isCollapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
 					{
 						style: {
-							padding: '0 24px',
+							padding: 0,
 							fontSize: '18px',
 							lineHeight: '64px',
 							cursor: 'pointer',
@@ -36,6 +41,7 @@ const Header: FC<HeaderProperties> = ({ token, isCollapsed, setCollapsed }) => {
 					}
 				)
 			}
+			<AccountDropDownMenu />
 		</AntHeader>
 	);
 };

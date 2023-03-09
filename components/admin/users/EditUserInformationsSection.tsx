@@ -1,9 +1,8 @@
-import { DeleteOutlined, KeyOutlined, LockOutlined, MoreOutlined, UnlockOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Button, Dropdown, MenuProps, Space, Tag } from 'antd';
+import { DeleteOutlined, KeyOutlined, LockOutlined, MoreOutlined, UnlockOutlined } from '@ant-design/icons';
+import { Button, Dropdown, MenuProps, Space, Tag } from 'antd';
 import { Dispatch, SetStateAction, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiSend } from 'react-icons/fi';
-
 
 import { useCsrfContext } from '@context/csrf.context';
 import useToast from '@hooks/useToast';
@@ -87,9 +86,9 @@ const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInf
 	] : [];
 
 	return(
-		<>
-			{
-				user ?
+		user ?
+			(
+				<>
 					<Space
 						className="drop-shadow"
 						style={ {
@@ -106,10 +105,9 @@ const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInf
 						<Space
 							size="large"
 						>
-							<Avatar
-								icon={ <UserOutlined /> }
-								size={ 100 }
-								src={ user.photo_url }
+							<UserProfilePhotoInput
+								setUser={ setUser }
+								user={ user }
 							/>
 							<Space direction="vertical">
 								<PageTitle style={ { margin: 0 } }>{ user.username }</PageTitle>
@@ -138,26 +136,20 @@ const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInf
 							</Dropdown>
 						</Space>
 					</Space>
-					: null
-			}
-			{
-				user ?
 					<SwitchDisableUserModal
 						isOpen={ isSwitchDisableUserModalOpen }
 						setIsOpen={ setIsSwitchDisableUserModalOpen }
 						setUser={ setUser }
 						user={ user }
 					/>
-					: null
-			}
-			{
-				user ? <DeleteUserModal
-					isOpen={ isDeleteUserModalOpen }
-					setIsOpen={ setIsDeleteUserModalOpen }
-					user={ user }
-				       /> : null
-			}
-		</>
+					<DeleteUserModal
+						isOpen={ isDeleteUserModalOpen }
+						setIsOpen={ setIsDeleteUserModalOpen }
+						user={ user }
+					/>
+				</>
+			)
+			: null
 	);
 };
 

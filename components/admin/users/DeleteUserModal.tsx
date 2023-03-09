@@ -79,11 +79,11 @@ const DeleteUserModal = ({ isOpen, setIsOpen, user }: DeleteUserModalProperties)
 			onCancel={ handleCloseModal }
 			onOk={ handleConfirmDeleteUser }
 		>
-			<div className="my-5">
-				<p className="text-sm text-secondary-dark-tint dark:text-secondary-light-shade">
+			<div>
+				<p>
 					Les données relatives à cet utilisateur seront définitivement supprimées.
 				</p>
-				<p className="text-sm text-secondary-dark-tint dark:text-secondary-light-shade mb-3">
+				<p>
 					Pour confirmer la suppression de ce compte, veuillez écrire l&apos;adresse email de l&apos;utilisateur (
 					<span
 						style={ {
@@ -95,15 +95,13 @@ const DeleteUserModal = ({ isOpen, setIsOpen, user }: DeleteUserModalProperties)
 					</span>
 					) ci-dessous:
 				</p>
-				<div className="flex text-sm">
-					<Input
-						id="deleteUserEmailInput"
-						placeholder="example@example.com"
-						type="email"
-						value={ confirmDeleteUserInputValue }
-						onChange={ handleChangeInput }
-					/>
-				</div>
+				<Input
+					id="deleteUserEmailInput"
+					placeholder="example@example.com"
+					type="email"
+					value={ confirmDeleteUserInputValue }
+					onChange={ handleChangeInput }
+				/>
 			</div>
 		</Modal>
 	);

@@ -1,5 +1,7 @@
 import { LoginOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, Typography } from 'antd';
+
+const { Text } = Typography;
 
 export type LoginFormValues = {
 	email: string;
@@ -64,7 +66,7 @@ const LoginForm = ({ onSubmit: handleSubmit, requestError = null }: LoginFormPro
 					justifyContent: 'center',
 				} }
 			>
-				{ requestError ? <p className="text-sm text-danger-light-default dark:text-danger-dark-default mb-5">{ requestError }</p> : null }
+				{ requestError ? <Text type="danger">{ requestError }</Text> : null }
 				<Button
 					htmlType="submit"
 					icon={ <LoginOutlined /> }

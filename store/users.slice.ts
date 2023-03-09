@@ -1,7 +1,7 @@
 import { Action, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { HYDRATE } from 'next-redux-wrapper';
 
-import { TableConfig, TableSort } from '../components/admin/tables/table.type';
+import { TableConfig, TableSort } from '../types/table.type';
 import { getUsers } from '../services/users/users.client.service';
 import { LoadingState } from '../types/loading.type';
 import { IUser } from '../types/user.type';

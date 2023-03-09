@@ -1,15 +1,15 @@
-import { ArrowLeftOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons';
-import { Button, Col, Row, Space, Tag } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Button, Col, Row } from 'antd';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { FiAlertTriangle } from 'react-icons/fi';
 
 import EditUserForm, { EditUserFormInputs } from '@components/admin/users/EditUserForm';
 import EditUserInformationsSection from '@components/admin/users/EditUserInformationsSection';
 import { useAuthContext } from '@context/auth.context';
 import { useCsrfContext } from '@context/csrf.context';
-import { fileDataAccess, userDataAccess } from '@infrastructure/data-access';
+import { findFileByUrl } from '@infrastructure/data-access/file.data-access';
+import { findUserById } from '@infrastructure/data-access/user.data-access';
 import { connectToDatabase } from '@infrastructure/database';
 import { getFileFromKey } from '@lib/bucket';
 import { updateUser } from '@services/users/users.client.service';
@@ -117,9 +117,9 @@ const getServerSideProps = wrapper.getServerSideProps(() => async ({ req, res, p
 
 	const { userId } = params as { userId: string };
 
-	const user = await userDataAccess.findUserById(userId);
+	const user = await findUserById(userId);
 	if (user && user.photo_url) {
-		const userPhotoData = await fileDataAccess.findFileByUrl(user.photo_url);
+		const userPhotoData = await findFileByUrl(user.photo_url);
 		if (userPhotoData) {
 			const userPhotoUrl = await getFileFromKey(userPhotoData);
 			user.photo_url = userPhotoUrl ? userPhotoUrl : '';

@@ -1,15 +1,34 @@
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { Spin } from 'antd';
 
 type LoaderProperties = {
 	isLoading: boolean;
 };
 
 const Loader = ({ isLoading = false }: LoaderProperties) => (
-    isLoading ?
-        <div className="absolute inset-0 z-50 bg-light-50/30 dark:bg-secondary-dark-tint/60 flex items-center justify-center">
-	    	<AiOutlineLoading3Quarters className={ `text-6xl text-primary-light-default dark:text-primary-dark-shade ${ isLoading && 'animate-spin' }` } />
-        </div>
-        : null
+	isLoading ?
+		<div
+			style={ {
+				position: 'absolute',
+				inset: 0,
+				zIndex: 50,
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				background: 'white',
+			} }
+		>
+			<div
+				style={ { width: 200 } }
+			>
+				<Spin
+					size="large"
+					tip="Chargement..."
+				>
+					<div className="content" />
+				</Spin>
+			</div>
+		</div>
+		: null
 );
 
 export default Loader;

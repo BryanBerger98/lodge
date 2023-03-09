@@ -2,7 +2,7 @@ import { AsyncThunk } from '@reduxjs/toolkit';
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { TableConfig, TableConfigWithSearch } from '@components/admin/tables/table.type';
+import { TableConfig, TableConfigWithSearch } from 'types/table.type';
 import { AppDispatch, AppState, AsyncThunkConfig } from '@store/index';
 import { FetchParameters } from 'types/query.type';
 

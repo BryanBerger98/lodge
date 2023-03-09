@@ -17,6 +17,7 @@ const Sider: FC<SiderProperties> = ({ isCollapsed, setCollapsed }) => {
 	return (
 		<AntSider
 			collapsed={ isCollapsed }
+			trigger={ null }
 			collapsible
 			onCollapse={ handleCollapse }
 		>

@@ -3,11 +3,11 @@ import type { AppProps } from 'next/app';
 import { SessionProvider } from 'next-auth/react';
 import { Provider } from 'react-redux';
 
-import Layout from '../components/layout/Layout';
-import AuthContextProvider from '../context/auth.context';
-import CsrfContextProvider from '../context/csrf.context';
-import ThemeContextProvider from '../context/theme.context';
-import { store, wrapper } from '../store';
+import Layout from '@components/layout/Layout';
+import AuthContextProvider from '@context/auth.context';
+import CsrfContextProvider from '@context/csrf.context';
+import ThemeContextProvider from '@context/theme.context';
+import { store, wrapper } from '@store/index';
 
 
 const App = ({ Component, pageProps }: AppProps) => {

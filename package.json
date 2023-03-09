@@ -17,7 +17,7 @@
 		"@types/node": "18.11.14",
 		"@types/react": "18.0.26",
 		"@types/react-dom": "18.0.9",
-		"antd": "^5.1.7",
+		"antd": "^5.3.0",
 		"aws-sdk": "^2.1293.0",
 		"axios": "^1.2.1",
 		"bcryptjs": "^2.4.3",

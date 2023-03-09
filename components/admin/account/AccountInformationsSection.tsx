@@ -1,11 +1,14 @@
-import { FiEdit } from 'react-icons/fi';
-import Button from '../ui/Button/Button';
+import { EditOutlined } from '@ant-design/icons';
+import { Button, Space, Tag } from 'antd';
 import { FC, useState } from 'react';
+
 import { useAuthContext } from '../../../context/auth.context';
 import useTranslate from '../../../hooks/useTranslate';
-import AccountProfilePhotoInput from './AccountProfilePhotoInput';
-import AccountInformationsFormModal from './AccountInformationsFormModal';
 import { IUser } from '../../../types/user.type';
+import PageTitle from '../ui/PageTitle';
+
+import AccountInformationsFormModal from './AccountInformationsFormModal';
+import AccountProfilePhotoInput from './AccountProfilePhotoInput';
 
 type AccountInformationsSectionProperties = {
 	currentUser: IUser | null;
@@ -13,40 +16,64 @@ type AccountInformationsSectionProperties = {
 
 const AccountInformationsSection: FC<AccountInformationsSectionProperties> = ({ currentUser }) => {
 
-    const { dispatchCurrentUser } = useAuthContext();
-    const { getTranslatedRole } = useTranslate({ locale: 'fr' });
+	const { dispatchCurrentUser } = useAuthContext();
+	const { getTranslatedRole } = useTranslate({ locale: 'fr' });
 
-    const [ isEditAccountInfosModalOpen, setIsEditAccountInfosModalOpen ] = useState(false);
+	const [ isEditAccountInfosModalOpen, setIsEditAccountInfosModalOpen ] = useState(false);
 
-    return(
-        <>
-            <div className="bg-primary-light-default dark:bg-primary-dark-default rounded-md p-6 text-light-50 dark:text-light-800 mb-4 flex flex-wrap gap-4">
-                { currentUser && <AccountProfilePhotoInput currentUser={ currentUser } /> }
-                <div className="my-auto mr-auto">
-                    <h2 className="text-2xl">{currentUser && currentUser.username ? currentUser.username : <span className="italic">Sans nom</span>}</h2>
-                    <p className="text-indigo-200 dark:text-light-700">{currentUser && currentUser.role && getTranslatedRole(currentUser.role)}</p>
-                </div>
-                <div className="mx-auto md:mx-0 lg:mr-0 mb-auto text-sm">
-                    <Button
-                        variant='secondary'
-                        onClick={ () => setIsEditAccountInfosModalOpen(true) }
-                    >
-                        <FiEdit />
-                        <span>Modifier</span>
-                    </Button>
-                </div>
-            </div>
-            {
-                currentUser &&
-				<AccountInformationsFormModal
-				    isOpen={ isEditAccountInfosModalOpen }
-				    setIsOpen={ setIsEditAccountInfosModalOpen }
-				    dispatchUser={ dispatchCurrentUser }
-				    user={ currentUser }
-				/>
-            }
-        </>
-    );
+	const handleEditInformations = () => setIsEditAccountInfosModalOpen(true);
+
+	return(
+		<>
+			{
+				currentUser ?
+					<Space
+						className="drop-shadow"
+						style={ {
+							borderRadius: 8,
+							backgroundColor: '#F5F5F5',
+							padding: '2rem',
+							margin: '2rem 0 1rem 0',
+							width: '100%',
+							display: 'flex',
+							justifyContent: 'space-between',
+							alignItems: 'flex-start',
+						} }
+					>
+						<Space
+							size="large"
+						>
+							<AccountProfilePhotoInput
+								currentUser={ currentUser }
+							/>
+							<Space direction="vertical">
+								<PageTitle style={ { margin: 0 } }>{ currentUser.username }</PageTitle>
+								<Space size="small">
+									<Tag>{ getTranslatedRole(currentUser.role) }</Tag>
+								</Space>
+							</Space>
+						</Space>
+						<Button
+							icon={ <EditOutlined /> }
+							onClick={ handleEditInformations }
+						>
+							Modifier
+						</Button>
+					</Space>
+					: null
+			}
+			{
+				currentUser ?
+					<AccountInformationsFormModal
+						dispatchUser={ dispatchCurrentUser }
+						isOpen={ isEditAccountInfosModalOpen }
+						setIsOpen={ setIsEditAccountInfosModalOpen }
+						user={ currentUser }
+					/>
+					: null
+			}
+		</>
+	);
 };
 
 export default AccountInformationsSection;

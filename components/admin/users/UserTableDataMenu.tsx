@@ -6,7 +6,6 @@ import toast from 'react-hot-toast';
 
 import { useCsrfContext } from '@context/csrf.context';
 import useToast from '@hooks/useToast';
-import { ObjectId } from '@infrastructure/types/database.type';
 import { sendResetPasswordEmailToUser } from '@services/users/users.client.service';
 import { IApiError } from 'types/error.type';
 import { IUser } from 'types/user.type';
@@ -34,11 +33,20 @@ const UserTableDataMenu: FC<UserTableDataMenuProperties> = ({ user, currentUser 
 	const onSendResetPasswordEmail = () => {
 		sendResetPasswordEmailToUser(user._id, csrfToken)
 			.then(() => {
+				console.log('TOAST');
 				toast.custom(<Toast><SendOutlined /><span>Email envoyé !</span></Toast>);
 			})
 			.catch(error => {
 				triggerErrorToast(error as IApiError);
 			});
+	};
+
+	const handleSwitchDisableUser = () => {
+		setIsSwitchDisableUserModalOpen(true);
+	};
+
+	const handleDeleteUser = () => {
+		setIsDeleteUserModalOpen(true);
 	};
 
 	const items: MenuProps['items'] = [
@@ -60,12 +68,16 @@ const UserTableDataMenu: FC<UserTableDataMenuProperties> = ({ user, currentUser 
 		  icon: <LockOutlined />,
 		  danger: true,
 		  style: { display: user.disabled ? 'none' : 'flex' },
+		  disabled: user._id === currentUser?._id,
+		  onClick: handleSwitchDisableUser,
 		},
 		{
 		  label: 'Activer le compte',
 		  key: 'enable',
 		  icon: <UnlockOutlined />,
 		  style: { display: user.disabled ? 'flex' : 'none' },
+		  disabled: user._id === currentUser?._id,
+		  onClick: handleSwitchDisableUser,
 		},
 		{
 		  label: 'Supprimer',
@@ -73,6 +85,7 @@ const UserTableDataMenu: FC<UserTableDataMenuProperties> = ({ user, currentUser 
 		  icon: <DeleteOutlined />,
 		  danger: true,
 		  disabled: user._id === currentUser?._id || user.role === 'admin',
+		  onClick: handleDeleteUser,
 		},
 	];
 
@@ -89,41 +102,6 @@ const UserTableDataMenu: FC<UserTableDataMenuProperties> = ({ user, currentUser 
 					</Space>
 				</Button>
 			</Dropdown>
-			{ /* <DropdownMenu name={ null }>
-				<div className="p-1">
-					{ user && !user.disabled ? <>
-						    <DropdownItem
-							icon={ <FiKey /> }
-							name="Réinitialiser le mot de passe"
-							onClick={ onSendResetPasswordEmail }
-						    />
-						    {
-						        currentUser && currentUser._id !== user._id ? <DropdownItem
-							icon={ <FiLock /> }
-							name="Suspendre le compte"
-							onClick={ () => setIsSwitchDisableUserModalOpen(true) }
-							variant="warning"
-						                                                      /> : null
-						    }
-                                </> : null }
-					{ user && user.disabled ? <DropdownItem
-						icon={ <FiUnlock /> }
-						name="Débloquer le compte"
-						variant="warning"
-						onClick={ () => setIsSwitchDisableUserModalOpen(true) }
-					                          /> : null }
-				</div>
-				{
-					currentUser && currentUser._id !== user._id ? <div className="p-1">
-						<DropdownItem
-							icon={ <FiTrash /> }
-							name="Supprimer"
-							variant="danger"
-							onClick={ () => setIsDeleteUserModalOpen(true) }
-						/>
-					</div> : null
-				}
-			</DropdownMenu> */ }
 			<SwitchDisableUserModal
 				isOpen={ isSwitchDisableUserModalOpen }
 				setIsOpen={ setIsSwitchDisableUserModalOpen }

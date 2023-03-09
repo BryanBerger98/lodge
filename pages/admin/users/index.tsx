@@ -5,7 +5,8 @@ import { connect, useSelector } from 'react-redux';
 import UsersPageHeader from '@components/admin/users/UsersPageHeader';
 import UsersTable from '@components/admin/users/UsersTable';
 import { useCsrfContext } from '@context/csrf.context';
-import { fileDataAccess, userDataAccess } from '@infrastructure/data-access';
+import { findMultipleFilesByUrl } from '@infrastructure/data-access/file.data-access';
+import { findUsers, findUsersCount } from '@infrastructure/data-access/user.data-access';
 import { connectToDatabase } from '@infrastructure/database';
 import { getMultipleFiles } from '@lib/bucket';
 import { wrapper } from '@store/index';
@@ -73,14 +74,14 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async ({ r
 	const skip = 0;
 	const limit = 10;
 
-	const usersData = await userDataAccess.findUsers({}, { 'created_at': -1 }, skip, limit);
-	const usersCount = await userDataAccess.findUsersCount({});
+	const usersData = await findUsers({}, { 'created_at': -1 }, skip, limit);
+	const usersCount = await findUsersCount({});
 
 	const serializedUsersData: IUser[] = JSON.parse(JSON.stringify(usersData));
 
 	const usersPhotoUrls = serializedUsersData.map(user => user.photo_url);
 
-	const files = await fileDataAccess.findMultipleFilesByUrl(usersPhotoUrls);
+	const files = await findMultipleFilesByUrl(usersPhotoUrls);
 
 	const usersPhotos = files ? await getMultipleFiles(files) : null;
 

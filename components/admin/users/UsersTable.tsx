@@ -159,7 +159,7 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 	const handleTablePaginationChange = (pagination: TablePaginationConfig, filters: Record<string, FilterValue | null>, sorter: SorterResult<IUser> | SorterResult<IUser>[]) => {
 		loadUsersTable({
 			limit: pagination.pageSize,
-			skip: pagination.current,
+			skip: pagination.current && pagination.pageSize ? ((pagination.current - 1) * pagination.pageSize) : 0,
 			sort: {
 				field: (sorter as SorterResult<IUser>).columnKey?.toString() || 'created_on',
 				direction: (sorter as SorterResult<IUser>).order === 'ascend' ? 1 : -1,
@@ -176,9 +176,10 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 			pagination={ {
 				defaultCurrent: 1,
 				defaultPageSize: 10,
-				hideOnSinglePage: true,
+				hideOnSinglePage: false,
 				pageSizeOptions: [ 10, 25, 50 ],
 				total: usersCount,
+				showSizeChanger: true,
 			} }
 			rowKey="_id"
 			onChange={ handleTablePaginationChange }

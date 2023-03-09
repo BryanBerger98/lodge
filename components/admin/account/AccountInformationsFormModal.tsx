@@ -1,19 +1,14 @@
-import { FiSave, FiUser } from 'react-icons/fi';
-import Modal from '../ui/Modal';
-import * as Yup from 'yup';
-import TextField from '../forms/TextField';
-import { Dispatch, FC, SetStateAction, useState } from 'react';
-import { IUser } from '../../../types/user.type';
-import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { updateAccount } from '../../../services/auth/auth.client.service';
-import { useCsrfContext } from '../../../context/csrf.context';
-import ButtonWithLoader from '../ui/Button/ButtonWithLoader';
-import { ErrorCode, ErrorDomain, IApiError } from '../../../types/error.type';
+import { UserOutlined } from '@ant-design/icons';
+import { Form, Input, Modal, Space, Typography } from 'antd';
+import { ChangeEventHandler, Dispatch, FC, SetStateAction, useState } from 'react';
 
-export type EditAccountInformationsFormInputs = {
-	username: string;
-} & FieldValues;
+import { useCsrfContext } from '@context/csrf.context';
+import useTranslate from '@hooks/useTranslate';
+import { updateAccount } from '@services/auth/auth.client.service';
+import { ErrorCode, ErrorDomain, IApiError } from 'types/error.type';
+import { IUser } from 'types/user.type';
+
+const { Text } = Typography;
 
 type AccountInformationsFormModalProperties = {
 	isOpen: boolean;
@@ -24,76 +19,79 @@ type AccountInformationsFormModalProperties = {
 
 const AccountInformationsFormModal: FC<AccountInformationsFormModalProperties> = ({ isOpen, setIsOpen, user, dispatchUser }) => {
 
-    const { csrfToken } = useCsrfContext();
+	const { csrfToken } = useCsrfContext();
 
-    const [ saving, setSaving ] = useState<boolean>(false);
-    const [ errorCode, setErrorCode ] = useState<ErrorCode<ErrorDomain> | null>(null);
+	const [ usernameInputValue, setUsernameInputValue ] = useState(user.username || '');
 
-    const accountInfosFormSchema = Yup.object().shape({ username: Yup.string().required('Champs requis') });
+	const [ saving, setSaving ] = useState<boolean>(false);
+	const [ errorCode, setErrorCode ] = useState<ErrorCode<ErrorDomain> | null>(null);
 
-    const { register, handleSubmit, formState: { errors } } = useForm<EditAccountInformationsFormInputs>({
-        resolver: yupResolver(accountInfosFormSchema),
-        mode: 'onTouched',
-        defaultValues: { username: user ? user.username : '' },
-    });
+	const { getTranslatedError } = useTranslate({ locale: 'fr' });
 
-    const handleAccountInfosFormSubmit = async (values: EditAccountInformationsFormInputs) => {
-        const { username } = values;
-        try {
-            setSaving(true);
-            await updateAccount({ username }, csrfToken);
-            dispatchUser({
-                ...user,
-                username,
-            });
-            setSaving(false);
-            setIsOpen(false);
-        } catch (error) {
-            setSaving(false);
-            const apiError = error as IApiError;
-            if (apiError.response && apiError.response.data && apiError.response.data.code) {
-                setErrorCode(apiError.response.data.code);
-                return;
-            }
-        }
-    };
+	const handleSaveAccountInfos = async () => {
+		try {
+			setSaving(true);
+			await updateAccount({ username: usernameInputValue }, csrfToken);
+			dispatchUser({
+				...user,
+				username: usernameInputValue,
+			});
+			setSaving(false);
+			setIsOpen(false);
+		} catch (error) {
+			setSaving(false);
+			const apiError = error as IApiError;
+			if (apiError.response && apiError.response.data && apiError.response.data.code) {
+				setErrorCode(apiError.response.data.code);
+				return;
+			}
+		}
+	};
 
-    return (
-        <Modal
-            isOpen={ isOpen }
-            closeModal={ () => setIsOpen(false) }
-            title={ {
-                text: <span className='flex items-center gap-2'><FiUser /><span>Profil</span></span>,
-                color: 'text-primary-light-default dark:text-primary-dark-default',
-            } }
-        >
-            <div className="my-5">
-                <form onSubmit={ handleSubmit(handleAccountInfosFormSubmit) }>
-                    <TextField
-                        name='username'
-                        type='text'
-                        register={ register }
-                        label="Nom d'utilisateur"
-                        placeholder='Ex: John DOE'
-                        errors={ errors as DeepMap<EditAccountInformationsFormInputs, FieldError> }
-                    />
-                    <div className="mt-4 flex text-sm justify-end">
-                        <ButtonWithLoader
-                            variant='success'
-                            type='submit'
-                            saving={ saving }
-                            loaderOrientation='left'
-                            errorCode={ errorCode }
-                            displayErrorMessage={ 'toast' }
-                        >
-                            <FiSave />
-                            <span>Enregistrer</span>
-                        </ButtonWithLoader>
-                    </div>
-                </form>
-            </div>
-        </Modal>
-    );
+	const handleCloseModal = () => setIsOpen(false);
+	const handleChangeUsernameInputValue: ChangeEventHandler<HTMLInputElement> = ({ target }) => setUsernameInputValue(target.value);
+
+	return (
+		<Modal
+			cancelText="Annuler"
+			confirmLoading={ saving }
+			okButtonProps={ { disabled: usernameInputValue === user.username || !usernameInputValue } }
+			okText="Enregister"
+			open={ isOpen }
+			title={
+				<Space
+					size="middle"
+					style={ { fontSize: '1.25rem' } }
+				>
+					<UserOutlined /><span>Profil</span>
+				</Space>
+		   }
+			centered
+			onCancel={ handleCloseModal }
+			onOk={ handleSaveAccountInfos }
+		>
+			<Form layout="vertical">
+				<Form.Item label="Nom d'utilisateur">
+					<Input
+						placeholder="Ex: John DOE"
+						type="text"
+						value={ usernameInputValue }
+						onChange={ handleChangeUsernameInputValue }
+					/>
+				</Form.Item>
+			</Form>
+			{
+				errorCode ?
+					<Text
+						style={ { textAlign: 'center' } }
+						type="danger"
+					>
+						{ getTranslatedError(errorCode) }
+					</Text>
+					: null
+			}
+		</Modal>
+	);
 
 };
 

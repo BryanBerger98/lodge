@@ -50,8 +50,6 @@ const EditUserForm = ({ user = defaultUser, onSubmit, isSaving, errorCode }: Edi
 		setPhoneNumberValues(values);
 	};
 
-	console.log(user);
-
 	return (
 		<>
 			<Form
