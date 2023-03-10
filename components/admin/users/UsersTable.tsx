@@ -3,37 +3,23 @@ import { Avatar, Space, Table, Tag, Typography } from 'antd';
 import { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { FilterValue, SorterResult } from 'antd/es/table/interface';
 import { useRouter } from 'next/router';
-import { useSelector } from 'react-redux';
 
 import { useAuthContext } from '@context/auth.context';
-import useLoadReduxTable from '@hooks/useLoadReduxTable';
+import { useUsersContext } from '@context/users/users.context';
 import { ObjectId } from '@infrastructure/types/database.type';
-import { fetchUsers, selectUsersState, setUsersTableConfig } from '@store/users.slice';
 import { getStringSlashedDateFromDate } from '@utils/date.util';
 import { formatPhoneNumber } from '@utils/phone-number.util';
 import { IUser } from 'types/user.type';
 
 import UserTableDataMenu from './UserTableDataMenu';
 
-type UserTableProperties = {
-	searchString?: string;
-	usersList: IUser[];
-	usersCount: number;
-};
-
 const { Text } = Typography;
 
-const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties) => {
+const UsersTable = () => {
 
 	const router = useRouter();
 
-	const { loadTable: loadUsersTable } = useLoadReduxTable({
-		dataList: usersList,
-		dataFetcher: fetchUsers,
-		stateSelector: selectUsersState,
-		tableConfigSetter: setUsersTableConfig,
-	});
-	const { loading } = useSelector(selectUsersState);
+	const { state: { loading, users, total }, fetchUsers } = useUsersContext();
 
 	const { currentUser } = useAuthContext();
 
@@ -157,28 +143,27 @@ const UsersTable = ({ searchString, usersList, usersCount }: UserTableProperties
 	];
 
 	const handleTablePaginationChange = (pagination: TablePaginationConfig, filters: Record<string, FilterValue | null>, sorter: SorterResult<IUser> | SorterResult<IUser>[]) => {
-		loadUsersTable({
-			limit: pagination.pageSize,
+		fetchUsers({
+			limit: pagination.pageSize || 10,
 			skip: pagination.current && pagination.pageSize ? ((pagination.current - 1) * pagination.pageSize) : 0,
 			sort: {
 				field: (sorter as SorterResult<IUser>).columnKey?.toString() || 'created_on',
 				direction: (sorter as SorterResult<IUser>).order === 'ascend' ? 1 : -1,
 			},
-			searchString,
 		});
 	};
 
 	return(
 		<Table
 			columns={ columns }
-			dataSource={ usersList }
+			dataSource={ users }
 			loading={ loading === 'pending' ? true : false }
 			pagination={ {
 				defaultCurrent: 1,
 				defaultPageSize: 10,
 				hideOnSinglePage: false,
 				pageSizeOptions: [ 10, 25, 50 ],
-				total: usersCount,
+				total,
 				showSizeChanger: true,
 			} }
 			rowKey="_id"

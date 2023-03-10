@@ -1,35 +1,24 @@
 import { PlusOutlined, TeamOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
 import { useRouter } from 'next/router';
-import { FC } from 'react';
 
-import useLoadReduxTable from '@hooks/useLoadReduxTable';
-import { fetchUsers, selectUsersState, setUsersTableConfig } from '@store/users.slice';
+import { useUsersContext } from '@context/users/users.context';
 
 import SearchField from '../forms/SearchField';
 import PageTitle from '../ui/PageTitle';
 
-type UsersPageHeaderProperties = {
-	total: number;
-}
-
-const UsersPageHeader: FC<UsersPageHeaderProperties> = ({ total }) => {
+const UsersPageHeader = () => {
 
 	const router = useRouter();
 
-	const { loadTable: loadUsersTable } = useLoadReduxTable({
-		dataList: [],
-		dataFetcher: fetchUsers,
-		stateSelector: selectUsersState,
-		tableConfigSetter: setUsersTableConfig,
-	});
+	const { state: { total }, fetchUsers } = useUsersContext();
 
 	const handleCreateNewUser = () => {
 		router.push('/admin/users/edit');
 	};
 
 	const handleSearchUsers = (value: string) => {
-		loadUsersTable({ searchString: value });
+		fetchUsers({ searchString: value });
 	};
 
 	return (

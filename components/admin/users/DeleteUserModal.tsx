@@ -4,10 +4,9 @@ import { useRouter } from 'next/router';
 import { ChangeEventHandler, Dispatch, SetStateAction, useState } from 'react';
 
 import { useCsrfContext } from '@context/csrf.context';
-import useLoadReduxTable from '@hooks/useLoadReduxTable';
+import { useUsersContext } from '@context/users/users.context';
 import useToast from '@hooks/useToast';
 import { deleteUserById } from '@services/users/users.client.service';
-import { fetchUsers, selectUsersState, setUsersTableConfig } from '@store/users.slice';
 import { IApiError } from 'types/error.type';
 
 import { IUser } from '../../../types/user.type';
@@ -22,13 +21,7 @@ const DeleteUserModal = ({ isOpen, setIsOpen, user }: DeleteUserModalProperties)
 
 	const router = useRouter();
 	const [ confirmDeleteUserInputValue, setConfirmDeleteUserInputValue ] = useState('');
-	const { loadTable: loadUsersTable } = useLoadReduxTable({
-		dataList: [],
-		dataFetcher: fetchUsers,
-		stateSelector: selectUsersState,
-		tableConfigSetter: setUsersTableConfig,
-	});
-
+	const { fetchUsers } = useUsersContext();
 	const { csrfToken } = useCsrfContext();
 
 	const { triggerErrorToast, triggerSuccessToast } = useToast({ locale: 'fr' });
@@ -37,7 +30,7 @@ const DeleteUserModal = ({ isOpen, setIsOpen, user }: DeleteUserModalProperties)
 		try {
 			await deleteUserById(user._id, csrfToken);
 			triggerSuccessToast('Utilisateur supprimé');
-			loadUsersTable();
+			fetchUsers();
 			router.push('/admin/users');
 		} catch (error) {
 			triggerErrorToast(error as IApiError);

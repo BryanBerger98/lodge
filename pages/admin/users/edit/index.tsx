@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import PageTitle from '@components/admin/ui/PageTitle';
 import EditUserForm, { EditUserFormInputs } from '@components/admin/users/EditUserForm';
+import UsersContextProvider from '@context/users/users.context';
 import { createUser } from '@services/users/users.client.service';
 import csrf from '@utils/csrf.util';
 import { ErrorCode, ErrorDomain, IApiError } from 'types/error.type';
@@ -49,7 +50,7 @@ const NewUserPage = ({ csrfToken }: NewUserPage) => {
 	};
 
 	return(
-		<>
+		<UsersContextProvider>
 			<Button
 				style={ { width: 'fit-content' } }
 				type="link"
@@ -68,7 +69,7 @@ const NewUserPage = ({ csrfToken }: NewUserPage) => {
 					/>
 				</Col>
 			</Row>
-		</>
+		</UsersContextProvider>
 	);
 };
 

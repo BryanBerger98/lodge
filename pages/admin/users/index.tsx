@@ -1,36 +1,44 @@
 import { getSession } from 'next-auth/react';
 import { FC, useEffect } from 'react';
-import { connect, useSelector } from 'react-redux';
 
 import UsersPageHeader from '@components/admin/users/UsersPageHeader';
 import UsersTable from '@components/admin/users/UsersTable';
 import { useCsrfContext } from '@context/csrf.context';
+import { UsersState } from '@context/users/users-context.type';
+import UsersContextProvider from '@context/users/users.context';
 import { findMultipleFilesByUrl } from '@infrastructure/data-access/file.data-access';
 import { findUsers, findUsersCount } from '@infrastructure/data-access/user.data-access';
 import { connectToDatabase } from '@infrastructure/database';
 import { getMultipleFiles } from '@lib/bucket';
-import { wrapper } from '@store/index';
-import { selectUsersState, setUsersState } from '@store/users.slice';
-import csrf, { CsrfRequest, CsrfResponse } from '@utils/csrf.util';
+import csrf from '@utils/csrf.util';
 import { isUserAbleToWatch } from '@utils/permissions.util';
+import { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
 import { IUser } from 'types/user.type';
 
 type UsersPageProperties = {
 	csrfToken: string;
+	usersData: {
+		users: IUser[];
+		total: number;
+	}
 }
 
-const UsersPage: FC<UsersPageProperties> = ({ csrfToken }) => {
+const UsersPage: FC<UsersPageProperties> = ({ csrfToken, usersData }) => {
 
-	const { users, total } = useSelector(selectUsersState);
 	const { dispatchCsrfToken } = useCsrfContext();
+
+	const initialUsersState: Partial<UsersState> = {
+		users: usersData.users,
+		total: usersData.total,
+	};
 
 	useEffect(() => {
 		dispatchCsrfToken(csrfToken);
 	}, [ dispatchCsrfToken, csrfToken ]);
 
 	return(
-		<>
-			<UsersPageHeader total={ total } />
+		<UsersContextProvider initialState={ initialUsersState }>
+			<UsersPageHeader />
 			<div
 				className="drop-shadow"
 				style={ {
@@ -41,22 +49,17 @@ const UsersPage: FC<UsersPageProperties> = ({ csrfToken }) => {
 					minHeight: '24rem',
 				} }
 			>
-				<UsersTable
-					usersCount={ total }
-					usersList={ users }
-				/>
+				<UsersTable />
 			</div>
-		</>
+		</UsersContextProvider>
 	);
 };
 
-export default connect(selectUsersState)(UsersPage);
+export default UsersPage;
 
-export const getServerSideProps = wrapper.getServerSideProps(store => async ({ req, res }) => {
+export const getServerSideProps = async ({ req, res }: GetServerSidePropsContextWithCsrf) => {
 
-	const request = req as CsrfRequest;
-	const response = res as CsrfResponse;
-	await csrf(request, response);
+	await csrf(req, res);
 
 	const session = await getSession({ req });
 
@@ -93,11 +96,13 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async ({ r
 		} as IUser;
 	});
 
-	store.dispatch(setUsersState({
-		users: usersWithPhotos,
-		total: usersCount,
-		count: usersData.length,
-	}));
-
-	return { props: { csrfToken: request.csrfToken() } };
-});
+	return {
+		props: {
+			csrfToken: req.csrfToken(),
+			usersData: {
+				users: usersWithPhotos,
+				total: usersCount,
+			},
+		},
+	};
+};

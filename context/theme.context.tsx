@@ -11,37 +11,37 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export { ThemeContext };
 
 export const useThemeContext = () => {
-    const context = useContext(ThemeContext);
-    if (context === null) {
-        throw new Error('useThemeContext is null');
-    }
-    if (context === undefined) {
-        throw new Error('useThemeContext was used outside of its Provider');
-    }
-    return context;
+	const context = useContext(ThemeContext);
+	if (context === null) {
+		throw new Error('useThemeContext is null');
+	}
+	if (context === undefined) {
+		throw new Error('useThemeContext was used outside of its Provider');
+	}
+	return context;
 };
 
 const ThemeContextProvider = ({ children }: { children: ReactNode }) => {
-    const [ theme, setTheme ] = useState<ThemeValue>('light');
+	const [ theme, setTheme ] = useState<ThemeValue>('light');
 
-    const toggleTheme = useCallback(
-        (value: ThemeValue) => {
-            const mode = value ? value : theme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('theme', mode);
-            setTheme(mode);
-        },
-        [ theme, setTheme ]
-    );
+	const toggleTheme = useCallback(
+		(value: ThemeValue) => {
+			const mode = value ? value : theme === 'light' ? 'dark' : 'light';
+			localStorage.setItem('theme', mode);
+			setTheme(mode);
+		},
+		[ theme, setTheme ]
+	);
 
-    const contextValues = useMemo(
-        () => ({
-            theme,
-            toggleTheme,
-        }),
-        [ theme, toggleTheme ]
-    );
+	const contextValues = useMemo(
+		() => ({
+			theme,
+			toggleTheme,
+		}),
+		[ theme, toggleTheme ]
+	);
 
-    return <ThemeContext.Provider value={ contextValues }>{children}</ThemeContext.Provider>;
+	return <ThemeContext.Provider value={ contextValues }>{ children }</ThemeContext.Provider>;
 };
 
 export default ThemeContextProvider;

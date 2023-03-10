@@ -1,7 +1,6 @@
 import { SaveOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
 import { useState } from 'react';
-import { FieldValues } from 'react-hook-form';
 
 import useTranslate from '@hooks/useTranslate';
 import { formatPhoneNumber, parsePhoneNumber, PhoneNumber } from '@utils/phone-number.util';
@@ -17,7 +16,7 @@ export type EditUserFormInputs = {
 	role: 'admin' | 'user';
 	disabled: boolean;
 	emailVerified: boolean;
-} & FieldValues;
+};
 
 type EditUserFormProperties = {
 	user?: IUser | null;
@@ -132,7 +131,6 @@ const EditUserForm = ({ user = defaultUser, onSubmit, isSaving, errorCode }: Edi
 						] }
 					/>
 				</Form.Item>
-
 				<Space
 					size="middle"
 					wrap

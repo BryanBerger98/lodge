@@ -1,13 +1,12 @@
 import { LockOutlined, UnlockOutlined } from '@ant-design/icons';
 import { Modal, Space } from 'antd';
 import { Dispatch, FC, SetStateAction } from 'react';
-import { useDispatch } from 'react-redux';
 
-import { useCsrfContext } from '../../../context/csrf.context';
-import useToast from '../../../hooks/useToast';
-import { switchDisabledUser } from '../../../services/users/users.client.service';
-import { updateUser } from '../../../store/users.slice';
-import { IUser } from '../../../types/user.type';
+import { useCsrfContext } from '@context/csrf.context';
+import { useUsersContext } from '@context/users/users.context';
+import useToast from '@hooks/useToast';
+import { switchDisabledUser } from '@services/users/users.client.service';
+import { IUser } from 'types/user.type';
 
 type SwitchDisableUserModalProperties = {
 	isOpen: boolean;
@@ -19,7 +18,8 @@ type SwitchDisableUserModalProperties = {
 const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, setIsOpen, user, setUser }) => {
 
 	const { csrfToken } = useCsrfContext();
-	const dispatch = useDispatch();
+
+	const { updateUser } = useUsersContext();
 
 	const { triggerErrorToast, triggerSuccessToast } = useToast({ locale: 'fr' });
 
@@ -27,10 +27,10 @@ const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, 
 		switchDisabledUser(user._id, csrfToken)
 			.then(() => {
 				triggerSuccessToast('Modification enregistrée', `L'utilisateur ${ !user.disabled ? 'ne pourra plus se connecter.' : 'pourra de nouveau se connecter.' }`);
-				dispatch(updateUser({
+				updateUser({
 					...user,
 					disabled: !user.disabled,
-				}));
+				});
 				if (setUser) {
 					setUser({
 						...user,
