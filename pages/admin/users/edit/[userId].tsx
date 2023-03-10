@@ -1,5 +1,6 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
+import { GetServerSidePropsContext } from 'next';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
@@ -8,12 +9,12 @@ import EditUserForm, { EditUserFormInputs } from '@components/admin/users/EditUs
 import EditUserInformationsSection from '@components/admin/users/EditUserInformationsSection';
 import { useAuthContext } from '@context/auth.context';
 import { useCsrfContext } from '@context/csrf.context';
+import UsersContextProvider from '@context/users/users.context';
 import { findFileByUrl } from '@infrastructure/data-access/file.data-access';
 import { findUserById } from '@infrastructure/data-access/user.data-access';
 import { connectToDatabase } from '@infrastructure/database';
 import { getFileFromKey } from '@lib/bucket';
 import { updateUser } from '@services/users/users.client.service';
-import { wrapper } from '@store/index';
 import csrf, { CsrfRequest, CsrfResponse } from '@utils/csrf.util';
 import { isUserAbleToWatch } from '@utils/permissions.util';
 import { ErrorCode, ErrorDomain, IApiError } from 'types/error.type';
@@ -67,7 +68,7 @@ const EditUserPage = ({ csrfToken, userToEdit }: EditUserPageProperties) => {
 	};
 
 	return(
-		<>
+		<UsersContextProvider>
 			<Button
 				style={ { width: 'fit-content' } }
 				type="link"
@@ -91,13 +92,13 @@ const EditUserPage = ({ csrfToken, userToEdit }: EditUserPageProperties) => {
 					/>
 				</Col>
 			</Row>
-		</>
+		</UsersContextProvider>
 	);
 };
 
 export default EditUserPage;
 
-const getServerSideProps = wrapper.getServerSideProps(() => async ({ req, res, params }) => {
+const getServerSideProps = async ({ req, res, params }: GetServerSidePropsContext) => {
 	const request = req as CsrfRequest;
 	const response = res as CsrfResponse;
 	await csrf(request, response);
@@ -134,6 +135,6 @@ const getServerSideProps = wrapper.getServerSideProps(() => async ({ req, res, p
 		},
 	};
 
-});
+};
 
 export { getServerSideProps };

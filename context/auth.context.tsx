@@ -1,5 +1,6 @@
 import { node } from 'prop-types';
 import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+
 import { getCurrentLoggedInUser } from '../services/auth/auth.client.service';
 import { IUser } from '../types/user.type';
 
@@ -15,14 +16,14 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export { AuthContext };
 
 export const useAuthContext = () => {
-    const context = useContext(AuthContext);
-    if (context === null) {
-        throw new Error('useAuthContext is null');
-    }
-    if (context === undefined) {
-        throw new Error('useAuthContext was used outside of its Provider');
-    }
-    return context;
+	const context = useContext(AuthContext);
+	if (context === null) {
+		throw new Error('useAuthContext is null');
+	}
+	if (context === undefined) {
+		throw new Error('useAuthContext was used outside of its Provider');
+	}
+	return context;
 };
 
 type AuthContextProviderProperties = {
@@ -31,50 +32,50 @@ type AuthContextProviderProperties = {
 
 const AuthContextProvider: FC<AuthContextProviderProperties> = ({ children }) => {
 
-    const [ currentUser, setCurrentUser ] = useState<IUser | null>(null);
+	const [ currentUser, setCurrentUser ] = useState<IUser | null>(null);
 
-    const [ csrfToken, setCsrfToken ] = useState<string | null>(null);
+	const [ csrfToken, setCsrfToken ] = useState<string | null>(null);
 
-    const getCurrentUser = useCallback(async () => {
-        try {
-            const user = await getCurrentLoggedInUser();
-            setCurrentUser(user);
-            return user;
-        } catch (error) {
-            throw error;
-        }
-    }, [ setCurrentUser ]);
+	const getCurrentUser = useCallback(async () => {
+		try {
+			const user = await getCurrentLoggedInUser();
+			setCurrentUser(user);
+			return user;
+		} catch (error) {
+			throw error;
+		}
+	}, [ setCurrentUser ]);
 
-    const dispatchCurrentUser = useCallback((user: IUser) => {
-        setCurrentUser({
-            ...currentUser,
-            ...user,
-        });
-    }, [ setCurrentUser, currentUser ]);
+	const dispatchCurrentUser = useCallback((user: IUser) => {
+		setCurrentUser({
+			...currentUser,
+			...user,
+		});
+	}, [ setCurrentUser, currentUser ]);
 
-    const dispatchCsrfToken = useCallback((token: string) => {
-        setCsrfToken(token);
-    }, [ setCsrfToken ]);
+	const dispatchCsrfToken = useCallback((token: string) => {
+		setCsrfToken(token);
+	}, [ setCsrfToken ]);
 
-    const contextValues = useMemo(() => ({
-        currentUser,
-        getCurrentUser,
-        dispatchCurrentUser,
-        csrfToken,
-        dispatchCsrfToken,
-    }), [
-        currentUser,
-        getCurrentUser,
-        dispatchCurrentUser,
-        csrfToken,
-        dispatchCsrfToken,
-    ]);
+	const contextValues = useMemo(() => ({
+		currentUser,
+		getCurrentUser,
+		dispatchCurrentUser,
+		csrfToken,
+		dispatchCsrfToken,
+	}), [
+		currentUser,
+		getCurrentUser,
+		dispatchCurrentUser,
+		csrfToken,
+		dispatchCsrfToken,
+	]);
 
-    return(
-        <AuthContext.Provider value={ contextValues }>
-            { children }
-        </AuthContext.Provider>
-    );
+	return(
+		<AuthContext.Provider value={ contextValues }>
+			{ children }
+		</AuthContext.Provider>
+	);
 
 };
 

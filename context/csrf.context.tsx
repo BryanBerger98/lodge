@@ -10,14 +10,14 @@ const CsrfContext = createContext<CsrfContextValues | null>(null);
 export { CsrfContext };
 
 export const useCsrfContext = () => {
-    const context = useContext(CsrfContext);
-    if (context === null) {
-        throw new Error('useCsrfContext is null');
-    }
-    if (context === undefined) {
-        throw new Error('useCsrfContext was used outside of its Provider');
-    }
-    return context;
+	const context = useContext(CsrfContext);
+	if (context === null) {
+		throw new Error('useCsrfContext is null');
+	}
+	if (context === undefined) {
+		throw new Error('useCsrfContext was used outside of its Provider');
+	}
+	return context;
 };
 
 type CsrfContextProviderProperties = {
@@ -26,25 +26,25 @@ type CsrfContextProviderProperties = {
 
 const CsrfContextProvider = ({ children }: CsrfContextProviderProperties) => {
 
-    const [ csrfToken, setCsrfToken ] = useState<string | null>(null);
+	const [ csrfToken, setCsrfToken ] = useState<string | null>(null);
 
-    const dispatchCsrfToken = useCallback((token: string) => {
-        setCsrfToken(token);
-    }, [ setCsrfToken ]);
+	const dispatchCsrfToken = useCallback((token: string) => {
+		setCsrfToken(token);
+	}, [ setCsrfToken ]);
 
-    const contextValues = useMemo(() => ({
-        csrfToken,
-        dispatchCsrfToken,
-    }), [
-        csrfToken,
-        dispatchCsrfToken,
-    ]);
+	const contextValues = useMemo(() => ({
+		csrfToken,
+		dispatchCsrfToken,
+	}), [
+		csrfToken,
+		dispatchCsrfToken,
+	]);
 
-    return(
-        <CsrfContext.Provider value={ contextValues }>
-            { children }
-        </CsrfContext.Provider>
-    );
+	return(
+		<CsrfContext.Provider value={ contextValues }>
+			{ children }
+		</CsrfContext.Provider>
+	);
 
 };
 

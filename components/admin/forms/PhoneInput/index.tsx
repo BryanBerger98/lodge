@@ -1,4 +1,5 @@
 import { Form, Input } from 'antd';
+import { Rule } from 'antd/es/form';
 import { AsYouType, CountryCode, PhoneNumber } from 'libphonenumber-js';
 import { BaseSyntheticEvent, FC, ReactNode, useState } from 'react';
 
@@ -8,9 +9,10 @@ type PhoneInputProperties = {
 	name: string;
 	label?: ReactNode;
 	onChangePhoneNumber: (phoneNumber: PhoneNumber | null) => void;
+	rules?: Rule[]
 }
 
-const PhoneInput: FC<PhoneInputProperties> = ({ name, label, onChangePhoneNumber }) => {
+const PhoneInput: FC<PhoneInputProperties> = ({ name, label, onChangePhoneNumber, rules = [] }) => {
 
 	const [ countrySelectValue, setCountrySelectValue ] = useState<CountryCode>('FR');
 
@@ -32,10 +34,7 @@ const PhoneInput: FC<PhoneInputProperties> = ({ name, label, onChangePhoneNumber
 		<Form.Item
 			label={ label }
 			name={ name }
-			rules={ [ {
-				required: true,
-				message: 'Champ requis.',
-			} ] }
+			rules={ rules }
 		>
 			<Input
 				addonBefore={
