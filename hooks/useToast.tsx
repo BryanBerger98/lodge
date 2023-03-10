@@ -1,26 +1,46 @@
-import { toast } from 'react-hot-toast';
-import { FiX } from 'react-icons/fi';
-import Toast from '../components/admin/ui/Toast';
+import { notification } from 'antd';
+import { ReactNode } from 'react';
+
 import { IApiError } from '../types/error.type';
+
 import useTranslate, { TranslateHookOptions } from './useTranslate';
 
 type ToastHookOptions = TranslateHookOptions;
 
 const useToast = (options: ToastHookOptions) => {
 
-    const { getTranslatedError } = useTranslate({ ...options });
+	const { getTranslatedError } = useTranslate({ ...options });
 
-    const triggerErrorToast = (error: IApiError | string) => {
-        if (typeof error === 'string') {
-            toast.custom(<Toast variant='danger'><FiX /><span>{ error }</span></Toast>);
-        }
-        if (typeof error !== 'string' && error.response && error.response.data && error.response.data.code) {
-            const errorMessage = getTranslatedError(error.response.data.code);
-            toast.custom(<Toast variant='danger'><FiX /><span>{ errorMessage ?? 'Une erreur est survenue' }</span></Toast>);
-        }
-    };
+	const triggerErrorToast = (error: IApiError | string) => {
+		if (typeof error === 'string') {
+			notification.error({
+				message: 'Erreur',
+				description: error,
+				placement: 'bottomRight',
+			});
+		}
+		if (typeof error !== 'string' && error.response && error.response.data && error.response.data.code) {
+			const errorMessage = getTranslatedError(error.response.data.code);
+			notification.error({
+				message: 'Erreur',
+				description: errorMessage || 'Une erreur est survenue' ,
+				placement: 'bottomRight',
+			});
+		}
+	};
 
-    return { triggerErrorToast };
+	const triggerSuccessToast = (title: ReactNode, description?: ReactNode) => {
+		notification.success({
+			message: title,
+			description,
+			placement: 'bottomRight',
+		  });
+	};
+
+	return {
+		triggerErrorToast,
+		triggerSuccessToast, 
+	};
 
 };
 

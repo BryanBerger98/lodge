@@ -1,18 +1,14 @@
 import { DeleteOutlined, KeyOutlined, LockOutlined, MoreOutlined, UnlockOutlined } from '@ant-design/icons';
 import { Button, Dropdown, MenuProps, Space, Tag } from 'antd';
 import { Dispatch, SetStateAction, useState } from 'react';
-import toast from 'react-hot-toast';
-import { FiSend } from 'react-icons/fi';
 
 import { useCsrfContext } from '@context/csrf.context';
 import useToast from '@hooks/useToast';
 import useTranslate from '@hooks/useTranslate';
 import { sendResetPasswordEmailToUser } from '@services/users/users.client.service';
-import { IApiError } from 'types/error.type';
 import { IUser } from 'types/user.type';
 
 import PageTitle from '../ui/PageTitle';
-import Toast from '../ui/Toast';
 
 import DeleteUserModal from './DeleteUserModal';
 import SwitchDisableUserModal from './SwitchDisableUserModal';
@@ -28,7 +24,7 @@ const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInf
 
 	const { csrfToken } = useCsrfContext();
 	const { getTranslatedRole } = useTranslate({ locale: 'fr' });
-	const { triggerErrorToast } = useToast({ locale: 'fr' });
+	const { triggerErrorToast, triggerSuccessToast } = useToast({ locale: 'fr' });
 
 	const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
 	const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
@@ -37,11 +33,9 @@ const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInf
 		if (user) {
 			sendResetPasswordEmailToUser(user._id, csrfToken)
 				.then(() => {
-					toast.custom(<Toast variant="success"><FiSend /><span>Email envoyé !</span></Toast>);
+					triggerSuccessToast('Email envoyé', 'L\'utilisateur a reçu un email de réinitialisation du mot de passe');
 				})
-				.catch(error => {
-					triggerErrorToast(error as IApiError);
-				});
+				.catch(triggerErrorToast);
 		}
 	};
 

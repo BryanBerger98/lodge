@@ -2,7 +2,6 @@ import { DeleteOutlined } from '@ant-design/icons';
 import { Space, Modal, Input } from 'antd';
 import { useRouter } from 'next/router';
 import { ChangeEventHandler, Dispatch, SetStateAction, useState } from 'react';
-import toast from 'react-hot-toast';
 
 import { useCsrfContext } from '@context/csrf.context';
 import useLoadReduxTable from '@hooks/useLoadReduxTable';
@@ -12,7 +11,6 @@ import { fetchUsers, selectUsersState, setUsersTableConfig } from '@store/users.
 import { IApiError } from 'types/error.type';
 
 import { IUser } from '../../../types/user.type';
-import Toast from '../ui/Toast';
 
 type DeleteUserModalProperties = {
 	isOpen: boolean;
@@ -33,12 +31,12 @@ const DeleteUserModal = ({ isOpen, setIsOpen, user }: DeleteUserModalProperties)
 
 	const { csrfToken } = useCsrfContext();
 
-	const { triggerErrorToast } = useToast({ locale: 'fr' });
+	const { triggerErrorToast, triggerSuccessToast } = useToast({ locale: 'fr' });
 
 	const handleConfirmDeleteUser = async () => {
 		try {
 			await deleteUserById(user._id, csrfToken);
-			toast.custom(<Toast variant="success"><DeleteOutlined /><span>Utilisateur supprimé</span></Toast>);
+			triggerSuccessToast('Utilisateur supprimé');
 			loadUsersTable();
 			router.push('/admin/users');
 		} catch (error) {

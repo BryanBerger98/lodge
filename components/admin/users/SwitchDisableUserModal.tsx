@@ -1,16 +1,13 @@
-import { CheckCircleOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons';
+import { LockOutlined, UnlockOutlined } from '@ant-design/icons';
 import { Modal, Space } from 'antd';
 import { Dispatch, FC, SetStateAction } from 'react';
-import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 
 import { useCsrfContext } from '../../../context/csrf.context';
 import useToast from '../../../hooks/useToast';
 import { switchDisabledUser } from '../../../services/users/users.client.service';
 import { updateUser } from '../../../store/users.slice';
-import { IApiError } from '../../../types/error.type';
 import { IUser } from '../../../types/user.type';
-import Toast from '../ui/Toast';
 
 type SwitchDisableUserModalProperties = {
 	isOpen: boolean;
@@ -24,12 +21,12 @@ const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, 
 	const { csrfToken } = useCsrfContext();
 	const dispatch = useDispatch();
 
-	const { triggerErrorToast } = useToast({ locale: 'fr' });
+	const { triggerErrorToast, triggerSuccessToast } = useToast({ locale: 'fr' });
 
 	const handleConfirmSwitchDisableUser = () => {
 		switchDisabledUser(user._id, csrfToken)
 			.then(() => {
-				toast.custom(<Toast variant="success"><CheckCircleOutlined /><span>Modification enregistrée</span></Toast>);
+				triggerSuccessToast('Modification enregistrée', `L'utilisateur ${ !user.disabled ? 'ne pourra plus se connecter.' : 'pourra de nouveau se connecter.' }`);
 				dispatch(updateUser({
 					...user,
 					disabled: !user.disabled,
@@ -40,9 +37,8 @@ const SwitchDisableUserModal: FC<SwitchDisableUserModalProperties> = ({ isOpen, 
 						disabled: !user.disabled,
 					});
 				}
-			}).catch(error => {
-				triggerErrorToast(error as IApiError);
-			}).finally(() => {
+			}).catch(triggerErrorToast)
+			.finally(() => {
 				setIsOpen(false);
 			});
 	};
