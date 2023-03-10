@@ -4,11 +4,24 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { findUserWithPasswordByEmail } from '@infrastructure/data-access/user.data-access';
 import { connectToDatabase } from '@infrastructure/database';
 import { verifyPassword } from '@utils/password.util';
+import { IUser, IUserWithPassword } from 'types/user.type';
+import { Optional } from 'types/utils.type';
 
 export default NextAuth({
 	session: { strategy: 'jwt' },
 	providers: [
 		CredentialsProvider({
+			credentials: {
+				email: {
+					label: 'Email',
+					type: 'email',
+					placeholder: 'example@example.com', 
+				},
+				password: {
+					label: 'Password',
+					type: 'password', 
+				},
+			},
 			authorize: async (credentials) => {
 				try {
 					await connectToDatabase();
@@ -33,7 +46,11 @@ export default NextAuth({
 						throw new Error('Wrong password.');
 					}
 
-					return user;
+					const sanitizedUser: Optional<IUserWithPassword, 'password'> = user;
+
+					delete sanitizedUser.password;
+
+					return sanitizedUser as IUser;
 				} catch (error) {
 					throw error;
 				}

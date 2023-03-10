@@ -2,11 +2,12 @@ import { AsyncThunk } from '@reduxjs/toolkit';
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { TableConfig, TableConfigWithSearch } from 'types/table.type';
-import { AppDispatch, AppState, AsyncThunkConfig } from '@store/index';
 import { FetchParameters } from 'types/query.type';
+import { TableConfig, TableConfigWithSearch } from 'types/table.type';
 
-export type Payload = {
+import { AppDispatch, AppState, AsyncThunkConfig } from '../store/index';
+
+type Payload = {
     payload: TableConfigWithSearch;
     type: string;
 }
@@ -15,19 +16,19 @@ interface SelectedWithTableConfig {
 	tableConfig: TableConfigWithSearch;
 }
 
-export type LoadTableHookConfig<TData> = {
+type LoadTableHookConfig<TData, ReturnedData> = {
 	dataList: TData;
 	stateSelector: (state: AppState) => unknown & SelectedWithTableConfig;
 	tableConfigSetter: (payload: TableConfigWithSearch) => Payload;
-	dataFetcher: AsyncThunk<any | undefined, FetchParameters, AsyncThunkConfig>
+	dataFetcher: AsyncThunk<ReturnedData | undefined, FetchParameters, AsyncThunkConfig>
 };
 
-const useLoadReduxTable = <T extends unknown[]>({
+const useLoadReduxTable = <TData extends unknown[], TReturnedData>({
 	dataList,
 	stateSelector,
 	tableConfigSetter,
 	dataFetcher,
-}: LoadTableHookConfig<T>) => {
+}: LoadTableHookConfig<TData, TReturnedData>) => {
 
 	const dispatch = useDispatch<AppDispatch>();
 	const { tableConfig: tableConfigState } = useSelector<AppState, SelectedWithTableConfig>(stateSelector);

@@ -7,12 +7,12 @@ export type FilesErrorKey = 'invalid-input' | 'file-not-found' | 'error' | 'wron
 
 export type ErrorCode<T extends ErrorDomain> = `${ T }/${ T extends 'auth' ? AuthErrorKey : T extends 'users' ? UsersErrorKey : T extends 'files' ? FilesErrorKey : 'default' }`;
 
-export type ErrorContent = {
+type ErrorContent = {
 	code: ErrorCode<ErrorDomain>;
 	message: string;
 }
 
-export interface IApiResponse extends AxiosResponse {
+interface IApiResponse extends AxiosResponse {
 	data: ErrorContent;
 }
 

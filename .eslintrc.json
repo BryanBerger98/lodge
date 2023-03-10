@@ -150,6 +150,14 @@
 						"newlines-between": "always"
 					}
 				],
+				// "import/no-unused-modules": [
+				// 	1,
+				// 	{
+				// 		"unusedExports": true,
+				// 		"missingExports": true,
+				// 		"ignoreExports": ["./tailwind.config.js"]
+				// 	}
+				// ],
 				// ES6
 				"no-duplicate-imports": ["error"],
 				"no-class-assign": "error",
@@ -254,7 +262,8 @@
 					{
 						"html": "enforce",
 						"custom": "ignore",
-						"explicitSpread": "enforce"
+						"explicitSpread": "enforce",
+						"exceptions": ["input", "select"]
 					}
 				],
 				"react/require-default-props": "off",

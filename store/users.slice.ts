@@ -1,14 +1,14 @@
 import { Action, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { HYDRATE } from 'next-redux-wrapper';
 
-import { TableConfig, TableSort } from '../types/table.type';
-import { getUsers } from '../services/users/users.client.service';
-import { LoadingState } from '../types/loading.type';
-import { IUser } from '../types/user.type';
+import { getUsers } from '@services/users/users.client.service';
+import { LoadingState } from 'types/loading.type';
+import { TableConfig, TableSort } from 'types/table.type';
+import { IUser } from 'types/user.type';
 
 import { AppState } from './index';
 
-export type UsersState = {
+type UsersState = {
 	users: IUser[];
 	count: number;
 	total: number;
@@ -118,5 +118,3 @@ export const usersSlice = createSlice({
 export const { setUsersState, updateUser, setUsersTableConfig } = usersSlice.actions;
 
 export const selectUsersState = (state: AppState) => state.users as UsersState;
-
-export default usersSlice.reducer;

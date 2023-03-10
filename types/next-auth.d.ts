@@ -1,17 +1,20 @@
 import { JWT } from 'next-auth/jwt';
-import { ObjectId } from '../infrastructure/types/database.type';
+
+import { ObjectId } from '@infrastructure/types/database.type';
+
 import { IUser } from './user.type';
 
 declare module 'next-auth' {
   /**
    * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
    */
+
 	interface User extends IUser {
-		_id: ObjectId | string;
+		id?: string;
 	}
 
   interface Session {
-    user: IUser;
+    user: User
 	token: JWT & {
 		_id: string;
 		email: string;

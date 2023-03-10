@@ -117,12 +117,14 @@ const ForgotPasswordPage: FC<ForgotPasswordPageProperties> = ({ csrfToken }) => 
 									</Button>
 								</> }
 							{
-								emailSent ? <>
-									<p className="mb-3 text-success-light-default dark:text-success-dark-default">Email envoyé !</p>
-									<div className="px-3 py-2 bg-secondary-light-shade text-secondary-dark-default dark:bg-secondary-dark-default dark:text-secondary-light-shade rounded-md">
-										Renvoyer un email dans { counter } secondes
-									</div>
-                    </> : null
+								emailSent ?
+									<>
+										<p className="mb-3 text-success-light-default dark:text-success-dark-default">Email envoyé !</p>
+										<div className="px-3 py-2 bg-secondary-light-shade text-secondary-dark-default dark:bg-secondary-dark-default dark:text-secondary-light-shade rounded-md">
+											Renvoyer un email dans { counter } secondes
+										</div>
+									</>
+									: null
 							}
 						</div>
 					</form>

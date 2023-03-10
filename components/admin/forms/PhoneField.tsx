@@ -1,5 +1,5 @@
 import { AsYouType, CountryCode, getCountries } from 'libphonenumber-js';
-import { BaseSyntheticEvent, useId, useState } from 'react';
+import { BaseSyntheticEvent, ChangeEventHandler, useId, useState } from 'react';
 
 import useFieldErrorMesssage from '../../../hooks/useFieldErrorMessage';
 
@@ -69,21 +69,27 @@ const PhoneField = <TFormValues extends Record<string, unknown>>({ name, label, 
 		}
 	};
 
+	const handleSelectCountry: ChangeEventHandler<HTMLSelectElement> = ({ target }) => setCountrySelectValue(target.value as CountryCode);
+
 	return (
 		<div className="relative mb-3 flex flex-col text-sm">
-			{ label ? <label
-				className={ mergedLabelStyle.className }
-				htmlFor={ `${ id }-${ name }` }
-				style={ mergedLabelStyle.style }
-			          >
-				{ label }
-				{ required ? <span className="text-red-500 dark:text-red-400"> *</span> : null }
-             </label> : null }
+			{
+				label ?
+					<label
+						className={ mergedLabelStyle.className }
+						htmlFor={ `${ id }-${ name }` }
+						style={ mergedLabelStyle.style }
+					>
+						{ label }
+						{ required ? <span className="text-red-500 dark:text-red-400"> *</span> : null }
+					</label>
+					: null
+			}
 			<div className="flex w-full gap-0">
 				<select
 					className="appearance-none p-2 px-3 rounded-none rounded-l-md shadow-inner bg-light-100 dark:bg-light-800"
 					value={ countrySelectValue }
-					onChange={ (event) => setCountrySelectValue(event.target.value as CountryCode) }
+					onChange={ handleSelectCountry }
 				>
 					{
 						getCountries().map(countryCode => (

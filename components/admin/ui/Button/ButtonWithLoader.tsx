@@ -1,6 +1,7 @@
+import { useCallback, useEffect, useState } from 'react';
+
 import Button, { ButtonProperties, ButtonType, ButtonUIOptions, ButtonVariant } from './Button';
 import ButtonSavingLoader, { ButtonSavingLoaderProperties } from './ButtonSavingLoader';
-import { useCallback, useEffect, useState } from 'react';
 
 export type ButtonWithLoaderProperties = ButtonProperties & Omit<ButtonSavingLoaderProperties, 'saved'>;
 
@@ -9,66 +10,66 @@ const defaultType: ButtonType = 'button';
 const defaultUIOptions: ButtonUIOptions = { shadows: false };
 
 const ButtonWithLoader = ({
-    href = undefined,
-    variant = defaultVariant,
-    type = defaultType,
-    onClick,
-    disabled = false,
-    uiOptions = defaultUIOptions,
-    saving = false,
-    loaderOrientation = 'right',
-    errorCode = null,
-    displayErrorMessage = 'none',
-    children = null,
+	href = undefined,
+	variant = defaultVariant,
+	type = defaultType,
+	onClick: handleClick,
+	isDisabled = false,
+	uiOptions = defaultUIOptions,
+	isSaving = false,
+	loaderOrientation = 'right',
+	errorCode = null,
+	displayErrorMessage = 'none',
+	children = null,
 }: ButtonWithLoaderProperties) => {
 
-    const [ firstLoad, setFirstLoad ] = useState<boolean>(true);
-    const [ saved, setSaved ] = useState<boolean>(false);
-    const [ savedDelay, setSavedDelay ] = useState<NodeJS.Timeout | null>(null);
+	const [ firstLoad, setFirstLoad ] = useState<boolean>(true);
+	const [ saved, setSaved ] = useState<boolean>(false);
+	const [ savedDelay, setSavedDelay ] = useState<NodeJS.Timeout | null>(null);
 
-    const triggerLoader = useCallback(() => {
-        if (saving) {
-            setFirstLoad(false);
-            setSaved(false);
-            if (savedDelay) clearTimeout(savedDelay);
-        }
-        if (!saving && !errorCode && !firstLoad) {
-            setSaved(true);
-            const delay = setTimeout(() => {
-                setSaved(false);
-            }, 3000);
-            setSavedDelay(delay);
-        }
-    }, [ saving, firstLoad, errorCode, savedDelay ]);
+	const triggerLoader = useCallback(() => {
+		if (isSaving) {
+			setFirstLoad(false);
+			setSaved(false);
+			if (savedDelay) clearTimeout(savedDelay);
+		}
+		if (!isSaving && !errorCode && !firstLoad) {
+			setSaved(true);
+			const delay = setTimeout(() => {
+				setSaved(false);
+			}, 3000);
+			setSavedDelay(delay);
+		}
+	}, [ isSaving, firstLoad, errorCode, savedDelay ]);
 
-    useEffect(() => {
-        triggerLoader();
+	useEffect(() => {
+		triggerLoader();
     	// eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ saving ]);
+	}, [ isSaving ]);
 
-    return(
-        <div className="relative w-fit">
-            <div className="relative z-10 w-fit">
-                <Button
-                    variant={ variant }
-                    type={ type }
-                    onClick={ onClick }
-                    href={ href }
-                    disabled={ disabled ? disabled : saving }
-                    uiOptions={ uiOptions }
-                >
-                    {children}
-                </Button>
-            </div>
-            <ButtonSavingLoader
-                saved={ saved }
-                saving={ saving }
-                loaderOrientation={ loaderOrientation }
-                errorCode={ errorCode }
-                displayErrorMessage={ displayErrorMessage }
-            />
-        </div>
-    );
+	return(
+		<div className="relative w-fit">
+			<div className="relative z-10 w-fit">
+				<Button
+					href={ href }
+					isDisabled={ isDisabled ? isDisabled : isSaving }
+					type={ type }
+					uiOptions={ uiOptions }
+					variant={ variant }
+					onClick={ handleClick }
+				>
+					{ children }
+				</Button>
+			</div>
+			<ButtonSavingLoader
+				displayErrorMessage={ displayErrorMessage }
+				errorCode={ errorCode }
+				isSaved={ saved }
+				isSaving={ isSaving }
+				loaderOrientation={ loaderOrientation }
+			/>
+		</div>
+	);
 };
 
 export default ButtonWithLoader;
