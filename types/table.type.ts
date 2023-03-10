@@ -9,6 +9,10 @@ export type TableConfig = {
 	sort: TableSort;
 }
 
+export type TableConfigWithSearch = TableConfig & {
+	search?: string;
+}
+
 export type TableField = {
 	title: string;
 	name: string;

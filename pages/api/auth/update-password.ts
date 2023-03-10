@@ -1,47 +1,48 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { userDataAccess } from '../../../infrastructure/data-access';
-import { connectToDatabase } from '../../../infrastructure/database';
-import { getSessionUser } from '../../../services/auth/auth.api.service';
-import { sendApiError } from '../../../utils/error.util';
-import { hashPassword, verifyPassword } from '../../../utils/password.util';
+
+import { findUserWithPasswordById, updateUserPassword } from '@infrastructure/data-access/user.data-access';
+import { connectToDatabase } from '@infrastructure/database';
+import { getSessionUser } from '@services/auth/auth.api.service';
+import { sendApiError } from '@utils/error.util';
+import { hashPassword, verifyPassword } from '@utils/password.util';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
-    await connectToDatabase();
+	await connectToDatabase();
 
-    if (req.method === 'PUT') {
+	if (req.method === 'PUT') {
 
-        const { oldPassword, newPassword } = req.body;
+		const { oldPassword, newPassword } = req.body;
 
-        if (!oldPassword || oldPassword.length < 8 || !newPassword || newPassword.length < 8) {
-            return sendApiError(res, 'auth', 'invalid-input');
-        }
+		if (!oldPassword || oldPassword.length < 8 || !newPassword || newPassword.length < 8) {
+			return sendApiError(res, 'auth', 'invalid-input');
+		}
 
-        const currentUser = await getSessionUser(req);
+		const currentUser = await getSessionUser(req);
 
-        if (!currentUser) {
-            return sendApiError(res, 'auth', 'unauthorized');
-        }
+		if (!currentUser) {
+			return sendApiError(res, 'auth', 'unauthorized');
+		}
 
-        const currentUserData = await userDataAccess.findUserWithPasswordById(currentUser._id);
+		const currentUserData = await findUserWithPasswordById(currentUser._id);
 
-        if (!currentUserData) {
-            return sendApiError(res, 'auth', 'user-not-found');
-        }
+		if (!currentUserData) {
+			return sendApiError(res, 'auth', 'user-not-found');
+		}
 
-        const isPasswordVerified = await verifyPassword(oldPassword, currentUserData.password);
-        if (!isPasswordVerified) {
-            return sendApiError(res, 'auth', 'wrong-password');
-        }
+		const isPasswordVerified = await verifyPassword(oldPassword, currentUserData.password);
+		if (!isPasswordVerified) {
+			return sendApiError(res, 'auth', 'wrong-password');
+		}
 
-        const hashedNewPassword = await hashPassword(newPassword);
+		const hashedNewPassword = await hashPassword(newPassword);
 
-        await userDataAccess.updateUserPassword(currentUserData._id, hashedNewPassword);
+		await updateUserPassword(currentUserData._id, hashedNewPassword);
 
-        return res.status(200).json({ message: 'Password updated.' });
+		return res.status(200).json({ message: 'Password updated.' });
 
-    }
+	}
 
-    return sendApiError(res, 'auth', 'wrong-method');
+	return sendApiError(res, 'auth', 'wrong-method');
 
 }

@@ -1,73 +1,71 @@
-import Modal from '../ui/Modal';
-import * as Yup from 'yup';
-import { FiAlertCircle, FiLock, FiUnlock } from 'react-icons/fi';
-import { Dispatch, FC, SetStateAction } from 'react';
-import Button from '../ui/Button/Button';
-import TextField from '../forms/TextField';
-import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { ErrorCode, ErrorDomain } from '../../../types/error.type';
+import { LockOutlined } from '@ant-design/icons';
+import { Form, Input, Modal, Space, Typography } from 'antd';
+import { ChangeEventHandler, Dispatch, FC, SetStateAction, useState } from 'react';
 
-export type PasswordFormInputs = {
-	password: string;
-} & FieldValues;
+import useTranslate from '@hooks/useTranslate';
+import { ErrorCode, ErrorDomain } from 'types/error.type';
+
+const { Text } = Typography;
 
 type PasswordFormModalProperties = {
 	isOpen: boolean;
 	setIsOpen: Dispatch<SetStateAction<boolean>>;
-	submitFunction: (password: string) => void;
+	onSubmit: (password: string) => void;
 	errorCode: ErrorCode<ErrorDomain> | null;
 }
 
-const PasswordFormModal: FC<PasswordFormModalProperties> = ({ isOpen, setIsOpen, submitFunction, errorCode }) => {
+const PasswordFormModal: FC<PasswordFormModalProperties> = ({ isOpen, setIsOpen, onSubmit, errorCode }) => {
 
-    const passwordFormSchema = Yup.object().shape({ password: Yup.string().min(8, 'Au moins 8 caractères').required('Champs requis') });
+	const [ passwordInputValue, setPasswordInputValue ] = useState('');
+	const { getTranslatedError } = useTranslate({ locale: 'fr' });
 
-    const { register, handleSubmit, formState: { errors }, setValue } = useForm<PasswordFormInputs>({
-        resolver: yupResolver(passwordFormSchema),
-        mode: 'onTouched',
-    });
+	const handlePasswordFormSubmit = () => {
+		onSubmit(passwordInputValue);
+		setPasswordInputValue('');
+	};
 
-    const handlePasswordFormSubmit = (values: PasswordFormInputs) => {
-        const { password } = values;
-        submitFunction(password);
-        setValue('password', '');
-    };
+	const handleCloseModal = () => setIsOpen(false);
+	const handleChangePasswordInputValue: ChangeEventHandler<HTMLInputElement> = ({ target }) => setPasswordInputValue(target.value);
 
-    return(
-        <Modal
-            isOpen={ isOpen }
-            closeModal={ () => setIsOpen(false) }
-            title={ {
-                text: <span className='flex items-center gap-2'><FiLock /><span>Mot de passe</span></span>,
-                color: 'text-primary-light-default dark:text-primary-dark-default',
-            } }
-        >
-            <div className="my-5">
-                <form onSubmit={ handleSubmit(handlePasswordFormSubmit) }>
-                    <TextField
-                        name='password'
-                        type='password'
-                        register={ register }
-                        label="Mot de passe"
-                        placeholder='Tapez votre mot de passe'
-                        errors={ errors as DeepMap<PasswordFormInputs, FieldError> }
-                        required
-                    />
-                    <div className="mt-4 flex flex-row text-sm justify-end items-center gap-2">
-                        {errorCode && errorCode === 'auth/wrong-password' && <span className='flex items-center text-danger-light-default dark:text-danger-dark-default'><span className='mr-1'>Mot de passe incorrect</span><FiAlertCircle /></span>}
-                        <Button
-                            variant='success'
-                            type='submit'
-                        >
-                            <FiUnlock />
-                            <span>Valider</span>
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        </Modal>
-    );
+	return(
+		<Modal
+			cancelText="Annuler"
+			okButtonProps={ { disabled: !passwordInputValue || passwordInputValue.length < 8 } }
+			okText="Enregister"
+			open={ isOpen }
+			title={
+				<Space
+					size="middle"
+					style={ { fontSize: '1.25rem' } }
+				>
+					<LockOutlined /><span>Mot de passe</span>
+				</Space>
+	   }
+			centered
+			onCancel={ handleCloseModal }
+			onOk={ handlePasswordFormSubmit }
+		>
+			<Form layout="vertical">
+				<Form.Item label="Mot de passe">
+					<Input.Password
+						placeholder="********"
+						value={ passwordInputValue }
+						onChange={ handleChangePasswordInputValue }
+					/>
+				</Form.Item>
+			</Form>
+			{
+				errorCode ?
+					<Text
+						style={ { textAlign: 'center' } }
+						type="danger"
+					>
+						{ getTranslatedError(errorCode) }
+					</Text>
+					: null
+			}
+		</Modal>
+	);
 };
 
 export default PasswordFormModal;

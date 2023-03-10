@@ -1,18 +1,18 @@
-import UserProfilePhotoInput from './UserProfilePhotoInput';
-import DropdownMenu from '../ui/DropdownMenu/DropdownMenu';
-import DropdownItem from '../ui/DropdownMenu/DropdownItem';
-import { FiKey, FiLock, FiSend, FiTrash, FiUnlock } from 'react-icons/fi';
+import { DeleteOutlined, KeyOutlined, LockOutlined, MoreOutlined, UnlockOutlined } from '@ant-design/icons';
+import { Button, Dropdown, MenuProps, Space, Tag } from 'antd';
 import { Dispatch, SetStateAction, useState } from 'react';
-import toast from 'react-hot-toast';
-import Toast from '../ui/Toast';
-import SwitchDisableUserModal from './SwitchDisableUserModal';
+
+import { useCsrfContext } from '@context/csrf.context';
+import useToast from '@hooks/useToast';
+import useTranslate from '@hooks/useTranslate';
+import { sendResetPasswordEmailToUser } from '@services/users/users.client.service';
+import { IUser } from 'types/user.type';
+
+import PageTitle from '../ui/PageTitle';
+
 import DeleteUserModal from './DeleteUserModal';
-import { sendResetPasswordEmailToUser } from '../../../services/users/users.client.service';
-import { IUser } from '../../../types/user.type';
-import useTranslate from '../../../hooks/useTranslate';
-import { useCsrfContext } from '../../../context/csrf.context';
-import { IApiError } from '../../../types/error.type';
-import useToast from '../../../hooks/useToast';
+import SwitchDisableUserModal from './SwitchDisableUserModal';
+import UserProfilePhotoInput from './UserProfilePhotoInput';
 
 type EditUserInformationsSectionProperties = {
 	user: IUser | null;
@@ -22,102 +22,129 @@ type EditUserInformationsSectionProperties = {
 
 const EditUserInformationsSection = ({ user, setUser, currentUser }: EditUserInformationsSectionProperties) => {
 
-    const { csrfToken } = useCsrfContext();
-    const { getTranslatedRole } = useTranslate({ locale: 'fr' });
-    const { triggerErrorToast } = useToast({ locale: 'fr' });
+	const { csrfToken } = useCsrfContext();
+	const { getTranslatedRole } = useTranslate({ locale: 'fr' });
+	const { triggerErrorToast, triggerSuccessToast } = useToast({ locale: 'fr' });
 
-    const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
-    const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
+	const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
+	const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
 
-    const onSendResetPasswordEmail = () => {
-        if (user) {
-            sendResetPasswordEmailToUser(user._id, csrfToken)
-                .then(() => {
-                    toast.custom(<Toast variant='success'><FiSend /><span>Email envoyé !</span></Toast>);
-                })
-                .catch(error => {
-                    triggerErrorToast(error as IApiError);
-                });
-        }
-    };
+	const onSendResetPasswordEmail = () => {
+		if (user) {
+			sendResetPasswordEmailToUser(user._id, csrfToken)
+				.then(() => {
+					triggerSuccessToast('Email envoyé', 'L\'utilisateur a reçu un email de réinitialisation du mot de passe');
+				})
+				.catch(triggerErrorToast);
+		}
+	};
 
-    return(
-        <>
-            <div className="bg-primary-light-default dark:bg-primary-dark-default rounded-md p-6 text-secondary-light-tint dark:text-secondary-dark-default mb-4 flex flex-wrap gap-4">
-                {
-                    user &&
-					<UserProfilePhotoInput
-					    user={ user }
-					    setUser={ setUser }
+	const handleSwitchDisableUser = () => {
+		setIsSwitchDisableUserModalOpen(true);
+	};
+
+	const handleDeleteUser = () => {
+		setIsDeleteUserModalOpen(true);
+	};
+
+	const items: MenuProps['items'] = user ? [
+		{
+			label: 'Reinitialiser le mot de passe',
+			key: 'reset_password',
+			icon: <KeyOutlined />,
+			onClick: onSendResetPasswordEmail,
+		},
+		{
+		  label: 'Suspendre le compte',
+		  key: 'disable',
+		  icon: <LockOutlined />,
+		  danger: true,
+		  style: { display: user.disabled ? 'none' : 'flex' },
+		  onClick: handleSwitchDisableUser,
+		},
+		{
+		  label: 'Activer le compte',
+		  key: 'enable',
+		  icon: <UnlockOutlined />,
+		  style: { display: user.disabled ? 'flex' : 'none' },
+		  onClick: handleSwitchDisableUser,
+		},
+		{
+		  label: 'Supprimer',
+		  key: 'delete',
+		  icon: <DeleteOutlined />,
+		  danger: true,
+		  disabled: user._id === currentUser?._id || user.role === 'admin',
+		  onClick: handleDeleteUser,
+		},
+	] : [];
+
+	return(
+		user ?
+			(
+				<>
+					<Space
+						className="drop-shadow"
+						style={ {
+							borderRadius: 8,
+							backgroundColor: '#F5F5F5',
+							padding: '2rem',
+							margin: '2rem 0',
+							width: '100%',
+							display: 'flex',
+							justifyContent: 'space-between',
+							alignItems: 'flex-start',
+						} }
+					>
+						<Space
+							size="large"
+						>
+							<UserProfilePhotoInput
+								setUser={ setUser }
+								user={ user }
+							/>
+							<Space direction="vertical">
+								<PageTitle style={ { margin: 0 } }>{ user.username }</PageTitle>
+								<Space size="small">
+									<Tag>{ getTranslatedRole(user.role) }</Tag>
+									<Tag
+										color={ user && user.disabled ? 'warning' : 'success' }
+										icon={ user && user.disabled ? <LockOutlined /> : <UnlockOutlined /> }
+									>
+										{ user && user.disabled ? 'Ce compte est suspendu' : 'Ce compte est actif' }
+									</Tag>
+								</Space>
+							</Space>
+						</Space>
+						<Space>
+							<Dropdown
+								menu={ { items } }
+								placement="bottomRight"
+								trigger={ [ 'click' ] }
+							>
+								<Button type="text">
+									<Space>
+										<MoreOutlined />
+									</Space>
+								</Button>
+							</Dropdown>
+						</Space>
+					</Space>
+					<SwitchDisableUserModal
+						isOpen={ isSwitchDisableUserModalOpen }
+						setIsOpen={ setIsSwitchDisableUserModalOpen }
+						setUser={ setUser }
+						user={ user }
 					/>
-                }
-                <div className="my-auto">
-                    <h2 className="text-2xl">{user && user.username ? user.username : <span className="italic">Sans nom</span>}</h2>
-                    <p className="text-primary-lighter dark:text-secondary-dark-tint">{user && user.role && getTranslatedRole(user.role)}</p>
-                </div>
-                <div className="ml-auto mb-auto">
-                    <DropdownMenu name={ null }>
-                        <div className="p-1">
-                            { user && !user.disabled &&
-								<>
-								    <DropdownItem
-								        icon={ <FiKey /> }
-								        name='Réinitialiser le mot de passe'
-								        onClick={ onSendResetPasswordEmail }
-								    />
-								    {
-								        currentUser && currentUser._id !== user._id &&
-										<DropdownItem
-										    icon={ <FiLock /> }
-										    name='Suspendre le compte'
-										    onClick={ () => setIsSwitchDisableUserModalOpen(true) }
-										    variant='warning'
-										/>
-								    }
-								</>
-                            }
-                            { user && user.disabled &&
-								<DropdownItem
-								    icon={ <FiUnlock /> }
-								    name='Débloquer le compte'
-								    onClick={ () => setIsSwitchDisableUserModalOpen(true) }
-								    variant='warning'
-								/>
-                            }
-                        </div>
-                        {
-                            currentUser && user && currentUser._id !== user._id &&
-							<div className="p-1">
-							    <DropdownItem
-							        icon={ <FiTrash /> }
-							        name='Supprimer'
-							        variant='danger'
-							        onClick={ () => setIsDeleteUserModalOpen(true) }
-							    />
-							</div>
-                        }
-                    </DropdownMenu>
-                </div>
-            </div>
-            {
-                user &&
-				<SwitchDisableUserModal
-				    isOpen={ isSwitchDisableUserModalOpen }
-				    setIsOpen={ setIsSwitchDisableUserModalOpen }
-				    user={ user }
-				    setUser={ setUser }
-				/>
-            }
-            {
-                user &&
-				<DeleteUserModal
-                	isOpen={ isDeleteUserModalOpen }
-				    setIsOpen={ setIsDeleteUserModalOpen }
-				    user={ user }
-				/>
-            }
-        </>
-    );
+					<DeleteUserModal
+						isOpen={ isDeleteUserModalOpen }
+						setIsOpen={ setIsDeleteUserModalOpen }
+						user={ user }
+					/>
+				</>
+			)
+			: null
+	);
 };
 
 export default EditUserInformationsSection;

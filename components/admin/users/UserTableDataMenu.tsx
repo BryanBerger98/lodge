@@ -1,17 +1,15 @@
-import { FC, useState } from 'react';
-import { FiEdit, FiKey, FiLock, FiSend, FiTrash, FiUnlock } from 'react-icons/fi';
-import toast from 'react-hot-toast';
+import { DeleteOutlined, EditOutlined, KeyOutlined, LockOutlined, MoreOutlined, UnlockOutlined } from '@ant-design/icons';
+import { Button, Dropdown, MenuProps, Space } from 'antd';
 import { useRouter } from 'next/router';
-import DropdownItem from '../ui/DropdownMenu/DropdownItem';
-import DropdownMenu from '../ui/DropdownMenu/DropdownMenu';
-import Toast from '../ui/Toast';
-import SwitchDisableUserModal from './SwitchDisableUserModal';
+import { FC, useState } from 'react';
+
+import { useCsrfContext } from '@context/csrf.context';
+import useToast from '@hooks/useToast';
+import { sendResetPasswordEmailToUser } from '@services/users/users.client.service';
+import { IUser } from 'types/user.type';
+
 import DeleteUserModal from './DeleteUserModal';
-import { IUser } from '../../../types/user.type';
-import { sendResetPasswordEmailToUser } from '../../../services/users/users.client.service';
-import { useCsrfContext } from '../../../context/csrf.context';
-import { IApiError } from '../../../types/error.type';
-import useToast from '../../../hooks/useToast';
+import SwitchDisableUserModal from './SwitchDisableUserModal';
 
 type UserTableDataMenuProperties = {
 	user: IUser,
@@ -20,84 +18,95 @@ type UserTableDataMenuProperties = {
 
 const UserTableDataMenu: FC<UserTableDataMenuProperties> = ({ user, currentUser }) => {
 
-    const router = useRouter();
+	const router = useRouter();
 
-    const { csrfToken } = useCsrfContext();
-    const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
-    const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
+	const { csrfToken } = useCsrfContext();
+	const [ isSwitchDisableUserModalOpen, setIsSwitchDisableUserModalOpen ] = useState(false);
+	const [ isDeleteUserModalOpen, setIsDeleteUserModalOpen ] = useState(false);
 
-    const { triggerErrorToast } = useToast({ locale: 'fr' });
+	const { triggerErrorToast, triggerSuccessToast } = useToast({ locale: 'fr' });
 
-    const onSendResetPasswordEmail = () => {
-        sendResetPasswordEmailToUser(user._id, csrfToken)
-            .then(() => {
-                toast.custom(<Toast><FiSend /><span>Email envoyé !</span></Toast>);
-            })
-            .catch(error => {
-                triggerErrorToast(error as IApiError);
-            });
-    };
+	const onSendResetPasswordEmail = () => {
+		sendResetPasswordEmailToUser(user._id, csrfToken)
+			.then(() => {
+				triggerSuccessToast('Email envoyé', 'L\'utilisateur a reçu un email de réinitialisation du mot de passe');
+			})
+			.catch(triggerErrorToast);
+	};
 
-    return (
-        <>
-            <DropdownMenu name={ null }>
-                <div className="p-1">
-                    <DropdownItem
-                        icon={ <FiEdit /> }
-                        name='Modifier'
-                        onClick={ () => router.push(`/admin/users/edit/${ user._id }`) }
-                    />
-                    { user && !user.disabled &&
-						<>
-						    <DropdownItem
-						        icon={ <FiKey /> }
-						        name='Réinitialiser le mot de passe'
-						        onClick={ onSendResetPasswordEmail }
-						    />
-						    {
-						        currentUser && currentUser._id !== user._id &&
-								<DropdownItem
-								    icon={ <FiLock /> }
-								    name='Suspendre le compte'
-								    onClick={ () => setIsSwitchDisableUserModalOpen(true) }
-								    variant='warning'
-								/>
-						    }
-						</>
-                    }
-                    { user && user.disabled &&
-						<DropdownItem
-					    icon={ <FiUnlock /> }
-					    name='Débloquer le compte'
-					    onClick={ () => setIsSwitchDisableUserModalOpen(true) }
-					    variant='warning'
-						/>
-                    }
-                </div>
-                {
-                    currentUser && currentUser._id !== user._id &&
-					<div className="p-1">
-					    <DropdownItem
-					        icon={ <FiTrash /> }
-					        name='Supprimer'
-					        variant='danger'
-					        onClick={ () => setIsDeleteUserModalOpen(true) }
-					    />
-					</div>
-                }
-            </DropdownMenu>
-            <SwitchDisableUserModal
-                isOpen={ isSwitchDisableUserModalOpen }
-                setIsOpen={ setIsSwitchDisableUserModalOpen }
-                user={ user }
-            />
-            <DeleteUserModal
-                isOpen={ isDeleteUserModalOpen }
-                setIsOpen={ setIsDeleteUserModalOpen }
-                user={ user }
-            />
-        </>
-    );
+	const handleSwitchDisableUser = () => {
+		setIsSwitchDisableUserModalOpen(true);
+	};
+
+	const handleDeleteUser = () => {
+		setIsDeleteUserModalOpen(true);
+	};
+
+	const items: MenuProps['items'] = [
+		{
+		  label: 'Modifier',
+		  key: 'edit',
+		  icon: <EditOutlined />,
+		  onClick: () => router.push(`/admin/users/edit/${ user._id }`),
+		},
+		{
+			label: 'Reinitialiser le mot de passe',
+			key: 'reset_password',
+			icon: <KeyOutlined />,
+			onClick: onSendResetPasswordEmail,
+		},
+		{
+		  label: 'Suspendre le compte',
+		  key: 'disable',
+		  icon: <LockOutlined />,
+		  danger: true,
+		  style: { display: user.disabled ? 'none' : 'flex' },
+		  disabled: user._id === currentUser?._id,
+		  onClick: handleSwitchDisableUser,
+		},
+		{
+		  label: 'Activer le compte',
+		  key: 'enable',
+		  icon: <UnlockOutlined />,
+		  style: { display: user.disabled ? 'flex' : 'none' },
+		  disabled: user._id === currentUser?._id,
+		  onClick: handleSwitchDisableUser,
+		},
+		{
+		  label: 'Supprimer',
+		  key: 'delete',
+		  icon: <DeleteOutlined />,
+		  danger: true,
+		  disabled: user._id === currentUser?._id || user.role === 'admin',
+		  onClick: handleDeleteUser,
+		},
+	];
+
+	return (
+		<>
+			<Dropdown
+				menu={ { items } }
+				placement="bottomRight"
+				trigger={ [ 'click' ] }
+			>
+				<Button>
+					<Space>
+						<MoreOutlined />
+					</Space>
+				</Button>
+			</Dropdown>
+			<SwitchDisableUserModal
+				isOpen={ isSwitchDisableUserModalOpen }
+				setIsOpen={ setIsSwitchDisableUserModalOpen }
+				user={ user }
+			/>
+			<DeleteUserModal
+				isOpen={ isDeleteUserModalOpen }
+				setIsOpen={ setIsDeleteUserModalOpen }
+				user={ user }
+			/>
+		</>
+	);
 };
 
 export default UserTableDataMenu;

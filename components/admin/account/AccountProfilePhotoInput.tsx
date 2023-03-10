@@ -1,89 +1,146 @@
-import { FC, useRef, useState } from 'react';
-import Image from 'next/image';
-import { FiUser } from 'react-icons/fi';
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import { useAuthContext } from '../../../context/auth.context';
-import { useCsrfContext } from '../../../context/csrf.context';
-import { IUser } from '../../../types/user.type';
-import { IApiError } from '../../../types/error.type';
-import { updateAvatar } from '../../../services/auth/auth.client.service';
-import { checkIfFileIsAnImage } from '../../../utils/file.util';
-import useToast from '../../../hooks/useToast';
+import { CameraOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { message, Upload } from 'antd';
+import type { RcFile, UploadChangeParam, UploadFile, UploadProps } from 'antd/es/upload/interface';
+import { useState } from 'react';
+
+import { useAuthContext } from '@context/auth.context';
+import { useCsrfContext } from '@context/csrf.context';
+import useToast from '@hooks/useToast';
+import { updateAvatar } from '@services/auth/auth.client.service';
+import { checkIfFileIsAnImage } from '@utils/file.util';
+import { IUser } from 'types/user.type';
+
 
 type AccountProfilePhotoInputProperties = {
 	currentUser: IUser;
 }
 
-const AccountProfilePhotoInput: FC<AccountProfilePhotoInputProperties> = ({ currentUser }) => {
+const AccountProfilePhotoInput = ({ currentUser }: AccountProfilePhotoInputProperties) => {
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const { dispatchCurrentUser } = useAuthContext();
-    const { csrfToken } = useCsrfContext();
-    const [ saving, setSaving ] = useState(false);
+	const { dispatchCurrentUser } = useAuthContext();
 
-    const { triggerErrorToast } = useToast({ locale: 'fr' });
+	const [ saving, setSaving ] = useState(false);
+	const [ isImgOverlayDisplayed, setIsImgOverlayDisplayed ] = useState(false);
+	const { csrfToken } = useCsrfContext();
 
-    const handleFileChange = async () => {
-        try {
-            const files = fileInputRef?.current?.files ?? [ null ];
-            const [ file ] = Array.from(files);
+	const { triggerErrorToast } = useToast({ locale: 'fr' });
 
-            if (!file || file && !checkIfFileIsAnImage(file.type)) {
-                triggerErrorToast('Merci de choisir une image.');
-                return;
-            }
-            setSaving(true);
-            const fileData = await updateAvatar(file, csrfToken);
-            dispatchCurrentUser({
-                ...currentUser,
-                photo_url: fileData.photoUrl,
-            });
-        } catch (error) {
-            triggerErrorToast(error as IApiError);
-        } finally {
-            setSaving(false);
-        }
-    };
+	const handleFileChange: UploadProps['onChange'] = (info: UploadChangeParam<UploadFile>) => {
+		if (info.file.status === 'uploading') {
+			return setSaving(true);
+		}
+		if (info.file.status === 'done') {
+			return setSaving(false);
+		}
+		if (info.file.status === 'error') {
+			triggerErrorToast(info.file.error);
+			return setSaving(false);
+		}
+	};
 
-    return(
-        <div
-            style={ { position: 'relative' } }
-            className="bg-light-50 rounded-full h-32 w-32 lg:h-20 lg:w-20 flex items-center justify-center text-3xl text-light-800 my-auto overflow-hidden group"
-        >
-            {
-                currentUser && currentUser.photo_url && currentUser.photo_url !== '' ?
-                    <Image
-                        src={ currentUser.photo_url }
-                        alt={ `${ currentUser.username } profile photo` }
-                        fill
-                    />
-                    :
-                    <FiUser />
-            }
-            {
-                saving &&
-                <div className="bg-light-800/50 flex items-center justify-center absolute inset-0 z-10">
-                    <AiOutlineLoading3Quarters className={ `text-2xl text-light-50 ${ saving && 'animate-spin' }` } />
-                </div>
-            }
-            {
-                !saving &&
-                <label
-                    htmlFor="updateProfilePhotoInput"
-                    className="absolute inset-0 text-xs items-end justify-center hidden group-hover:flex group-hover:cursor-pointer"
-                >
-                    <small className="text-light-50 bg-light-800/75 pb-1 w-full text-center">MODIFIER</small>
-                </label>
-            }
-            <input
-                type="file"
-                id="updateProfilePhotoInput"
-                onChange={ handleFileChange }
-                ref={ fileInputRef }
-                hidden
-            />
-        </div>
-    );
+	const onUploadFile = async (file: RcFile) => {
+		const { photoUrl } = await updateAvatar(file, csrfToken);
+		dispatchCurrentUser({
+			...currentUser,
+			photo_url: photoUrl,
+		});
+		return photoUrl;
+	};
+
+	const onBeforeUpload = (file: RcFile) => {
+		const isFileAnImage = checkIfFileIsAnImage(file.type);
+		if (!isFileAnImage) {
+			message.error('Seuls les fichiers gif, jpeg, png et webp sont acceptés.');
+		}
+		const hasFileGoodSize = file.size / 1024 / 1024 < 5;
+		if (!hasFileGoodSize) {
+			message.error('La taille de l\'image doit être inférieure à 5Mo.');
+		  }
+		return ;
+	};
+
+	const uploadButton = (
+		<div>
+			{ saving ? <LoadingOutlined /> : <PlusOutlined /> }
+			<div style={ { marginTop: 8 } }>Photo</div>
+		</div>
+	);
+
+	const handleDisplayImgOverlay = (event: 'enter' | 'leave') => () => {
+		if (event === 'enter') {
+			return setIsImgOverlayDisplayed(true);
+		}
+		setIsImgOverlayDisplayed(false);
+	};
+
+	return(
+		<>
+			<Upload
+				action={ onUploadFile }
+				beforeUpload={ onBeforeUpload }
+				className="avatar-uploader"
+				listType="picture-circle"
+				name="avatar"
+				showUploadList={ false }
+				onChange={ handleFileChange }
+			>
+				{ currentUser.photo_url ?
+					<div
+						style={ {
+							width: '100%',
+							display: 'flex',
+							position: 'relative',
+							alignItems: 'center',
+							justifyContent: 'center',
+							padding: 2,
+							borderRadius: '200px',
+							overflow: 'hidden',
+						} }
+					>
+						<img
+							alt="avatar"
+							src={ currentUser.photo_url }
+							style={ {
+								width: '100%',
+								borderRadius: '200px',
+							} }
+							onMouseEnter={ handleDisplayImgOverlay('enter') }
+						/>
+						<div
+							role="button"
+							style={ {
+								display: isImgOverlayDisplayed || saving ? 'flex' : 'none',
+								position: 'absolute',
+								inset: 2,
+								borderRadius: '200px',
+								backgroundColor: 'rgba(0, 0, 0, 0.6)',
+								justifyContent: 'center',
+								alignItems: 'center',
+							} }
+							onMouseLeave={ handleDisplayImgOverlay('leave') }
+						>
+							{
+								saving ?
+									<LoadingOutlined
+										style={ {
+											color: 'white',
+											fontSize: '2rem',
+										} }
+									/>
+									:
+									<CameraOutlined
+										style={ {
+											color: 'white',
+											fontSize: '2rem',
+										} }
+									/>
+							}
+						</div>
+					</div>
+					: uploadButton }
+			</Upload>
+		</>
+	);
 };
 
 export default AccountProfilePhotoInput;

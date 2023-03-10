@@ -1,12 +1,16 @@
+import { Layout as AntLayout, theme as antTheme } from 'antd';
 import { useRouter } from 'next/router';
-import { ReactNode, useEffect, useState } from 'react';
-import { ThemeValue, useThemeContext } from '../../context/theme.context';
-import { Toaster } from 'react-hot-toast';
-import Loader from '../admin/ui/Loader';
-import Sidebar from './Sidebar';
-import { useAuthContext } from '../../context/auth.context';
-import AdminHeader from './AdminHeader';
 import { useSession } from 'next-auth/react';
+import { ReactNode, useEffect, useState } from 'react';
+
+import { useAuthContext } from '@context/auth.context';
+
+import Loader from '../admin/ui/Loader';
+
+import Header from './Header';
+import Sider from './Sider';
+
+const { Content } = AntLayout;
 
 type LayoutProperties = {
 	children: ReactNode;
@@ -14,90 +18,98 @@ type LayoutProperties = {
 
 const Layout = ({ children = null }: LayoutProperties) => {
 
-    const { data: session, status } = useSession();
+	const { data: session, status } = useSession();
 
-    const { currentUser, getCurrentUser } = useAuthContext();
-    const { theme, toggleTheme } = useThemeContext();
-    const [ showLayout, setShowLayout ] = useState<boolean>(true);
-    const [ showHeader, setShowHeader ] = useState<boolean>(false);
-    const [ showAdminHeader, setShowAdminHeader ] = useState<boolean>(false);
-    const [ showSidebar, setShowSidebar ] = useState<boolean>(false);
-    const [ isSidebarOpen, setIsSidebarOpen ] = useState<boolean>(false);
-    const router = useRouter();
+	const { currentUser, getCurrentUser } = useAuthContext();
+	const [ showAdminHeader, setShowAdminHeader ] = useState<boolean>(false);
+	const [ showSidebar, setShowSidebar ] = useState<boolean>(false);
+	const [ isSidebarOpen, setIsSidebarOpen ] = useState<boolean>(false);
+	const router = useRouter();
+	const [ , pathDomain, pathRoute ] = router.pathname.split('/');
 
-    useEffect(() => {
-        if (session) {
-            getCurrentUser();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ session ]);
+	useEffect(() => {
+		if (session) {
+			getCurrentUser();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ session ]);
 
-    useEffect(() => {
-        const pathArr = router.pathname.split('/');
-        pathArr.splice(0, 1);
-        if ((pathArr[ 0 ] === 'auth' && pathArr[ 1 ] === 'verify-email') || (pathArr[ 0 ] === 'auth' && pathArr[ 1 ] === 'reset-password') || (pathArr[ 0 ] === 'admin' && pathArr[ 1 ] === 'auth')) {
-            setShowLayout(false);
-            setShowHeader(false);
-            setShowAdminHeader(false);
-            setShowSidebar(false);
-        } else {
-            if (currentUser) {
-                setShowLayout(true);
-                setShowHeader(true);
-                setShowAdminHeader(true);
-                setShowSidebar(true);
-            }
-        }
-    }, [ router, currentUser ]);
+	useEffect(() => {
+		if (currentUser) {
+			if (pathDomain === 'admin' && pathRoute !== 'auth') {
+				setShowAdminHeader(true);
+				setShowSidebar(true);
+			}
+			if (pathDomain !== 'admin') {
+				setShowAdminHeader(true);
+				setShowSidebar(false);
+			}
+		} else {
+			setShowAdminHeader(false);
+			setShowSidebar(false);
+		}
+	}, [ pathDomain, pathRoute, currentUser ]);
 
-    useEffect(() => {
-        const darkMode = localStorage.getItem('theme') as ThemeValue | null;
-        toggleTheme(darkMode ? darkMode : 'light');
-    }, [ toggleTheme ]);
+	const { token } = antTheme.useToken();
 
-    useEffect(() => {
-        const body = document.getElementsByTagName('body').item(0);
-        if (body) {
-            body.className = theme === 'dark' ? 'dark text-secondary-light-shade bg-secondary-dark-default' : 'text-secondary-dark-default bg-secondary-light-shade';
-        }
-    }, [ theme ]);
+	return (
+		<AntLayout
+			style={ {
+				minHeight: '100vh',
+				flexFlow: 'row',
+			} }
+		>
+			{
+				status === 'loading'
+					? <Loader isLoading />
+					:
+					<>
+						{
+							currentUser && showSidebar ?
+								<Sider
+									isCollapsed={ isSidebarOpen }
+									setCollapsed={ setIsSidebarOpen }
+								/> : null
+						}
 
-    return (
-        <div className={ 'h-full' }>
-            {
-                status === 'loading' ?
-                    <Loader isLoading={ true } />
-                    : <>
-                        <div className='flex h-full'>
-                            {
-                                currentUser && showSidebar &&
-                                <Sidebar
-                                    setIsSidebarOpen={ setIsSidebarOpen }
-                                    isSidebarOpen={ isSidebarOpen }
-                                />
-                            }
-                            <div className='grow h-full flex flex-col'>
-                                {
-                                    showAdminHeader &&
-									<AdminHeader
-									    currentUser={ currentUser }
-									    isSidebarOpen={ isSidebarOpen }
-									    setIsSidebarOpen={ setIsSidebarOpen }
-									/>
-                                }
-                                <div className="grow">
-                                    { children }
-                                </div>
-                            </div>
-                        </div>
-                        <Toaster
-                            position="bottom-right"
-                            toastOptions={ { duration: 3000 } }
-                        />
-                    </>
-            }
-        </div>
-    );
+					</>
+			}
+			<AntLayout
+				style={ {
+					flexFlow: 'column',
+					flexGrow: 1,
+				} }
+			>
+				{
+					currentUser && showAdminHeader ?
+						<Header
+							isCollapsed={ isSidebarOpen }
+							isToggleButtonDisplayed={ showSidebar }
+							setCollapsed={ setIsSidebarOpen }
+							token={ token }
+						/> : null
+				}
+				<Content
+					style={ {
+						flexGrow: 1,
+						margin: pathDomain === 'admin' ? 24 : 0,
+					} }
+				>
+					<div
+						style={ pathDomain === 'admin' ? {
+							padding: 24,
+							minHeight: '100%',
+							background: token.colorBgContainer,
+							display: 'flex',
+							flexDirection: 'column',
+						} : { padding: 24 } }
+					>
+						{ children }
+					</div>
+				</Content>
+			</AntLayout>
+		</AntLayout>
+	);
 
 };
 

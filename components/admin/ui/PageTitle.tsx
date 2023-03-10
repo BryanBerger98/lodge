@@ -1,14 +1,29 @@
-import { ReactNode } from 'react';
+import { Typography } from 'antd';
+import { CSSProperties, ReactNode } from 'react';
+
+const { Title } = Typography;
 
 type PageTitleProperties = {
 	children: ReactNode;
+	style?: CSSProperties;
 }
 
-const PageTitle = ({ children = null }: PageTitleProperties) => {
+const PageTitle = ({ children = null, style = {} }: PageTitleProperties) => {
 
-    return (
-        <h1 className="flex items-center gap-2 text-xl mb-5 dark:text-secondary-light-shade">{ children }</h1>
-    );
+	return (
+		<Title
+			style={ {
+				fontSize: '2rem',
+				fontWeight: 400,
+				display: 'flex',
+				gap: '1rem',
+				alignItems: 'center',
+				...style,
+			} }
+		>
+			{ children }
+		</Title>
+	);
 };
 
 export default PageTitle;
