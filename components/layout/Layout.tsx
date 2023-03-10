@@ -25,6 +25,7 @@ const Layout = ({ children = null }: LayoutProperties) => {
 	const [ showSidebar, setShowSidebar ] = useState<boolean>(false);
 	const [ isSidebarOpen, setIsSidebarOpen ] = useState<boolean>(false);
 	const router = useRouter();
+	const [ , pathDomain, pathRoute ] = router.pathname.split('/');
 
 	useEffect(() => {
 		if (session) {
@@ -34,7 +35,6 @@ const Layout = ({ children = null }: LayoutProperties) => {
 	}, [ session ]);
 
 	useEffect(() => {
-		const [ , pathDomain, pathRoute ] = router.pathname.split('/');
 		if (currentUser) {
 			if (pathDomain === 'admin' && pathRoute !== 'auth') {
 				setShowAdminHeader(true);
@@ -48,7 +48,7 @@ const Layout = ({ children = null }: LayoutProperties) => {
 			setShowAdminHeader(false);
 			setShowSidebar(false);
 		}
-	}, [ router, currentUser ]);
+	}, [ pathDomain, pathRoute, currentUser ]);
 
 	const { token } = antTheme.useToken();
 
@@ -92,17 +92,17 @@ const Layout = ({ children = null }: LayoutProperties) => {
 				<Content
 					style={ {
 						flexGrow: 1,
-						margin: 24,
+						margin: pathDomain === 'admin' ? 24 : 0,
 					} }
 				>
 					<div
-						style={ {
+						style={ pathDomain === 'admin' ? {
 							padding: 24,
 							minHeight: '100%',
 							background: token.colorBgContainer,
 							display: 'flex',
 							flexDirection: 'column',
-						} }
+						} : { padding: 24 } }
 					>
 						{ children }
 					</div>

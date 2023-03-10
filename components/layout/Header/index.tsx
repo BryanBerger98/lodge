@@ -32,6 +32,7 @@ const Header: FC<HeaderProperties> = ({ token, isCollapsed, setCollapsed, isTogg
 
 	return (
 		<AntHeader
+			className="drop-shadow"
 			style={ {
 				padding: '0 24px',
 				background: colorBgContainer,
