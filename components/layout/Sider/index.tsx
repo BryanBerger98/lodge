@@ -33,7 +33,7 @@ const Sider: FC<SiderProperties> = ({ isCollapsed, setCollapsed }) => {
 					fontSize: '1rem',
 				} }
 			>
-				Lodge
+				{ isCollapsed ? 'L' : 'Lodge' }
 			</div>
 			<SiderMenu />
 		</AntSider>

@@ -34,18 +34,19 @@ const Layout = ({ children = null }: LayoutProperties) => {
 	}, [ session ]);
 
 	useEffect(() => {
-		const pathElementIndex = 0;
-		const numberOfElementsToDelete = 1;
-		const pathArr = router.pathname.split('/');
-		pathArr.splice(pathElementIndex, numberOfElementsToDelete);
-		if ((pathArr[ 0 ] === 'auth' && pathArr[ 1 ] === 'verify-email') || (pathArr[ 0 ] === 'auth' && pathArr[ 1 ] === 'reset-password') || (pathArr[ 0 ] === 'admin' && pathArr[ 1 ] === 'auth')) {
-			setShowAdminHeader(false);
-			setShowSidebar(false);
-		} else {
-			if (currentUser) {
+		const [ , pathDomain, pathRoute ] = router.pathname.split('/');
+		if (currentUser) {
+			if (pathDomain === 'admin' && pathRoute !== 'auth') {
 				setShowAdminHeader(true);
 				setShowSidebar(true);
 			}
+			if (pathDomain !== 'admin') {
+				setShowAdminHeader(true);
+				setShowSidebar(false);
+			}
+		} else {
+			setShowAdminHeader(false);
+			setShowSidebar(false);
 		}
 	}, [ router, currentUser ]);
 
@@ -83,6 +84,7 @@ const Layout = ({ children = null }: LayoutProperties) => {
 					currentUser && showAdminHeader ?
 						<Header
 							isCollapsed={ isSidebarOpen }
+							isToggleButtonDisplayed={ showSidebar }
 							setCollapsed={ setIsSidebarOpen }
 							token={ token }
 						/> : null
