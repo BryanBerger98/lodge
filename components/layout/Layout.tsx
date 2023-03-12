@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { ReactNode, useEffect, useState } from 'react';
 
 import { useAuthContext } from '@context/auth.context';
+import useBreakpoints from '@hooks/useBreakpoints';
 
 const DynamicHeader = dynamic(() => import('./Header'));
 const DynamicSider = dynamic(() => import('./Sider'));
@@ -19,10 +20,12 @@ const Layout = ({ children = null }: LayoutProperties) => {
 
 	const { data: session } = useSession();
 
+	const { isDeviceMobile } = useBreakpoints();
+
 	const { currentUser, getCurrentUser } = useAuthContext();
 	const [ showAdminHeader, setShowAdminHeader ] = useState<boolean>(false);
 	const [ showSidebar, setShowSidebar ] = useState<boolean>(false);
-	const [ isSidebarOpen, setIsSidebarOpen ] = useState<boolean>(false);
+	const [ isSidebarCollapsed, setIsSidebarCollapsed ] = useState<boolean>(isDeviceMobile);
 	const router = useRouter();
 	const [ , pathDomain, pathRoute ] = router.pathname.split('/');
 
@@ -57,26 +60,29 @@ const Layout = ({ children = null }: LayoutProperties) => {
 				minHeight: '100vh',
 				flexFlow: 'row',
 			} }
+			hasSider
 		>
 			{
 				currentUser && showSidebar ?
 					<DynamicSider
-						isCollapsed={ isSidebarOpen }
-						setCollapsed={ setIsSidebarOpen }
+						isCollapsed={ isSidebarCollapsed }
+						setCollapsed={ setIsSidebarCollapsed }
 					/> : null
 			}
 			<AntLayout
 				style={ {
 					flexFlow: 'column',
 					flexGrow: 1,
+
 				} }
+
 			>
 				{
 					currentUser && showAdminHeader ?
 						<DynamicHeader
-							isCollapsed={ isSidebarOpen }
+							isCollapsed={ isSidebarCollapsed }
 							isToggleButtonDisplayed={ showSidebar }
-							setCollapsed={ setIsSidebarOpen }
+							setCollapsed={ setIsSidebarCollapsed }
 							token={ token }
 						/> : null
 				}
