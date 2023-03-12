@@ -1,15 +1,18 @@
 import { SendOutlined } from '@ant-design/icons';
 import { Button, Card, Typography } from 'antd';
+import dynamic from 'next/dynamic';
 import { FC, useEffect, useState } from 'react';
 
-import ForgotPasswordForm, { ForgotPasswordFormValues } from '@components/admin/auth/ForgotPasswordForm';
-import Loader from '@components/admin/ui/Loader';
+import type { ForgotPasswordFormValues } from '@components/admin/auth/ForgotPasswordForm';
 import { useCsrfContext } from '@context/csrf.context';
 import useTranslate from '@hooks/useTranslate';
 import { sendResetPasswordEmailToUserByEmail } from '@services/auth/auth.client.service';
 import csrf from '@utils/csrf.util';
-import { IApiError } from 'types/error.type';
-import { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+import type { IApiError } from 'types/error.type';
+import type { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+
+const ForgotPasswordForm = dynamic(() => import('@components/admin/auth/ForgotPasswordForm'));
+const Loader = dynamic(() => import('@components/admin/ui/Loader'));
 
 const { Title, Text } = Typography;
 

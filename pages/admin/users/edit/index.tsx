@@ -1,16 +1,19 @@
 import { ArrowLeftOutlined, UserAddOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { string } from 'prop-types';
 import { useState } from 'react';
 
-import PageTitle from '@components/admin/ui/PageTitle';
-import EditUserForm, { EditUserFormInputs } from '@components/admin/users/EditUserForm';
+import type { EditUserFormInputs } from '@components/admin/users/EditUserForm';
 import UsersContextProvider from '@context/users/users.context';
 import { createUser } from '@services/users/users.client.service';
 import csrf from '@utils/csrf.util';
-import { ErrorCode, ErrorDomain, IApiError } from 'types/error.type';
-import { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+import type { ErrorCode, ErrorDomain, IApiError } from 'types/error.type';
+import type { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+
+const PageTitle = dynamic(() => import('@components/admin/ui/PageTitle'));
+const EditUserForm = dynamic(() => import('@components/admin/users/EditUserForm'));
 
 type NewUserPage = {
 	csrfToken: string;

@@ -1,14 +1,13 @@
 import { Layout as AntLayout, theme as antTheme } from 'antd';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { ReactNode, useEffect, useState } from 'react';
 
 import { useAuthContext } from '@context/auth.context';
 
-import Loader from '../admin/ui/Loader';
-
-import Header from './Header';
-import Sider from './Sider';
+const DynamicHeader = dynamic(() => import('./Header'));
+const DynamicSider = dynamic(() => import('./Sider'));
 
 const { Content } = AntLayout;
 
@@ -18,7 +17,7 @@ type LayoutProperties = {
 
 const Layout = ({ children = null }: LayoutProperties) => {
 
-	const { data: session, status } = useSession();
+	const { data: session } = useSession();
 
 	const { currentUser, getCurrentUser } = useAuthContext();
 	const [ showAdminHeader, setShowAdminHeader ] = useState<boolean>(false);
@@ -60,19 +59,11 @@ const Layout = ({ children = null }: LayoutProperties) => {
 			} }
 		>
 			{
-				status === 'loading'
-					? <Loader isLoading />
-					:
-					<>
-						{
-							currentUser && showSidebar ?
-								<Sider
-									isCollapsed={ isSidebarOpen }
-									setCollapsed={ setIsSidebarOpen }
-								/> : null
-						}
-
-					</>
+				currentUser && showSidebar ?
+					<DynamicSider
+						isCollapsed={ isSidebarOpen }
+						setCollapsed={ setIsSidebarOpen }
+					/> : null
 			}
 			<AntLayout
 				style={ {
@@ -82,7 +73,7 @@ const Layout = ({ children = null }: LayoutProperties) => {
 			>
 				{
 					currentUser && showAdminHeader ?
-						<Header
+						<DynamicHeader
 							isCollapsed={ isSidebarOpen }
 							isToggleButtonDisplayed={ showSidebar }
 							setCollapsed={ setIsSidebarOpen }

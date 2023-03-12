@@ -1,17 +1,19 @@
 import { UserOutlined } from '@ant-design/icons';
 import { Col, Row } from 'antd';
 import { GetServerSidePropsContext } from 'next';
+import dynamic from 'next/dynamic';
 import { getSession } from 'next-auth/react';
 import { FC, useEffect } from 'react';
 
-import AccountChangePasswordForm from '@components/admin/account/AccountChangePasswordForm';
-import AccountContactInformationsForm from '@components/admin/account/AccountContactInformationsForm';
-import AccountEmailVerification from '@components/admin/account/AccountEmailVerification';
-import AccountInformationsSection from '@components/admin/account/AccountInformationsSection';
-import PageTitle from '@components/admin/ui/PageTitle';
 import { useAuthContext } from '@context/auth.context';
 import { useCsrfContext } from '@context/csrf.context';
 import csrf, { CsrfRequest, CsrfResponse } from '@utils/csrf.util';
+
+const AccountChangePasswordForm = dynamic(() => import('@components/admin/account/AccountChangePasswordForm'));
+const AccountEmailVerification = dynamic(() => import('@components/admin/account/AccountEmailVerification'));
+const AccountInformationsSection = dynamic(() => import('@components/admin/account/AccountInformationsSection'));
+const AccountContactInformationsForm = dynamic(() => import('@components/admin/account/AccountContactInformationsForm'));
+const PageTitle = dynamic(() => import('@components/admin/ui/PageTitle'));
 
 type AdminAccountPageProperties = {
 	csrfToken: string;
