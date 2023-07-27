@@ -1,8 +1,9 @@
 import { HomeOutlined } from '@ant-design/icons';
 import { GetServerSidePropsContext } from 'next';
+import dynamic from 'next/dynamic';
 import { getSession } from 'next-auth/react';
 
-import PageTitle from '@components/admin/ui/PageTitle';
+const PageTitle = dynamic(() => import('@components/admin/ui/PageTitle'));
 
 const AdminDashboardPage = () => {
 	return(

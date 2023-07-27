@@ -1,11 +1,13 @@
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { useEffect, FC, memo } from 'react';
 
-import VerifyEmailBlock from '@components/admin/auth/VerifyEmailBlock';
 import { useCsrfContext } from '@context/csrf.context';
 import csrf from '@utils/csrf.util';
-import { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+import type { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+
+const VerifyEmailBlock = dynamic(() => import('@components/admin/auth/VerifyEmailBlock'));
 
 type VerifyEmailPageProperties = {
 	csrfToken: string;

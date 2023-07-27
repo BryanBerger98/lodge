@@ -1,13 +1,16 @@
 import { Card, Typography } from 'antd';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { signIn } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
-import LoginForm, { LoginFormValues } from '@components/admin/auth/LoginForm';
-import Loader from '@components/admin/ui/Loader';
+import type { LoginFormValues } from '@components/admin/auth/LoginForm';
 import { useCsrfContext } from '@context/csrf.context';
 import csrf from '@utils/csrf.util';
-import { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+import type { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+
+const LoginForm = dynamic(() => import('@components/admin/auth/LoginForm'));
+const Loader = dynamic(() => import('@components/admin/ui/Loader'));
 
 const { Title } = Typography;
 

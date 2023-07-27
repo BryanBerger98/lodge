@@ -1,12 +1,12 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
 import { GetServerSidePropsContext } from 'next';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
-import EditUserForm, { EditUserFormInputs } from '@components/admin/users/EditUserForm';
-import EditUserInformationsSection from '@components/admin/users/EditUserInformationsSection';
+import type { EditUserFormInputs } from '@components/admin/users/EditUserForm';
 import { useAuthContext } from '@context/auth.context';
 import { useCsrfContext } from '@context/csrf.context';
 import UsersContextProvider from '@context/users/users.context';
@@ -17,8 +17,11 @@ import { getFileFromKey } from '@lib/bucket';
 import { updateUser } from '@services/users/users.client.service';
 import csrf, { CsrfRequest, CsrfResponse } from '@utils/csrf.util';
 import { isUserAbleToWatch } from '@utils/permissions.util';
-import { ErrorCode, ErrorDomain, IApiError } from 'types/error.type';
-import { IUser } from 'types/user.type';
+import type { ErrorCode, ErrorDomain, IApiError } from 'types/error.type';
+import type { IUser } from 'types/user.type';
+
+const EditUserForm = dynamic(() => import('@components/admin/users/EditUserForm'));
+const EditUserInformationsSection = dynamic(() => import('@components/admin/users/EditUserInformationsSection'));
 
 type EditUserPageProperties = {
 	csrfToken: string;

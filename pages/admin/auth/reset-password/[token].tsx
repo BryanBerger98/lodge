@@ -1,13 +1,15 @@
 import { ArrowRightOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { Button, Card, Typography } from 'antd';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 
-import ResetPasswordForm from '@components/admin/auth/ResetPasswordForm';
-import Loader from '@components/admin/ui/Loader';
 import { useCsrfContext } from '@context/csrf.context';
 import csrf from '@utils/csrf.util';
-import { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+import type { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+
+const Loader = dynamic(() => import('@components/admin/ui/Loader'));
+const ResetPasswordForm = dynamic(() => import('@components/admin/auth/ResetPasswordForm'));
 
 const { Title, Text } = Typography;
 

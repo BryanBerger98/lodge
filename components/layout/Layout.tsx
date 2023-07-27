@@ -1,14 +1,14 @@
 import { Layout as AntLayout, theme as antTheme } from 'antd';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { ReactNode, useEffect, useState } from 'react';
 
 import { useAuthContext } from '@context/auth.context';
+import useBreakpoints from '@hooks/useBreakpoints';
 
-import Loader from '../admin/ui/Loader';
-
-import Header from './Header';
-import Sider from './Sider';
+const DynamicHeader = dynamic(() => import('./Header'));
+const DynamicSider = dynamic(() => import('./Sider'));
 
 const { Content } = AntLayout;
 
@@ -18,12 +18,14 @@ type LayoutProperties = {
 
 const Layout = ({ children = null }: LayoutProperties) => {
 
-	const { data: session, status } = useSession();
+	const { data: session } = useSession();
+
+	const { isDeviceMobile } = useBreakpoints();
 
 	const { currentUser, getCurrentUser } = useAuthContext();
 	const [ showAdminHeader, setShowAdminHeader ] = useState<boolean>(false);
 	const [ showSidebar, setShowSidebar ] = useState<boolean>(false);
-	const [ isSidebarOpen, setIsSidebarOpen ] = useState<boolean>(false);
+	const [ isSidebarCollapsed, setIsSidebarCollapsed ] = useState<boolean>(isDeviceMobile);
 	const router = useRouter();
 	const [ , pathDomain, pathRoute ] = router.pathname.split('/');
 
@@ -58,34 +60,29 @@ const Layout = ({ children = null }: LayoutProperties) => {
 				minHeight: '100vh',
 				flexFlow: 'row',
 			} }
+			hasSider
 		>
 			{
-				status === 'loading'
-					? <Loader isLoading />
-					:
-					<>
-						{
-							currentUser && showSidebar ?
-								<Sider
-									isCollapsed={ isSidebarOpen }
-									setCollapsed={ setIsSidebarOpen }
-								/> : null
-						}
-
-					</>
+				currentUser && showSidebar ?
+					<DynamicSider
+						isCollapsed={ isSidebarCollapsed }
+						setCollapsed={ setIsSidebarCollapsed }
+					/> : null
 			}
 			<AntLayout
 				style={ {
 					flexFlow: 'column',
 					flexGrow: 1,
+
 				} }
+
 			>
 				{
 					currentUser && showAdminHeader ?
-						<Header
-							isCollapsed={ isSidebarOpen }
+						<DynamicHeader
+							isCollapsed={ isSidebarCollapsed }
 							isToggleButtonDisplayed={ showSidebar }
-							setCollapsed={ setIsSidebarOpen }
+							setCollapsed={ setIsSidebarCollapsed }
 							token={ token }
 						/> : null
 				}

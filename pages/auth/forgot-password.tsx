@@ -4,16 +4,16 @@ import { DeepMap, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { FiSend } from 'react-icons/fi';
 import * as Yup from 'yup';
 
-import TextField from '../../components/admin/forms/TextField';
-import Button from '../../components/admin/ui/Button/Button';
-import Loader from '../../components/admin/ui/Loader';
-import ThemeToggleSwitch from '../../components/admin/ui/ThemeToggleSwitch';
-import { useCsrfContext } from '../../context/csrf.context';
-import useTranslate from '../../hooks/useTranslate';
-import { sendResetPasswordEmailToUserByEmail } from '../../services/auth/auth.client.service';
-import { IApiError } from '../../types/error.type';
-import { GetServerSidePropsContextWithCsrf } from '../../types/ssr.type';
-import csrf from '../../utils/csrf.util';
+import TextField from '@components/admin/forms/TextField';
+import Button from '@components/admin/ui/Button/Button';
+import Loader from '@components/admin/ui/Loader';
+import ThemeToggleSwitch from '@components/admin/ui/ThemeToggleSwitch';
+import { useCsrfContext } from '@context/csrf.context';
+import useTranslate from '@hooks/useTranslate';
+import { sendResetPasswordEmailToUserByEmail } from '@services/auth/auth.client.service';
+import csrf from '@utils/csrf.util';
+import type { IApiError } from 'types/error.type';
+import type { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
 
 type ForgotPasswordFormValues = {
 	email: string;

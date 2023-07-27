@@ -1,8 +1,7 @@
+import dynamic from 'next/dynamic';
 import { getSession } from 'next-auth/react';
 import { FC, useEffect } from 'react';
 
-import UsersPageHeader from '@components/admin/users/UsersPageHeader';
-import UsersTable from '@components/admin/users/UsersTable';
 import { useCsrfContext } from '@context/csrf.context';
 import { UsersState } from '@context/users/users-context.type';
 import UsersContextProvider from '@context/users/users.context';
@@ -12,8 +11,11 @@ import { connectToDatabase } from '@infrastructure/database';
 import { getMultipleFiles } from '@lib/bucket';
 import csrf from '@utils/csrf.util';
 import { isUserAbleToWatch } from '@utils/permissions.util';
-import { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
-import { IUser } from 'types/user.type';
+import type { GetServerSidePropsContextWithCsrf } from 'types/ssr.type';
+import type { IUser } from 'types/user.type';
+
+const UsersPageHeader = dynamic(() => import('@components/admin/users/UsersPageHeader'));
+const UsersTable = dynamic(() => import('@components/admin/users/UsersTable'));
 
 type UsersPageProperties = {
 	csrfToken: string;
